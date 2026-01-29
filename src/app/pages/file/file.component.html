@@ -1,0 +1,84 @@
+<div class="flex flex-col h-screen bg-gray-50">
+  <!-- File viewer container -->
+  <div
+    class="flex-1 flex items-center justify-center p-4"
+    style="height: calc(100vh - 100px)"
+  >
+    <!-- Not supported file type -->
+    @if (filetype === 'other') {
+    <div class="text-center">
+      <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="text-6xl text-gray-400 mb-4">📄</div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          {{ "file.notsupported" | i18n }}
+        </h3>
+        <p class="text-gray-600">
+          This file type is not supported for preview.
+        </p>
+        @if (fileInfo.name) {
+        <p class="text-sm text-gray-500 mt-2">{{ fileInfo.name }}</p>
+        }
+      </div>
+    </div>
+    }
+
+    <!-- PDF viewer -->
+    @if (filetype === 'pdf') {
+    <div
+      class="w-full h-full bg-white rounded-lg shadow-md overflow-hidden"
+      style="height: calc(100vh - 150px)"
+    >
+      <iframe
+        #pdfViewer
+        [src]="pdfUrl"
+        class="w-full h-full border-0"
+        title="PDF Viewer"
+        style="min-height: calc(100vh - 150px)"
+      ></iframe>
+    </div>
+    }
+
+    <!-- Image viewer -->
+    @if (filetype === 'image') {
+    <div
+      class="max-w-full max-h-full bg-white rounded-lg shadow-md overflow-hidden"
+      style="height: calc(100vh - 150px)"
+    >
+      <img
+        [src]="imageUrl"
+        [alt]="fileInfo.name || 'File preview'"
+        class="max-w-full max-h-full object-contain"
+        style="max-height: calc(100vh - 150px)"
+      />
+    </div>
+    }
+  </div>
+
+  <!-- File info bar (optional) -->
+  @if (fileInfo.name) {
+  <div class="bg-white border-t border-gray-200 px-4 py-3">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="flex-shrink-0">
+          @if (filetype === 'pdf') {
+          <span class="text-red-600">📄</span>
+          } @else if (filetype === 'image') {
+          <span class="text-green-600">🖼️</span>
+          } @else {
+          <span class="text-gray-600">📁</span>
+          }
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-900">{{ fileInfo.name }}</p>
+          @if (fileInfo.mimeType) {
+          <p class="text-xs text-gray-500">{{ fileInfo.mimeType }}</p>
+          }
+        </div>
+      </div>
+      @if (fileInfo.size) {
+      <span class="text-xs text-gray-500">{{ fileInfo.size }} bytes</span>
+      }
+    </div>
+  </div>
+  }
+</div>

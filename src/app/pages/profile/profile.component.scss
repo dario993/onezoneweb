@@ -1,0 +1,49 @@
+// Custom component styles for profile page
+
+.profile-avatar {
+  transition: all 0.2s ease;
+}
+
+.profile-avatar.inactive {
+  opacity: 0.5;
+}
+
+.profile-avatar.active {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.profile-section-header {
+  border-top: 1px solid #e5e7eb;
+  font-weight: bold;
+  font-size: 1rem;
+  padding: 0.75rem 0;
+}
+
+.profile-section-header:first-child {
+  border-top: none;
+}
+
+.profile-action-button {
+  transition: all 0.2s ease;
+}
+
+.profile-action-button:hover {
+  transform: scale(1.05);
+}
+
+.document-item {
+  transition: all 0.2s ease;
+}
+
+.document-item:hover {
+  background-color: #f3f4f6;
+}
+
+.chevron-icon {
+  transition: transform 0.2s ease;
+}
+
+.chevron-icon.rotated {
+  transform: rotate(180deg);
+}

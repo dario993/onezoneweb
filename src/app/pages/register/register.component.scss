@@ -1,0 +1,55 @@
+.button {
+  background-color: #d4d5d7; /* Hintergrundfarbe des Login-Buttons */
+  color: black; /* Textfarbe des Login-Buttons */
+  font-size: 16; /* Schriftgröße des Login-Buttons */
+  padding: 10;
+  width: 50%;
+  margin: 0;
+}
+
+.button-submit {
+  color: white;
+  background-color: #eea400; /* Hintergrundfarbe des Login-Buttons */
+}
+
+.inactive {
+  background-color: white; /* Hintergrundfarbe des Login-Buttons */
+  border-top-color: #d4d5d7;
+  border-bottom-color: #d4d5d7;
+  border-left-color: #d4d5d7;
+  border-right-color: #d4d5d7;
+}
+
+.label {
+  color: #203363;
+  font-weight: bold;
+  font-size: 15; /* Schriftgröße für die Textfelder */
+  margin-bottom: 10; /* Abstand zum nächsten Element */
+}
+
+.red {
+  color: red;
+}
+
+.error {
+  border-color: red;
+  border-top-width: 1;
+  border-right-width: 1;
+  border-bottom-width: 1;
+  border-left-width: 1;
+}
+
+.input {
+  color: #203363;
+  border-bottom-color: #203363;
+  border-bottom-width: 1;
+  margin: 0;
+  padding: 5;
+  margin-bottom: 15;
+  font-size: 14; /* Schriftgröße für die Textfelder */
+}
+
+.input:focus {
+  border-bottom-color: #eea400;
+  border-bottom-width: 1;
+}

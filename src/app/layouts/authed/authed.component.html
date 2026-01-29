@@ -1,0 +1,106 @@
+<!-- Main Container for Authenticated Layout -->
+<div class="flex flex-col min-h-screen bg-gradient-to-b from-white to-gray-100">
+  <!-- Top Navigation Header -->
+  <header
+    class="flex justify-between items-center h-16 px-4 bg-gradient-to-b from-blue-900 to-blue-700 text-white"
+  >
+    <!-- Profile Button -->
+    <button
+      (click)="navigator.navigateTo('profile')"
+      class="flex items-center justify-center h-10 w-10 hover:bg-blue-800 rounded transition-colors"
+      aria-label="Profile"
+    >
+      <img src="assets/icons/ozo/user-icon.png" alt="Profile" class="h-6 w-6" />
+    </button>
+
+    <!-- Logo (Center) -->
+    <button
+      (click)="navigator.navigateTo('home')"
+      class="flex-1 flex justify-center items-center"
+    >
+      <img
+        src="assets/images/onezone-logo-neg-RGB.svg"
+        alt="OneZone Logo"
+        class="h-4"
+      />
+    </button>
+
+    <!-- Menu/Close Button -->
+    <button
+      *ngIf="!navigator.inMenu"
+      (click)="navigator.navigateTo('menu', true)"
+      class="flex items-center justify-center h-10 w-10 hover:bg-blue-800 rounded transition-colors"
+      aria-label="Menu"
+    >
+      <img src="assets/icons/ozo/equals-solid.png" alt="Menu" class="h-6" />
+    </button>
+
+    <button
+      *ngIf="navigator.inMenu"
+      (click)="navigator.back()"
+      class="flex items-center justify-center h-10 w-10 hover:bg-blue-800 rounded transition-colors"
+      aria-label="Close"
+    >
+      <img
+        src="assets/icons/ozo/times-light-white.png"
+        alt="Close"
+        class="h-6"
+      />
+    </button>
+  </header>
+
+  <!-- Main Content Area with Scroll -->
+  <main class="flex-1 overflow-y-auto bg-gradient-to-b from-white to-gray-100">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Bottom Navigation Menu -->
+  <nav class="grid grid-cols-3 bg-gradient-to-b from-white to-gray-100">
+    <!-- Support Button -->
+    <button
+      (click)="openFooterLink('support')"
+      class="flex flex-col items-center justify-center h-16 text-white bg-gradient-to-b from-blue-900 to-blue-700 font-bold text-sm hover:from-blue-800 hover:to-blue-600 transition-all"
+    >
+      <img
+        src="assets/icons/ozo/phone-flip-light-white.png"
+        alt="Support"
+        class="h-3.5 mb-1"
+      />
+      <span>{{ "menu.support" | i18n }}</span>
+    </button>
+
+    <!-- FAQ Button -->
+    <button
+      (click)="openFooterLink('faq')"
+      class="flex flex-col items-center justify-center h-16 text-blue-900 bg-gradient-to-b from-white to-gray-100 font-bold text-sm hover:bg-gradient-to-b hover:from-gray-50 hover:to-gray-200 transition-all"
+    >
+      <img
+        src="assets/icons/ozo/question-light.png"
+        alt="FAQ"
+        class="h-3.5 mb-1"
+      />
+      <span>{{ "menu.faq" | i18n }}</span>
+    </button>
+
+    <!-- Home Button -->
+    <button
+      (click)="openFooterLink('home')"
+      class="flex flex-col items-center justify-center h-16 text-blue-900 bg-gradient-to-b from-white to-gray-100 font-bold text-sm hover:bg-gradient-to-b hover:from-gray-50 hover:to-gray-200 transition-all"
+    >
+      <img
+        src="assets/icons/ozo/home-lg-light-blue.png"
+        alt="Home"
+        class="h-3.5 mb-1"
+      />
+      <span>{{ "menu.home" | i18n }}</span>
+    </button>
+  </nav>
+</div>
+
+<!-- Loading Overlay -->
+<div
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  *ngIf="loaderService.loading$ | async"
+>
+  <img #loadingImage src="assets/logo.png" alt="Loading" class="h-12 w-12" />
+</div>

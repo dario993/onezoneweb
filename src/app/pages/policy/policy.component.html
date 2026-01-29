@@ -1,0 +1,108 @@
+<div class="flex flex-col h-full bg-gray-50">
+  <!-- Blue Background Header -->
+  <div class="h-32 bg-gradient-to-b from-blue-900 to-blue-700"></div>
+
+  <!-- Policy Card - Overlapping the blue background -->
+  <div class="flex-1 px-4 -mt-16">
+    <div class="w-3/5 mx-auto mb-8">
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="p-6 flex flex-col items-center">
+          <img
+            class="max-w-full max-h-24 object-contain mb-4"
+            [src]="policy.img || '/assets/icons/ozo/insurance-placeholder.png'"
+            [alt]="policy.licencePlate || policy.title[i18n.currentLanguage]"
+          />
+          <p class="text-sm text-gray-700 text-center">
+            {{ policy.licencePlate || policy.title[i18n.currentLanguage] }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Policy Details -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+      <div class="space-y-4">
+        <div
+          class="flex justify-between items-center py-2 border-b border-gray-200"
+        >
+          <span class="font-bold text-gray-900">{{ "policy.nr" | i18n }}</span>
+          <span class="text-gray-700">{{ policy.nr }}</span>
+        </div>
+
+        <div
+          class="flex justify-between items-center py-2 border-b border-gray-200"
+        >
+          <span class="font-bold text-gray-900">{{
+            "policy.expire" | i18n
+          }}</span>
+          <span class="text-gray-700">{{
+            policy.endDate | date : "dd.MM.yyyy"
+          }}</span>
+        </div>
+
+        @if (hasBilling()) {
+        <div
+          class="flex justify-between items-center py-2 border-b border-gray-200"
+        >
+          <span class="font-bold text-gray-900">{{
+            "policy.invoice" | i18n
+          }}</span>
+          <div class="text-right">
+            <div class="text-gray-700">{{ policy.invoiceamount }}</div>
+            <div class="text-sm text-gray-500">{{ policy.invoicedate }}</div>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="space-y-4">
+      <!-- Top Row - Download & Report -->
+      <div class="grid grid-cols-2 gap-4">
+        @if (hasPolicyDocument()) {
+        <button
+          class="flex items-center justify-center bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200"
+          (click)="downloadPolicy()"
+        >
+          <img
+            src="/assets/icons/ozo/copy-light.png"
+            alt="Download"
+            class="h-4 mr-2"
+          />
+          <span class="font-bold text-gray-900">{{
+            "policy.copy" | i18n
+          }}</span>
+        </button>
+        }
+
+        <button
+          class="flex items-center justify-center bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200"
+          (click)="createReport()"
+        >
+          <img
+            src="/assets/icons/ozo/exclamation-light.png"
+            alt="Report"
+            class="h-4 mr-2"
+          />
+          <span class="font-bold text-gray-900">{{
+            "policy.report" | i18n
+          }}</span>
+        </button>
+      </div>
+
+      <!-- Bottom Row - Contact Consultant -->
+      <button
+        class="w-full flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-md p-4 transition-colors duration-200"
+        (click)="gotoConsultant()"
+      >
+        <img
+          src="/assets/icons/ozo/phone-flip-light-white.png"
+          alt="Call"
+          class="w-4 mr-2"
+        />
+        <span class="font-medium">{{ "policy.button" | i18n }}</span>
+      </button>
+    </div>
+  </div>
+</div>

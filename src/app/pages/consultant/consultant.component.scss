@@ -1,0 +1,25 @@
+// Custom styles for consultant component
+
+.consultant-card {
+  transition: all 0.2s ease;
+}
+
+.consultant-card:hover {
+  transform: translateY(-2px);
+}
+
+.contact-method {
+  transition: all 0.2s ease;
+}
+
+.contact-method:hover {
+  background-color: #f9fafb;
+}
+
+.consultant-avatar {
+  transition: all 0.2s ease;
+}
+
+.consultant-avatar:hover {
+  transform: scale(1.05);
+}

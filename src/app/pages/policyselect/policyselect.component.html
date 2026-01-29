@@ -1,0 +1,44 @@
+<div class="flex flex-col h-full">
+  <!-- Header -->
+  <div class="relative">
+    <div class="h-24 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+    <div class="absolute inset-0 flex items-center justify-center">
+      <h1 class="text-xl font-medium text-white px-4">
+        {{ "injure.title" | i18n }}
+      </h1>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="flex-1 p-4 -mt-6">
+    <div class="grid grid-cols-2 gap-4">
+      @for (policy of policies; track policy['id']; let i = $index) {
+      <div
+        class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer transform transition-all duration-200 hover:scale-105 hover:shadow-xl"
+        (click)="selectPolicy(policy['id'])"
+      >
+        <div class="p-4 flex flex-col items-center">
+          <div class="flex-1 flex items-center justify-center mb-3">
+            <img
+              class="max-w-full max-h-16 object-contain"
+              [src]="
+                policy['img'] || '/assets/icons/ozo/insurance-placeholder.png'
+              "
+              [alt]="
+                policy['licencePlate'] || policy['title'][i18n.currentLanguage]
+              "
+            />
+          </div>
+          <p
+            class="text-xs text-gray-900 text-center font-medium leading-tight"
+          >
+            {{
+              policy["licencePlate"] || policy["title"][i18n.currentLanguage]
+            }}
+          </p>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</div>

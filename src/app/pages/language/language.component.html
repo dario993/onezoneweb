@@ -1,0 +1,44 @@
+<!-- Language Selection Container -->
+<div class="flex flex-col min-h-full p-6 text-blue-900">
+  <!-- Header -->
+  <h1 class="text-xl font-bold mb-8 text-center">
+    {{ "language.selectlanguage" | i18n }}
+  </h1>
+
+  <!-- Language Selector -->
+  <div
+    class="flex justify-between items-center p-4 border border-blue-900 rounded cursor-pointer hover:bg-gray-50"
+    (click)="showLanguages()"
+  >
+    <!-- Selected Language -->
+    <span class="text-blue-900 font-medium">
+      {{ "language." + selectedLanguage | i18n }}
+    </span>
+
+    <!-- Dropdown Icon -->
+    <img
+      [src]="
+        showLanguageList
+          ? 'assets/icons/ozo/chevron-up-light.png'
+          : 'assets/icons/ozo/chevron-down-light.png'
+      "
+      alt="Toggle dropdown"
+      class="w-4 h-4"
+    />
+  </div>
+
+  <!-- Language List -->
+  <div
+    *ngIf="showLanguageList"
+    class="mt-4 border border-gray-300 rounded bg-white shadow-lg"
+  >
+    <button
+      *ngFor="let language of languagesToChooseFrom"
+      type="button"
+      (click)="selectLanguage(language)"
+      class="w-full p-4 text-left hover:bg-gray-100 border-b last:border-b-0 text-blue-900"
+    >
+      {{ "language." + language["name"] | i18n }}
+    </button>
+  </div>
+</div>

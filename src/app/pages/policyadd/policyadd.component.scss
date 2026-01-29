@@ -1,0 +1,47 @@
+// Custom styles for policy add component
+
+.insurance-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.insurance-item {
+  transition: all 0.2s ease;
+}
+
+.insurance-item:hover {
+  transform: translateY(-1px);
+}
+
+.insurance-item.selected {
+  background-color: #dbeafe;
+  border-color: #3b82f6;
+  color: #1e40af;
+}
+
+.insurance-item.selected:hover {
+  background-color: #bfdbfe;
+}
+
+.submit-button {
+  transition: all 0.2s ease;
+}
+
+.submit-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.checkmark {
+  transition: all 0.2s ease;
+}
+
+.checkmark.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.checkmark.hidden {
+  opacity: 0;
+  transform: scale(0.8);
+}

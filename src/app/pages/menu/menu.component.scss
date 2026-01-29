@@ -1,0 +1,19 @@
+/* Menu Component Styles - using Tailwind CSS classes in template */
+
+/* Additional styling for menu items */
+.menu-item {
+  transition: all 0.2s ease;
+}
+
+.menu-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Logout button styling */
+.logout-button {
+  transition: all 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: rgba(239, 68, 68, 0.05);
+}

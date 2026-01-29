@@ -1,0 +1,35 @@
+/* You can add global styles to this file, and also import other style files */
+
+// ngx-toastr styles (using modern @use syntax) - must be before @tailwind
+@use "ngx-toastr/toastr";
+
+// Tailwind CSS base styles
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// Custom toast colors to match the original NativeScript implementation
+.toast-primary {
+  background-color: #2196f3 !important;
+  color: #000000 !important;
+}
+
+.toast-accent {
+  background-color: #9e9e9e !important;
+  color: #000000 !important;
+}
+
+.toast-alert {
+  background-color: #fcff56 !important;
+  color: #000000 !important;
+}
+
+.toast-warn {
+  background-color: #e57373 !important;
+  color: #000000 !important;
+}
+
+.toast-success {
+  background-color: #4dbd74 !important;
+  color: #000000 !important;
+}

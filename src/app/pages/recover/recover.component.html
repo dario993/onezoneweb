@@ -1,0 +1,76 @@
+<!-- Recover Password Container -->
+<div
+  class="flex flex-col items-center justify-start min-h-full p-6 text-blue-900"
+>
+  <!-- Header -->
+  <h1 class="text-lg font-bold mb-8 text-center">
+    {{ "recover.passwordforgotten" | i18n }}
+  </h1>
+
+  <!-- Email Section -->
+  <div class="w-full mb-6">
+    <label class="block mb-2 text-sm font-bold">
+      {{ "recover.email" | i18n }}
+    </label>
+    <input
+      type="email"
+      [(ngModel)]="recoverData['email']"
+      autocomplete="email"
+      class="w-full p-2 text-sm text-blue-900 border-0 border-b border-blue-900 bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2"
+    />
+  </div>
+
+  <!-- Or Divider -->
+  <div class="w-full text-center mb-6">
+    <span class="text-base text-blue-900">{{ "recover.or" | i18n }}</span>
+  </div>
+
+  <!-- New Password Section -->
+  <div class="w-full mb-4">
+    <label class="block mb-2 text-sm font-bold">
+      {{ "recover.newpassword" | i18n }}
+    </label>
+    <div class="relative">
+      <input
+        [type]="securePass ? 'password' : 'text'"
+        [(ngModel)]="recoverData['password']"
+        autocomplete="new-password"
+        class="w-full p-2 pr-8 text-sm text-blue-900 border-0 border-b border-blue-900 bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2"
+      />
+      <button
+        type="button"
+        (click)="togglePasswordVisibility()"
+        class="absolute right-0 bottom-2 p-1 hover:bg-gray-100 rounded"
+        aria-label="Toggle password visibility"
+      >
+        <img
+          src="assets/icons/ozo/eye-light.png"
+          alt="Toggle password"
+          class="h-3 w-3"
+        />
+      </button>
+    </div>
+  </div>
+
+  <!-- Code Section -->
+  <div class="w-full mb-8">
+    <label class="block mb-2 text-sm font-bold">
+      {{ "recover.code" | i18n }}
+    </label>
+    <input
+      type="text"
+      [(ngModel)]="recoverData['code']"
+      autocomplete="one-time-code"
+      class="w-full p-2 text-sm text-blue-900 border-0 border-b border-blue-900 bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2"
+    />
+  </div>
+
+  <!-- Submit Button -->
+  <button
+    type="button"
+    (click)="submit()"
+    class="w-full p-3 font-bold text-white bg-yellow-500 rounded hover:bg-yellow-600 transition-colors"
+  >
+    {{ "recover.submit" | i18n }}
+  </button>
+</div>

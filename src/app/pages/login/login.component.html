@@ -1,0 +1,93 @@
+<!-- Login Page Container -->
+<div
+  class="flex flex-col items-center justify-start min-h-full p-5 text-blue-900"
+>
+  <!-- Logo -->
+  <img
+    src="assets/images/onezone-logo-pos-RGB.svg"
+    alt="OneZone Logo"
+    class="w-2/3 mt-12 mb-20"
+  />
+
+  <!-- Error Message -->
+  <div
+    *ngIf="error"
+    (click)="hideError()"
+    class="w-full p-2.5 mb-2.5 text-sm text-white bg-red-400 rounded cursor-pointer"
+  >
+    {{ errorMessage }}
+  </div>
+
+  <!-- Email Section -->
+  <div class="w-full mb-4">
+    <label class="block mb-2.5 text-sm font-bold">
+      {{ "login.email" | i18n }}
+    </label>
+    <input
+      type="email"
+      [(ngModel)]="username"
+      autocomplete="username"
+      class="w-full p-1.5 text-sm text-blue-900 border-0 border-b border-blue-900 bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2"
+      (keydown.enter)="focusPassword()"
+    />
+  </div>
+
+  <!-- Password Section -->
+  <div class="w-full mb-4">
+    <label class="block mb-2.5 text-sm font-bold">
+      {{ "login.password" | i18n }}
+    </label>
+    <div class="relative">
+      <input
+        #passwordInput
+        [type]="securePass ? 'password' : 'text'"
+        [(ngModel)]="password"
+        autocomplete="new-password"
+        class="w-full p-1.5 pr-8 text-sm text-blue-900 border-0 border-b border-blue-900 bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2"
+        (keydown.enter)="login()"
+      />
+      <button
+        type="button"
+        (click)="togglePasswordVisibility()"
+        class="absolute right-0 bottom-1.5 p-1 hover:bg-gray-100 rounded"
+        aria-label="Toggle password visibility"
+      >
+        <img
+          src="assets/icons/ozo/eye-light.png"
+          alt="Toggle password"
+          class="h-3 w-3"
+        />
+      </button>
+    </div>
+  </div>
+
+  <!-- Forgot Password Link -->
+  <button
+    type="button"
+    (click)="navigator.navigateTo('recover', true)"
+    class="self-start mt-2.5 text-xs text-blue-900 hover:text-blue-700 underline"
+  >
+    {{ "login.remember" | i18n }}
+  </button>
+
+  <!-- Login Button -->
+  <button
+    type="button"
+    (click)="login()"
+    class="w-full mt-6 mb-4 p-3 font-bold text-white bg-yellow-500 rounded hover:bg-yellow-600 transition-colors"
+  >
+    {{ "login.button" | i18n }}
+  </button>
+
+  <!-- Register Link -->
+  <div class="text-center text-xs">
+    <span>{{ "login.noLogin" | i18n }} </span>
+    <button
+      type="button"
+      (click)="navigator.navigateTo('register', true)"
+      class="font-bold text-blue-900 hover:text-blue-700 underline"
+    >
+      {{ "login.register" | i18n }}
+    </button>
+  </div>
+</div>

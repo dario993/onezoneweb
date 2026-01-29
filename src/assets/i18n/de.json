@@ -1,0 +1,216 @@
+{
+  "menu": {
+    "support": "Support",
+    "onezone": "OneZone",
+    "lang": "Sprachen",
+    "faq": "FAQ",
+    "home": "Home",
+    "messages": "Nachrichten"
+  },
+  "login": {
+    "email": "Email",
+    "password": "Passwort",
+    "remember": "Passwort vergessen",
+    "button": "Login",
+    "noLogin": "Noch kein Konto?",
+    "register": "Jetzt registrieren",
+    "LOGIN_STATUS_FAILED": "Login aufgrund von falscher Emailadresse oder Passwort fehlgeschlagen.",
+    "2FA_NOT_SUPPORTED": "2FA Authentifizierung wird nicht unterstützt",
+    "error": "Email oder Passwort falsch"
+  },
+  "recover": {
+    "passwordforgotten": "Passwort vergessen",
+    "email": "Email",
+    "newpassword": "Neues Passwort",
+    "code": "Aktivierungscode",
+    "or": "oder",
+    "submit": "Abschicken",
+    "youhaveanemail": "Sie haben eine Email mit einem Code erhalten.",
+    "passwordchanged": "Ihr Passwort wurder erfolgreich geändert.",
+    "mail_subject": "OneZone: Passwort zurücksetzen",
+    "mail_template": "Sie möchten Ihr Passwort für den Zugang zu OneZone zurücksetzen. Bitte geben Sie dazu den folgenden Code im entsprechenden Feld im Webbrowser oder in der App ein.\n\nIhr Code: %code%\n\nDer Code ist bis %expire% gültig."
+  },
+  "register": {
+    "registeras": "Registrieren als",
+    "relationship": "Beziehung zu Hauptversicherungsnehmer",
+    "headercustomer": "Kunde",
+    "headercompany": "Unternehmen",
+    "firstname": "Vorname",
+    "lastname": "Nachname",
+    "company": "Firmenname",
+    "address": "Adresse",
+    "zip": "PLZ",
+    "city": "Ort",
+    "mobile": "Mobil",
+    "optional": "optional",
+    "email": "Email",
+    "birthday": "Geburtstag",
+    "birthdaycompany": "Gründungstag",
+    "required": "Pflichtfeld",
+    "phone": "Telefon",
+    "password": "Passwort",
+    "connect": "Login verbinden mit",
+    "connectOption": "Bitte wählen...",
+    "button": "Registrieren",
+    "addcontact": "Hinzufügen",
+    "code": "Code",
+    "success": "Daten erfolgreich gespeichert",
+    "error": "Fehler beim Speichern der Daten",
+    "invalid": "Ungültige Eingabe"
+  },
+  "language": {
+    "selectlanguage": "Sprache wählen",
+    "german": "Deutsch",
+    "english": "Englisch",
+    "french": "Französisch",
+    "italian": "Italienisch"
+  },
+  "index": {
+    "welcome": "Willkommen, ",
+    "welcomeHelp": "Wie können wir helfen?",
+    "policies": "Meine Policen",
+    "offer": "Meine Offerten",
+    "offert": "Neue Offerte rechnen",
+    "injure": "Schaden melden",
+    "numbers": "Notfallnummern"
+  },
+  "nav": {
+    "policies": "Meine Policen",
+    "offert": "Offerten verwalten",
+    "injure": "Schaden melden",
+    "tax": "Steuern",
+    "compare": "Neue Versicherung rechnen",
+    "news": "News und Informationen",
+    "help": "Notfallnummern",
+    "konto": "Konto und Einstellungen",
+    "logout": "Ausloggen",
+    "web": "OneZone Web"
+  },
+  "profile": {
+    "title": "Meine Profile",
+    "personal": "Persönliche Daten",
+    "address": "Wohnadresse",
+    "access": "Zugangsdaten",
+    "documents": "Dokumente",
+    "dataaddress": "Adresse",
+    "datapostcode": "PLZ",
+    "datacity": "Ort",
+    "datacountry": "Land",
+    "datacurrentpassword": "Aktuelles Passwort",
+    "datapassword": "Neues Passwort",
+    "upload": "Hochladen",
+    "download": "Runterladen",
+    "save": "Speichern",
+    "success": "Daten erfolgreich gespeichert",
+    "error": "Fehler beim Speichern der Daten"
+  },
+  "policies": {
+    "title": "Meine Policen",
+    "policen": "Policen",
+    "add": "Police hinzufügen"
+  },
+  "help": {
+    "title": "Berater kontaktieren",
+    "contact": "Ihr Berater"
+  },
+  "policy": {
+    "detail": "Policendetails",
+    "report": "Schaden melden",
+    "copy": "Police herunterladen",
+    "button": "Hilfe & Kontakt",
+    "nr": "Police-Nr.",
+    "expire": "Ablauf",
+    "invoice": "Rechnung"
+  },
+  "compare": {
+    "title": "Was benötigen Sie?",
+    "travel": "Reiseversicherung",
+    "household": "Hausrat - Haftpflicht",
+    "pension": "Private Vorsorge 3a",
+    "law": "Rechtsschutz",
+    "cyber": "Cyberversicherung",
+    "animal": "Tierversicherung",
+    "car": "Motorfahrzeugversicherung",
+    "insurance": "Krankenkasse",
+    "rent": "Mietkaution",
+    "other": "Sonstiges"
+  },
+  "policy-add": {
+    "title": "Neue Police hinzufügen",
+    "button": "Police laden",
+    "text": "Bitte wählen Sie alle Gesellschaften, bei denen Sie Policen haben:"
+  },
+  "offer": {
+    "title": "Neue Offerten",
+    "nav": {
+      "pendent": "pendent",
+      "accepted": "akzeptiert",
+      "declined": "abgelehnt"
+    },
+    "button": {
+      "accept": "akzeptieren",
+      "decline": "ablehnen",
+      "download": "download"
+    },
+    "offers": {
+      "travel": "Offerte Reiseversicherung",
+      "household": "Offerte Hausrat - Haftpflicht",
+      "pension": "Offerte Private Vorsorge 3a",
+      "law": "Offerte Rechtsschutz",
+      "cyber": "Offerte Cyberversicherung",
+      "car": "Offerte Motorfahrzeugversicherung",
+      "insurance": "Offerte Krankenkasse",
+      "other": "Offerte Sonstiges"
+    },
+    "contact": "Berater kontaktieren"
+  },
+  "customers": {
+    "title": "Meine Kunden",
+    "add": "Kunde erfassen",
+    "people": "Personen",
+    "policies": "Verträge",
+    "mandat": "Mandat",
+    "search": "Kunde suchen..."
+  },
+  "messages": {
+    "title": "Nachrichten",
+    "advisor": "Berater",
+    "loadmore": "Mehr laden",
+    "newmessage": "Neue Nachricht",
+    "send": "Senden"
+  },
+  "contact": {
+    "title": "Versicherung kontaktieren"
+  },
+  "injure": {
+    "title": "Schaden melden",
+    "subject": "Betreff: Schadenfall Police Nr. ",
+    "date": "Datum des Schadens",
+    "details": "Schadensbeschreibung",
+    "photos": "Fotos hochladen",
+    "send": "Auftrag absenden",
+    "injurecreated": "Schaden wurde gemeldet"
+  },
+  "agreement": {
+    "title": "Einverständnis",
+    "line1": "Mit der Einverständniserklärung (Brokermandat) dürfen wir für Sie:",
+    "line2": "Ihre aktuellen Policen einfordern und ansehen",
+    "line3": "Optimierungen ausarbeiten und vorschlagen",
+    "line4": "Sie behalten jederzeit die Kontrolle und entscheiden über Versicherungsverträge. DIe Dienstleistung ist kostenlos und jederzeit kündbar.",
+    "line5": "Ich möchte meinen Berater behalten",
+    "line5AddOn": " für folgende Versicherungsgesellschaften",
+    "line51": "Für welche Policen möchten Sie den Berater behalten?",
+    "line52": "Bitte anwählen:",
+    "line6": "Vollständiges Mandat anzeigen",
+    "sign": "Ihre Unterschrift",
+    "line7": "Ich bestätige, den Inhalt und die Absicht des unterschiebenen Brokermandats ",
+    "line8": "(Bedingungen zur Brokermandatierung und Kundenformulare nach Art. 45 VAG)",
+    "line9": " verstanden zu haben, und dass die Betreuung meiner bestehenden Versicherungen dadurch ab sofort an die oneZone übergeht.",
+    "send": "Abschicken",
+    "signatureisrequired": "Unterschrift ist erforderlich",
+    "successsend": "Anfrage erfolgreich abgesendet"
+  },
+  "file": {
+    "notsupported": "Dateityp wird nicht unterstützt"
+  }
+}

@@ -1,0 +1,96 @@
+<div class="flex flex-col h-full">
+  <!-- Header -->
+  <div class="relative">
+    <div class="h-24 bg-gradient-to-b from-blue-900 to-blue-700"></div>
+    <div class="absolute inset-0 flex items-center justify-center">
+      <h1 class="text-xl font-medium text-white px-4 text-center">
+        {{ "help.title" | i18n }}
+      </h1>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="flex-1 p-4 -mt-4">
+    <!-- Consultant Profile Card -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+      <div class="flex items-start justify-between">
+        <div class="flex-1">
+          <p class="text-sm text-gray-600 mb-2">{{ "help.contact" | i18n }}</p>
+          <h2 class="text-lg font-bold text-gray-900">
+            {{ consultant.firstname }} {{ consultant.lastname }}
+          </h2>
+        </div>
+
+        <div class="relative ml-4">
+          <img
+            class="w-20 h-20 rounded-lg object-cover"
+            [src]="consultant.img || '/assets/icons/ozo/user-icon.png'"
+            [alt]="consultant.firstname + ' ' + consultant.lastname"
+          />
+          <div
+            class="absolute inset-0 bg-gray-900 bg-opacity-20 rounded-lg"
+          ></div>
+          <div class="absolute inset-0 flex items-end justify-center p-2">
+            <span class="text-white text-xs font-medium">
+              {{ consultant.firstname }} {{ policyid }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Methods -->
+    <div class="space-y-4">
+      <!-- Email -->
+      @if (consultant.mail) {
+      <div
+        class="bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg transition-shadow duration-200"
+        (click)="mail()"
+      >
+        <div class="flex items-center">
+          <img
+            src="/assets/icons/ozo/envelope-light-orange.png"
+            alt="Email"
+            class="w-5 h-5 mr-4"
+          />
+          <span class="text-gray-900 font-medium">{{ consultant.mail }}</span>
+        </div>
+      </div>
+      }
+
+      <!-- Phone -->
+      @if (consultant.phone) {
+      <div
+        class="bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg transition-shadow duration-200"
+        (click)="phone()"
+      >
+        <div class="flex items-center">
+          <img
+            src="/assets/icons/ozo/phone-flip-light-orange.png"
+            alt="Phone"
+            class="w-5 h-5 mr-4"
+          />
+          <span class="text-gray-900 font-medium">{{ consultant.phone }}</span>
+        </div>
+      </div>
+      }
+
+      <!-- Mobile -->
+      @if (consultant.mobile) {
+      <div
+        class="bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg transition-shadow duration-200"
+        (click)="mobile()"
+      >
+        <div class="flex items-center">
+          <img
+            src="/assets/icons/ozo/phone-flip-light-orange.png"
+            alt="Mobile"
+            class="w-5 h-5 mr-4"
+          />
+          <span class="text-gray-900 font-medium">{{ consultant.mobile }}</span>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</div>

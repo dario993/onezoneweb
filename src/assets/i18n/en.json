@@ -1,0 +1,177 @@
+{
+  "menu": {
+    "support": "Support",
+    "onezone": "OneZone",
+    "lang": "Languages",
+    "faq": "FAQ",
+    "home": "Home",
+    "messages": "Messages"
+  },
+  "login": {
+    "email": "Email",
+    "password": "Password",
+    "remember": "Forgot Password",
+    "button": "Login",
+    "noLogin": "Don't have an account yet?",
+    "register": "Sign up now",
+    "LOGIN_STATUS_FAILED": "Login failed because of wrong email or password",
+    "2FA_NOT_SUPPORTED": "2FA Authentification is not supported",
+    "error": "Email or Password are wrong"
+  },
+  "register": {
+    "registeras": "Sign in as",
+    "headercustomer": "Private Client",
+    "headercompany": "Business Client",
+    "firstname": "Name",
+    "lastname": "Surname",
+    "company": "Businessname",
+    "email": "Email",
+    "birthday": "Birthday",
+    "birthdaycompany": "Foundation date",
+    "phone": "Telephone",
+    "password": "Password",
+    "connect": "Connect login with",
+    "connectOption": "Please choose..",
+    "button": "Register",
+    "addcontact": "Add",
+    "invalid": "Invalid input"
+  },
+  "language": {
+    "selectlanguage": "Choose Language",
+    "german": "German",
+    "english": "English",
+    "french": "French",
+    "italian": "Italian"
+  },
+  "index": {
+    "welcome": "Welcome,",
+    "welcomeHelp": "How can we help you?",
+    "policies": "My Policies",
+    "offert": "Calculate offer",
+    "injure": "Register a claim"
+  },
+  "nav": {
+    "policies": "My Policies",
+    "offert": "Offers",
+    "injure": "Register a claim",
+    "tax": "Taxes",
+    "compare": "Comparison tools",
+    "news": "News and Information",
+    "help": "Help and Contact",
+    "konto": "Account and settings",
+    "logout": "Log Out",
+    "web": "OneZone Web"
+  },
+  "profile": {
+    "title": "My Profile",
+    "personal": "Personal data",
+    "address": "Address",
+    "access": "Login data",
+    "documents": "Documents",
+    "dataaddress": "Address",
+    "datapostcode": "Postal code",
+    "datacity": "Place",
+    "datacountry": "Country",
+    "datacurrentpassword": "Current password",
+    "datapassword": "New Password",
+    "upload": "Upload",
+    "save": "Save"
+  },
+  "policies": {
+    "title": "My Policies",
+    "add": "Add policy"
+  },
+  "help": {
+    "title": "Contact consultant",
+    "contact": "Your consultant"
+  },
+  "policy": {
+    "detail": "Policy details",
+    "report": "Register claim,",
+    "copy": "Create copy of policy",
+    "button": "Help & Contact",
+    "nr": "Policy-Nr.",
+    "expire": "Expiration",
+    "invoice": "Bill"
+  },
+  "compare": {
+    "title": "What do you need?",
+    "travel": "Travel insurance",
+    "household": "Household and liability insurance",
+    "pension": "Private Previdence 3rd Pillar",
+    "law": "Legal protection",
+    "cyber": "Cyber insurance",
+    "car": "Motorvehicle insurance",
+    "insurance": "Health insurance",
+    "other": "Other"
+  },
+  "policy-add": {
+    "title": "Add new Policy",
+    "button": "Load Policy",
+    "text": "Please select all companies, where you already have a policy:"
+  },
+  "offer": {
+    "title": "New offer",
+    "nav": {
+      "pendent": "pending",
+      "accepted": "accepted",
+      "declined": "refused"
+    },
+    "button": {
+      "accept": "accept",
+      "decline": "refuse"
+    },
+    "offers": {
+      "travel": "Offer travel insurance",
+      "household": "Offer Household and liability insurance",
+      "pension": "Offer Private Previdence 3a insurance",
+      "law": "Offer legal protection insurance",
+      "cyber": "Offer Cyber insurance",
+      "car": "Offer Motorvehicle insurance",
+      "insurance": "Offer Health insurance",
+      "other": "Other insurance offers"
+    },
+    "contact": "Contact Consultant"
+  },
+  "customers": {
+    "title": "My client",
+    "add": "Register client",
+    "open": "Open client",
+    "people": "Person",
+    "policies": "Contracts"
+  },
+  "messages": {
+    "title": "New message",
+    "search": "Search message",
+    "nav": {
+      "task": "Task"
+    }
+  },
+  "contact": {
+    "title": "Contact insurance"
+  },
+  "injure": {
+    "title": "Register a claim",
+    "subject": "Subject",
+    "date": "Date of claim",
+    "details": "Description of claim",
+    "photos": "Upload Photos",
+    "send": "Submit claim"
+  },
+  "agreement": {
+    "title": "Agreement",
+    "line1": "With the agreement (brokermandate) you allow us to do the following for your:",
+    "line2": "Ask for the copies and have insight into your current policies",
+    "line3": "Elaborate and propose you optimizations",
+    "line4": "You always maintain the main control and you decide about insurance contracts. This service is for free and can be cancelled any time.",
+    "line5": "I want to maintain my consultant",
+    "line51": "For which policies do you want to maintain the consultant?",
+    "line52": "Please choose:",
+    "line6": "Show complete Mandate",
+    "sign": "Your Signature",
+    "line7": "I confirm I understand the content and intention of the signed brokermandate",
+    "line8": "(Conditons about brokermandate and all client information basing on art. VAG 45)",
+    "line9": "and I agree that the supporting of my current insurances will pass over immediately to the supporting team of oneZone.",
+    "send": "Submit"
+  }
+}

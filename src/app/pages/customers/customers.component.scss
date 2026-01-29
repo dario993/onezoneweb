@@ -1,0 +1,99 @@
+/* Custom styles for customers component */
+
+.customer-card {
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.add-customer-button {
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.search-input {
+  transition: all 0.2s ease-in-out;
+
+  &:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+}
+
+.contact-button {
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background-color: #dbeafe;
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.mandate-chip {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 768px) {
+  .customer-details-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .contact-actions {
+    justify-content: center;
+    margin-top: 1rem;
+  }
+}
+
+/* Empty state styling */
+.empty-state {
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Customer name styling */
+.customer-name {
+  color: #1f2937;
+  line-height: 1.4;
+}
+
+/* Address text styling */
+.address-text {
+  color: #4b5563;
+  line-height: 1.3;
+}
+
+/* Count text styling */
+.count-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+}

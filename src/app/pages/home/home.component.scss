@@ -1,0 +1,28 @@
+/* Home Component Styles - using Tailwind CSS classes in template */
+
+/* Custom scrollbar hide for horizontal slider */
+.scrollbar-hide {
+  /* For WebKit browsers */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* For Mozilla Firefox */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Smooth scroll behavior for slider */
+.overflow-x-auto {
+  scroll-behavior: smooth;
+}
+
+/* Additional hover effects that aren't covered by Tailwind */
+.slide-card {
+  transition: all 0.3s ease;
+}
+
+.slide-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}

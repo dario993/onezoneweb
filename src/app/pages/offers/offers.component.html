@@ -1,0 +1,164 @@
+<!-- Offers Container -->
+<div class="flex flex-col min-h-screen bg-gradient-to-b from-white to-gray-100">
+  <!-- Header Section -->
+  <div class="relative bg-gradient-to-b from-blue-900 to-blue-700 pb-8">
+    <div class="px-4 py-8">
+      <h1 class="text-xl font-medium text-white text-center">
+        {{ "offer.title" | i18n }}
+      </h1>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 px-4 -mt-6 relative z-10">
+    <!-- Tab Navigation -->
+    <div class="bg-white rounded-lg shadow-sm p-2 mb-6">
+      <div class="grid grid-cols-3 gap-2">
+        <!-- Pending Tab -->
+        <button
+          class="flex items-center justify-center px-4 py-3 rounded-full text-sm font-medium transition-all"
+          [class.bg-gray-200]="tab === eOfferStatus.PENDENT"
+          [class.font-bold]="tab === eOfferStatus.PENDENT"
+          [class.bg-white]="tab !== eOfferStatus.PENDENT"
+          [class.hover:bg-gray-50]="tab !== eOfferStatus.PENDENT"
+          (click)="selectTap(eOfferStatus.PENDENT)"
+        >
+          <img
+            src="assets/icons/ozo/clock-light.png"
+            alt="Pending"
+            class="h-4 mr-2"
+          />
+          {{ "offer.nav.pendent" | i18n }}
+        </button>
+
+        <!-- Accepted Tab -->
+        <button
+          class="flex items-center justify-center px-4 py-3 rounded-full text-sm font-medium transition-all"
+          [class.bg-gray-200]="tab === eOfferStatus.ACCEPTED"
+          [class.font-bold]="tab === eOfferStatus.ACCEPTED"
+          [class.bg-white]="tab !== eOfferStatus.ACCEPTED"
+          [class.hover:bg-gray-50]="tab !== eOfferStatus.ACCEPTED"
+          (click)="selectTap(eOfferStatus.ACCEPTED)"
+        >
+          <img
+            src="assets/icons/ozo/check-light-blue.png"
+            alt="Accepted"
+            class="h-4 mr-2"
+          />
+          {{ "offer.nav.accepted" | i18n }}
+        </button>
+
+        <!-- Declined Tab -->
+        <button
+          class="flex items-center justify-center px-4 py-3 rounded-full text-sm font-medium transition-all"
+          [class.bg-gray-200]="tab === eOfferStatus.DECLINED"
+          [class.font-bold]="tab === eOfferStatus.DECLINED"
+          [class.bg-white]="tab !== eOfferStatus.DECLINED"
+          [class.hover:bg-gray-50]="tab !== eOfferStatus.DECLINED"
+          (click)="selectTap(eOfferStatus.DECLINED)"
+        >
+          <img
+            src="assets/icons/ozo/times-light-blue.png"
+            alt="Declined"
+            class="h-4 mr-2"
+          />
+          {{ "offer.nav.declined" | i18n }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Tenders List -->
+    @for (tender of tendersFiltered; track trackByTenderId($index, tender)) {
+    <div class="bg-white rounded-lg shadow-sm mb-4 overflow-hidden">
+      <!-- Tender Header -->
+      <button
+        class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors text-left border-b border-gray-200"
+        (click)="tender.open = !tender.open"
+      >
+        <span class="font-semibold text-gray-800">
+          {{ tender.branch.name[i18n.currentLanguage] }} ({{
+            tender.offers?.length || 0
+          }})
+        </span>
+        <img
+          [src]="
+            tender.open
+              ? 'assets/icons/ozo/chevron-up-light.png'
+              : 'assets/icons/ozo/chevron-down-light.png'
+          "
+          alt="Toggle"
+          class="h-4 opacity-60"
+        />
+      </button>
+
+      <!-- Offers List (Collapsible) -->
+      @if (tender.open) {
+      <div class="p-4 space-y-4">
+        @for (offer of tender.offers; track trackByOfferId($index, offer)) {
+        <div class="bg-gray-50 rounded-lg p-4">
+          <!-- Offer Header -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div class="md:col-span-2">
+              <h3 class="font-bold text-gray-800 mb-1">
+                {{ offer.insurance.name }}
+              </h3>
+              <p class="text-gray-600">CHF {{ offer.amountBrutto }}</p>
+            </div>
+            <div class="text-right">
+              <button
+                class="text-blue-600 font-bold text-sm hover:text-blue-800 transition-colors"
+                (click)="consultant(offer.contact.id)"
+              >
+                {{ "offer.contact" | i18n }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap gap-2">
+            <!-- Accept Button (only for pending offers) -->
+            @if (tab === eOfferStatus.PENDENT) {
+            <button
+              class="flex items-center px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded text-sm font-medium transition-colors"
+              (click)="acceptOffer(offer.id)"
+            >
+              <img
+                src="assets/icons/ozo/check-light-white.png"
+                alt="Accept"
+                class="h-3 mr-2"
+              />
+              {{ "offer.button.accept" | i18n }}
+            </button>
+
+            <!-- Reject Button -->
+            <button
+              class="flex items-center px-4 py-2 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 rounded text-sm font-medium transition-colors"
+              (click)="rejectOffer(offer.id)"
+            >
+              <img
+                src="assets/icons/ozo/times-light-blue.png"
+                alt="Reject"
+                class="h-3 mr-2"
+              />
+              {{ "offer.button.decline" | i18n }}
+            </button>
+            }
+
+            <!-- Download Button (if attachment exists) -->
+            @if (offer.attachment?.id) {
+            <button
+              class="flex items-center px-4 py-2 bg-blue-900 hover:bg-blue-800 text-white rounded text-sm font-medium transition-colors"
+              (click)="downloadOffer(offer)"
+            >
+              {{ "offer.button.download" | i18n }}
+            </button>
+            }
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,22 @@
+.list {
+  padding-right: 10;
+  padding-left: 10;
+}
+
+.listitem {
+  font-size: 14; /* Schriftgröße für die Textfelder */
+  padding-top: 5;
+  padding-bottom: 5;
+  border-top-width: 1;
+  border-color: #d9dadb;
+}
+
+.button {
+  background-color: #eea400; /* Hintergrundfarbe des Login-Buttons */
+  color: white; /* Textfarbe des Login-Buttons */
+  font-size: 16; /* Schriftgröße des Login-Buttons */
+  border-radius: 4; /* Abrundung der Ecken des Buttons */
+  margin-top: 25; /* Abstand vom vorherigen Element (Passwort vergessen) */
+  margin-bottom: 15;
+  width: 100%;
+}

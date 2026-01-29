@@ -1,0 +1,36 @@
+<div class="flex flex-col h-full">
+  <!-- Header -->
+  <div class="relative">
+    <div class="h-24 bg-gradient-to-b from-blue-900 to-blue-700"></div>
+    <div class="absolute inset-0 flex items-center justify-center">
+      <h1 class="text-xl font-medium text-white px-4 text-center">
+        {{ "compare.title" | i18n }}
+      </h1>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="flex-1 p-4 -mt-6">
+    <div class="grid grid-cols-2 gap-4">
+      @for (button of buttons; track button.label; let i = $index) {
+      <div
+        class="bg-orange-500 rounded-lg shadow-lg overflow-hidden cursor-pointer"
+        (click)="openCompare(button)"
+      >
+        <div class="p-4 flex flex-col items-center">
+          <div class="flex-1 flex items-center justify-center mb-3">
+            <img
+              class="max-w-full max-h-6 object-contain"
+              [src]="'/assets/icons/ozo/' + button.icon + '.png'"
+              [alt]="button.label"
+            />
+          </div>
+          <p class="text-sm text-white text-center font-medium leading-tight">
+            {{ "compare." + button.label | i18n }}
+          </p>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</div>

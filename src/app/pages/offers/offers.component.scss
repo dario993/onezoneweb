@@ -1,0 +1,38 @@
+/* Offers Component Styles - using Tailwind CSS classes in template */
+
+/* Tab styling for active/inactive states */
+.tab-button {
+  transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Tender header styling */
+.tender-header {
+  transition: background-color 0.2s ease;
+}
+
+.tender-header:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Offer card styling */
+.offer-card {
+  transition: all 0.2s ease;
+}
+
+.offer-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Button styling */
+.action-button {
+  transition: all 0.2s ease;
+}
+
+.action-button:hover {
+  transform: translateY(-1px);
+}

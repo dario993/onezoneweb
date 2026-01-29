@@ -1,0 +1,158 @@
+<div class="flex flex-col h-full">
+  <!-- Header -->
+  <div class="relative">
+    <div class="h-24 bg-gradient-to-b from-blue-900 to-blue-700"></div>
+    <div class="absolute inset-0 flex items-center justify-center">
+      <h1 class="text-xl font-medium text-white px-4 text-center">
+        {{ "agreement.title" | i18n }}
+      </h1>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="flex-1 p-4 overflow-y-auto">
+    <!-- Introduction Text -->
+    <p class="text-sm text-gray-700 mb-4 leading-relaxed">
+      {{ "agreement.line1" | i18n }}
+    </p>
+
+    <!-- Check Points -->
+    <div class="space-y-3 mb-4">
+      <div class="flex items-start">
+        <img
+          src="/assets/icons/ozo/check-light-blue.png"
+          alt="Check"
+          class="w-4 h-4 mr-3 mt-0.5"
+        />
+        <p class="text-sm font-bold text-gray-900 leading-relaxed">
+          {{ "agreement.line2" | i18n }}
+        </p>
+      </div>
+      <div class="flex items-start">
+        <img
+          src="/assets/icons/ozo/check-light-blue.png"
+          alt="Check"
+          class="w-4 h-4 mr-3 mt-0.5"
+        />
+        <p class="text-sm font-bold text-gray-900 leading-relaxed">
+          {{ "agreement.line3" | i18n }}
+        </p>
+      </div>
+    </div>
+
+    <p class="text-sm text-gray-700 mb-6 leading-relaxed">
+      {{ "agreement.line4" | i18n }}
+    </p>
+
+    <!-- Consultant Checkbox -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+      <label class="flex items-start cursor-pointer">
+        <input
+          type="checkbox"
+          [(ngModel)]="keepConsultant"
+          class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+        />
+        <div class="ml-3">
+          <span class="text-sm font-bold text-gray-900">
+            {{ "agreement.line5" | i18n }}
+            @if (keepConsultant) {
+            <span>{{ "agreement.line5AddOn" | i18n }}</span>
+            }
+          </span>
+        </div>
+      </label>
+    </div>
+
+    <!-- Insurance Selection -->
+    @if (keepConsultant) {
+    <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+      <div class="max-h-32 overflow-y-auto space-y-2">
+        @for (insurance of insurances; track insurance.id) {
+        <button
+          class="w-full p-3 rounded-lg border transition-all duration-200 text-left"
+          [class.bg-blue-100]="insurance.selected"
+          [class.border-blue-500]="insurance.selected"
+          [class.text-blue-900]="insurance.selected"
+          [class.bg-gray-50]="!insurance.selected"
+          [class.border-gray-200]="!insurance.selected"
+          [class.text-gray-900]="!insurance.selected"
+          [class.hover:bg-blue-50]="!insurance.selected"
+          [class.hover:border-blue-300]="!insurance.selected"
+          (click)="insurance.selected = !insurance.selected"
+        >
+          <span class="font-medium truncate">{{ insurance.name }}</span>
+        </button>
+        }
+      </div>
+    </div>
+    }
+
+    <!-- Download Document -->
+    <div
+      class="flex items-center p-4 bg-white rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-200 mb-4 border-b-2 border-orange-200"
+      (click)="downloadDokument()"
+    >
+      <img
+        src="/assets/icons/ozo/plus-light.png"
+        alt="Download"
+        class="w-4 h-4 mr-3"
+      />
+      <span class="text-sm font-bold text-orange-600">{{
+        "agreement.line6" | i18n
+      }}</span>
+    </div>
+
+    <!-- Signature Section -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+      <h3 class="text-sm font-bold text-gray-900 mb-3">
+        {{ "agreement.sign" | i18n }}
+      </h3>
+
+      <!-- Signature Canvas Placeholder -->
+      <div
+        class="border border-gray-300 rounded-lg h-32 bg-gray-50 flex items-center justify-center"
+      >
+        <canvas
+          #signatureCanvas
+          width="400"
+          height="120"
+          class="border border-gray-300 rounded cursor-crosshair bg-white"
+          (mousedown)="startDrawing($event)"
+          (mousemove)="draw($event)"
+          (mouseup)="stopDrawing()"
+          (mouseleave)="stopDrawing()"
+        ></canvas>
+      </div>
+
+      <button
+        type="button"
+        class="mt-2 text-sm text-gray-600 hover:text-gray-800"
+        (click)="clearSignature()"
+      >
+        Clear Signature
+      </button>
+    </div>
+
+    <!-- Terms and Conditions -->
+    <div class="mb-6">
+      <p
+        class="text-xs text-gray-600 leading-relaxed cursor-pointer"
+        (click)="openConditions()"
+      >
+        <span>{{ "agreement.line7" | i18n }}</span>
+        <span class="text-orange-600 underline">{{
+          "agreement.line8" | i18n
+        }}</span>
+        <span>{{ "agreement.line9" | i18n }}</span>
+      </p>
+    </div>
+
+    <!-- Submit Button -->
+    <button
+      class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+      (click)="submit()"
+    >
+      {{ "agreement.send" | i18n }}
+    </button>
+  </div>
+</div>

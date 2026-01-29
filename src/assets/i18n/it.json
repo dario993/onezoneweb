@@ -1,0 +1,176 @@
+{
+  "menu": {
+    "support": "Supporto",
+    "onezone": "OneZone",
+    "lang": "Lingue",
+    "faq": "Domande Frequenti",
+    "home": "Home",
+    "messages": "Messaggi"
+  },
+  "login": {
+    "email": "Email",
+    "password": "Password",
+    "remember": "Password dimenticata",
+    "button": "Login",
+    "noLogin": "Non ha ancora un account?",
+    "register": "Registrarsi ora",
+    "LOGIN_STATUS_FAILED": "Login fallito a causa di indirizzo email o password errati.",
+    "2FA_NOT_SUPPORTED": "Autentificazione a 2 fattori non supportata",
+    "error": "Email o password errati"
+  },
+  "register": {
+    "registeras": "Registrarsi come",
+    "headercustomer": "Cliente",
+    "headercompany": "Ditta",
+    "firstname": "Nome",
+    "lastname": "Cognome",
+    "company": "Nome ditta",
+    "email": "Email",
+    "birthday": "Data di nascita",
+    "birthdaycompany": "Data di fondazione",
+    "phone": "Telefono",
+    "password": "Password",
+    "connect": "Collegare Login con",
+    "connectOption": "Per favore scelga...",
+    "button": "Registrare",
+    "addcontact": "Aggiungere",
+    "invalid": "Inserimento non valido"
+  },
+  "language": {
+    "selectlanguage": "Scegliere lingua",
+    "german": "Tedesco",
+    "english": "Inglese",
+    "french": "Francese",
+    "italian": "Italiano"
+  },
+  "index": {
+    "welcome": "Benvenuto/a, ",
+    "welcomeHelp": "Come possiamo aiutare?",
+    "policies": "Le mie polizze",
+    "offert": "Calcolare Offerta",
+    "injure": "Segnalare un sinistro"
+  },
+  "nav": {
+    "policies": "Le mie polizze",
+    "offert": "Offerte",
+    "injure": "Segnalare sinistro",
+    "tax": "Tasse",
+    "compare": "Portali di confronto",
+    "news": "Novità ed informazioni",
+    "help": "Aiuto e contatto",
+    "konto": "Account e impostazioni",
+    "logout": "Log Out",
+    "web": "OneZone Web"
+  },
+  "profile": {
+    "title": "Il mio profilo",
+    "personal": "Dati Personali",
+    "address": "Indirizzo di residenza",
+    "access": "Dati di accesso",
+    "documents": "Documenti",
+    "dataaddress": "Indirizzo",
+    "datapostcode": "Codice postale",
+    "datacity": "Luogo",
+    "datacountry": "Paese",
+    "datacurrentpassword": "Password attuale",
+    "datapassword": "Nuova password",
+    "save": "Salva"
+  },
+  "policies": {
+    "title": "Le mie polizze",
+    "add": "Aggiungi polizza"
+  },
+  "help": {
+    "title": "Contatta consulente",
+    "contact": "Il Suo consulente"
+  },
+  "policy": {
+    "detail": "Dettagli polizza",
+    "report": "Segnala un sinistro",
+    "copy": "Crea copia di polizza",
+    "button": "Aiuto & contatto",
+    "nr": "Nr. di polizza",
+    "expire": "Scadenza",
+    "invoice": "Fattura"
+  },
+  "compare": {
+    "title": "Cosa Le serve?",
+    "travel": "Assicurazione viaggio",
+    "household": "Assicurazione mobilia domestica e responsabilità civile",
+    "pension": "Previdenza privata 3a",
+    "law": "Protezione legale",
+    "cyber": "Assicurazione cyber",
+    "car": "Assicurazione veicolo",
+    "insurance": "Confronto cassa malattia",
+    "other": "Altre assicurazioni"
+  },
+  "policy-add": {
+    "title": "Aggiungere nuova polizza",
+    "button": "Carica polizza",
+    "text": "Per favore selezioni tutte le compagnie assicurative, dove possiede delle polizze:"
+  },
+  "offer": {
+    "title": "Nuove offerte",
+    "nav": {
+      "pendent": "in sospeso",
+      "accepted": "accettata",
+      "declined": "rifiutata"
+    },
+    "button": {
+      "accept": "accettare",
+      "decline": "rifiutare"
+    },
+    "offers": {
+      "travel": "Offerta assicurazione viaggio",
+      "household": "Offerta assicurazione mobilia domestica e responsabilità civile",
+      "pension": "Offerta assicurazione Previdenza privata 3a",
+      "law": "Offerta assicurazione protezione legale",
+      "cyber": "Offerte assicurazione cyber",
+      "car": "Offerta assicurazione veicolo",
+      "insurance": "Offerta cassa malattia",
+      "other": "Offerta altre assicurazioni"
+    },
+    "contact": "Contattare consulente"
+  },
+  "customers": {
+    "title": "I miei clienti",
+    "add": "Registra cliente",
+    "open": "Apri cliente",
+    "people": "Persone",
+    "policies": "Contratti"
+  },
+  "messages": {
+    "title": "Nuovi messaggi",
+    "search": "Cerca messaggio",
+    "nav": {
+      "task": "Incarichi"
+    }
+  },
+  "contact": {
+    "title": "Contattare compagnia assicurativa"
+  },
+  "injure": {
+    "title": "Segnalare sinistro",
+    "subject": "Oggetto",
+    "date": "Data del sinistro",
+    "details": "Descrizione del sinistro",
+    "photos": "Caricare foto",
+    "send": "Invia segnalazione"
+  },
+  "agreement": {
+    "title": "Consenso",
+    "line1": "Attraverso il consenso (mandato del broker) ci autorizza ad eseguire i seguenti incarichi per Lei:",
+    "line2": "Richiedere e visionare le Sue polizze",
+    "line3": "elaborare e porporre ottimizzazioni",
+    "line4": "Lei mantiene sempre il controle e decide sui contratti di assicurazione. Questo servizio è gratuito e puo' essere disdetto in ogni momento.",
+    "line5": "Voglio mantenere il mio consulente",
+    "line51": "Per quale polizza vuole mantenere il consulente?",
+    "line52": "Per favore selezioni",
+    "line6": "Mostrare mandato completo",
+    "sign": "La vostra firma",
+    "line7": "Io confermo di aver compreso il contenuto e le intenzioni del mandato del broker che ho firmato ",
+    "line8": "(Le condizioni per il mandato del broker e formulari del cliente secondo art. VAG 45)",
+    "line9": "e che la gestione ed il supporto delle mie assicurazioni attuali con questo passano con effetto immediato a oneZone.",
+    "send": "Invia"
+  }
+}
