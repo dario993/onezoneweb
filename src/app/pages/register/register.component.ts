@@ -44,8 +44,8 @@ export class RegisterComponent implements OnInit {
 
   public ngOnInit(): void {
     this.route.params.subscribe((params) => {
-      if (params['code']) {
-        this.code = params['code'];
+      if (params['consultantCode']) {
+        this.code = params['consultantCode'];
       }
       if (params['contactid']) {
         this.link = true;
@@ -234,13 +234,19 @@ export class RegisterComponent implements OnInit {
             });
         },
         error: (error: any) => {
-          this.toasterService.alert(
-            this.i18n.getTranslation('profile', 'error')
-          );
+          if (error.error?.error) {
+            this.toasterService.alert(error.error.error);
+          } else {
+            this.toasterService.alert(
+              this.i18n.getTranslation('profile', 'error')
+            );
+          }
 
-          error.error.violations.forEach((violation: any) => {
-            this.errorFields[violation.propertyPath] = violation.title;
-          });
+          if (error.error?.violations) {
+            error.error.violations.forEach((violation: any) => {
+              this.errorFields[violation.propertyPath] = violation.title;
+            });
+          }
 
           this.loaderService.hide();
 

@@ -41,6 +41,7 @@ export const routes: Routes = [
       { path: 'login', component: LoginComponent },
       { path: 'recover', component: RecoverComponent },
       { path: 'register', component: RegisterComponent },
+      { path: 'register/:consultantCode', component: RegisterComponent },
       { path: 'language_unauthed', component: LanguageComponent },
     ],
     canActivate: [isNonAuthenticatedRoute],
