@@ -1,3 +1,18 @@
+# Regole di Sviluppo
+
+## Documento di Progetto Obbligatorio
+
+Ogni volta che viene richiesto di sviluppare una nuova funzionalità o implementazione, **prima di scrivere qualsiasi codice** è necessario:
+
+1. **Verificare la data e ora corrente** eseguendo il comando `date` nel terminale
+2. **Creare un documento di progetto** nella cartella `/docs` con il nome nel formato: `YYYY-MM-DD-HH-mm-nome-funzione.md` (usando la data e ora correnti appena verificate)
+3. **Descrivere nel documento** cosa verrà implementato: obiettivi, modifiche ai file, logica di funzionamento, eventuali impatti su componenti esistenti
+4. **Attendere la conferma esplicita dell'utente** prima di procedere con lo sviluppo
+
+> **IMPORTANTE**: Non procedere mai con l'implementazione del codice senza aver prima creato il documento di progetto e ricevuto conferma dall'utente.
+
+---
+
 # Documentazione Tecnica - OneZone Web Application
 
 ## Indice
@@ -198,6 +213,7 @@ routes = [
       { path: 'login', component: LoginComponent },
       { path: 'recover', component: RecoverComponent },
       { path: 'register', component: RegisterComponent },
+      { path: 'register/:consultantCode', component: RegisterComponent },
       { path: 'language_unauthed', component: LanguageComponent }
     ]
   },
@@ -641,7 +657,7 @@ Il token viene validato in due modi:
 
 #### RegisterComponent
 **Path**: [pages/register/](src/app/pages/register/)
-**Rotta**: `/register` o `/link/:contactid`
+**Rotta**: `/register`, `/register/:consultantCode` o `/link/:contactid`
 
 **Funzionalità**:
 - Registrazione come cliente (persona fisica) o azienda
@@ -649,6 +665,18 @@ Il token viene validato in due modi:
 - Campi: nome, cognome, email, data nascita, telefono, password
 - Collegamento a un contatto esistente (via parametro `:contactid`)
 - Chiamata `brokerstarService.registerUser()`
+
+**Assegnazione Consulente tramite URL**:
+- La rotta `/register/:consultantCode` permette di assegnare automaticamente un consulente al nuovo utente
+- Esempio URL: `https://webapp.onezone.ch/register/0852221850d5638e4c80b9da870f942b`
+- Il parametro `consultantCode` viene letto da `ActivatedRoute.params` e inviato nel payload della registrazione come campo `invitationCode`
+- L'API `POST /api/v3/user/register` accetta il campo `invitationCode` e assegna automaticamente l'intermediario corrispondente
+- Il link "Registrati" nella pagina di login punta direttamente a `/register/0852221850d5638e4c80b9da870f942b`
+
+**Gestione Errori API**:
+- Se l'API restituisce un errore con campo `violations`, i singoli campi vengono evidenziati con il relativo messaggio
+- Se l'API restituisce un errore generico (es. `{error: "This value is too short..."}`) il messaggio viene mostrato all'utente tramite `toasterService.alert()`
+- Il loader viene sempre nascosto correttamente in caso di errore
 
 **Campi Azienda**:
 - Nome ditta
