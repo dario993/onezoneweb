@@ -7,7 +7,8 @@ Ogni volta che viene richiesto di sviluppare una nuova funzionalità o implement
 1. **Verificare la data e ora corrente** eseguendo il comando `date` nel terminale
 2. **Creare un documento di progetto** nella cartella `/docs` con il nome nel formato: `YYYY-MM-DD-HH-mm-nome-funzione.md` (usando la data e ora correnti appena verificate)
 3. **Descrivere nel documento** cosa verrà implementato: obiettivi, modifiche ai file, logica di funzionamento, eventuali impatti su componenti esistenti
-4. **Attendere la conferma esplicita dell'utente** prima di procedere con lo sviluppo
+4. **Aggiornare la sezione "Documenti di Progetto (docs/)"** in questo file CLAUDE.md, aggiungendo il nuovo documento con il formato: `nome-file.md` — Titolo del documento
+5. **Attendere la conferma esplicita dell'utente** prima di procedere con lo sviluppo
 
 > **IMPORTANTE**: Non procedere mai con l'implementazione del codice senza aver prima creato il documento di progetto e ricevuto conferma dall'utente.
 
@@ -1306,6 +1307,13 @@ HTTP status codes e costanti.
 Per supporto tecnico o domande:
 - **Repository**: Consultare il README.md
 - **API Documentation**: https://wmcch.atlassian.net/wiki/spaces/FAQ/
+
+---
+
+## Documenti di Progetto (docs/)
+
+- `2026-01-29-00-00-assegnazione-consulente.md` — Piano di Implementazione: Assegnazione Consulente Tramite URL
+- `2026-02-11-17-41-fix-file-loading-flash.md` — Fix Flash "Not Supported" nel FileComponent
 
 ---
 

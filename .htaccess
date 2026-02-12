@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# Redirige HTTPS (se non già attivo)
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Se il file o la directory esistono fisicamente, servili direttamente
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Altrimenti redirige tutto a index.html (Angular SPA routing)
+RewriteRule ^ index.html [L]

@@ -30,7 +30,7 @@ export class FileComponent implements OnInit {
   pdfUrl: SafeResourceUrl | string = '';
   imageUrl: string = '';
   fileInfo: any = {};
-  filetype: 'pdf' | 'image' | 'other' = 'other';
+  filetype: 'pdf' | 'image' | 'other' | 'loading' = 'loading';
   tmp: any = {};
 
   constructor(
@@ -81,6 +81,8 @@ export class FileComponent implements OnInit {
                   } else if (this.isImage()) {
                     this.filetype = 'image';
                     this.imageUrl = <any>reader.result;
+                  } else {
+                    this.filetype = 'other';
                   }
                   this.changeDetection.detectChanges();
                 };

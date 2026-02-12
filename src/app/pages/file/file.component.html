@@ -4,6 +4,16 @@
     class="flex-1 flex items-center justify-center p-4"
     style="height: calc(100vh - 100px)"
   >
+    <!-- Loading state -->
+    @if (filetype === 'loading') {
+    <div class="text-center">
+      <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+        <p class="text-gray-600">{{ "file.loading" | i18n }}</p>
+      </div>
+    </div>
+    }
+
     <!-- Not supported file type -->
     @if (filetype === 'other') {
     <div class="text-center">

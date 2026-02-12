@@ -172,5 +172,9 @@
     "line8": "(Conditions pour le mandat de courtier et le formulaire client selon l'art. 45 VAG)",
     "line9": "et que la gestion de mes polices d'assurance existantes sera transférée à oneZone avec effet immédiat.",
     "send": "Envoyer"
+  },
+  "file": {
+    "notsupported": "Type de fichier non pris en charge",
+    "loading": "Chargement du fichier..."
   }
 }

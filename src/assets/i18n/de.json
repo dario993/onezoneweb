@@ -211,6 +211,7 @@
     "successsend": "Anfrage erfolgreich abgesendet"
   },
   "file": {
-    "notsupported": "Dateityp wird nicht unterstützt"
+    "notsupported": "Dateityp wird nicht unterstützt",
+    "loading": "Datei wird geladen..."
   }
 }

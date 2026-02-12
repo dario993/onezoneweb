@@ -172,5 +172,9 @@
     "line8": "(Le condizioni per il mandato del broker e formulari del cliente secondo art. VAG 45)",
     "line9": "e che la gestione ed il supporto delle mie assicurazioni attuali con questo passano con effetto immediato a oneZone.",
     "send": "Invia"
+  },
+  "file": {
+    "notsupported": "Tipo di file non supportato",
+    "loading": "Caricamento file..."
   }
 }

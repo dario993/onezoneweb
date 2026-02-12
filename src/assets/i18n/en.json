@@ -173,5 +173,9 @@
     "line8": "(Conditons about brokermandate and all client information basing on art. VAG 45)",
     "line9": "and I agree that the supporting of my current insurances will pass over immediately to the supporting team of oneZone.",
     "send": "Submit"
+  },
+  "file": {
+    "notsupported": "File type not supported",
+    "loading": "Loading file..."
   }
 }
