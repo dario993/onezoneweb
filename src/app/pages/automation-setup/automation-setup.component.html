@@ -1,0 +1,202 @@
+<div class="bg-gray-50 flex flex-col items-center py-6 px-4">
+  <div class="bg-white rounded-2xl shadow-lg w-full max-w-xl p-8">
+
+    <!-- Header -->
+    <h1 class="text-2xl font-bold text-gray-800 mb-2">
+      {{ 'automation.setup_title' | i18n }}
+    </h1>
+    <p class="text-gray-500 mb-6">
+      {{ 'automation.setup_welcome_pre' | i18n }} <strong>{{ userName }}</strong>{{ 'automation.setup_welcome_post' | i18n }}
+    </p>
+
+    <!-- Barra di progresso -->
+    <div class="flex items-center mb-8">
+      @for (s of [1, 2, 3]; track s) {
+      <div class="flex-1 h-2 rounded-full mx-1"
+        [ngClass]="currentStep >= s ? 'bg-blue-600' : 'bg-gray-200'">
+      </div>
+      }
+    </div>
+    <p class="text-sm text-gray-400 text-center mb-6">{{ 'automation.step_label' | i18n }} {{ currentStep }} {{ 'automation.step_of' | i18n }} 3</p>
+
+    <!-- STEP 1: Credenziali EcoHub -->
+    @if (currentStep === 1) {
+    <div>
+      <h2 class="text-lg font-semibold text-gray-700 mb-4">
+        {{ 'automation.step_credenziali' | i18n }}
+      </h2>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.username_label' | i18n }}</label>
+        <input type="text" [(ngModel)]="form.ecohub_username"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          [placeholder]="'automation.username_placeholder' | i18n" />
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.password_label' | i18n }}</label>
+        <div class="relative">
+          <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="form.ecohub_password"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [placeholder]="'automation.password_placeholder' | i18n" />
+          <button type="button" (click)="showPassword = !showPassword"
+            class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600">
+            @if (!showPassword) {
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            }
+            @if (showPassword) {
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+            </svg>
+            }
+          </button>
+        </div>
+      </div>
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.commission_label' | i18n }}</label>
+        <input type="text" [(ngModel)]="form.commission_number"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="F01362298" />
+        <p class="text-xs text-gray-400 mt-1">{{ 'automation.commission_hint' | i18n }}</p>
+      </div>
+    </div>
+    }
+
+    <!-- STEP 2: QR Code 2FA -->
+    @if (currentStep === 2) {
+    <div>
+      <h2 class="text-lg font-semibold text-gray-700 mb-4">
+        {{ 'automation.step_qrcode' | i18n }}
+      </h2>
+      <ol class="list-decimal list-inside text-gray-600 space-y-2 mb-6 text-sm">
+        <li>{{ 'automation.step2_instruction_1' | i18n }}</li>
+        <li>{{ 'automation.step2_instruction_2' | i18n }}</li>
+        <li [innerHTML]="'automation.step2_instruction_3' | i18n"></li>
+        <li>{{ 'automation.step2_instruction_4' | i18n }}</li>
+        <li>{{ 'automation.step2_instruction_5' | i18n }}</li>
+      </ol>
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+        <p class="text-amber-800 text-sm">
+          <strong>{{ 'automation.step2_note_title' | i18n }}</strong> {{ 'automation.step2_note_text' | i18n }}
+        </p>
+      </div>
+
+      <!-- Box paste QR Code -->
+      <div
+        (paste)="onQrPaste($event)"
+        (click)="qrInput.click()"
+        class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 transition-colors mb-4 min-h-[150px] flex flex-col items-center justify-center">
+        @if (qrPreview) {
+        <img [src]="qrPreview" class="max-h-40 mb-2" alt="QR Code" />
+        }
+        @if (!qrPreview) {
+        <p class="text-gray-400 text-sm">
+          {{ 'automation.qr_paste_hint' | i18n }}<br/>
+          {{ 'automation.qr_paste_or_click' | i18n }}
+        </p>
+        }
+        <input #qrInput type="file" accept="image/*" (change)="onQrFileSelect($event)" class="hidden" />
+      </div>
+
+      <!-- Risultato TOTP estratto -->
+      @if (totpExtracted) {
+      <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+        <p class="text-green-700 text-sm font-medium">{{ 'automation.totp_success' | i18n }}</p>
+      </div>
+      }
+      @if (totpError) {
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+        <p class="text-red-700 text-sm">{{ totpError }}</p>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- STEP 3: Google Authenticator + OTP -->
+    @if (currentStep === 3) {
+    <div>
+      <h2 class="text-lg font-semibold text-gray-700 mb-4">
+        {{ 'automation.step_authenticator' | i18n }}
+      </h2>
+      <ol class="list-decimal list-inside text-gray-600 space-y-2 mb-6 text-sm">
+        <li [innerHTML]="'automation.step3_instruction_1' | i18n"></li>
+        <li>{{ 'automation.step3_instruction_2' | i18n }}</li>
+        <li>{{ 'automation.step3_instruction_3' | i18n }}</li>
+        <li>{{ 'automation.step3_instruction_4' | i18n }}</li>
+        <li [innerHTML]="'automation.step3_instruction_5' | i18n"></li>
+      </ol>
+
+      <!-- Avviso sessione unica -->
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+        <p class="text-yellow-800 text-sm">
+          <strong>{{ 'automation.step3_warning_title' | i18n }}</strong> {{ 'automation.step3_warning_text' | i18n }}
+        </p>
+      </div>
+    </div>
+    }
+
+    <!-- Messaggio di attesa verifica login -->
+    @if (isVerifying) {
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+      <div class="flex items-center gap-3">
+        <svg class="animate-spin h-5 w-5 text-blue-600 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        <p class="text-blue-800 text-sm font-medium">
+          {{ 'automation.verifying_message' | i18n }}<br/>
+          {{ 'automation.verifying_wait' | i18n }}
+        </p>
+      </div>
+    </div>
+    }
+
+    <!-- Bottoni navigazione -->
+    <div class="flex justify-between mt-6">
+      @if (currentStep > 1) {
+      <button (click)="previousStep()"
+        [disabled]="isLoading"
+        class="px-5 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50">
+        {{ 'automation.indietro' | i18n }}
+      </button>
+      }
+      @if (currentStep === 1) {
+      <div></div>
+      }
+
+      @if (currentStep < 3) {
+      <button (click)="nextStep()"
+        [disabled]="!canProceed() || isLoading"
+        class="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+        @if (!isLoading) {
+        <span>{{ 'automation.avanti' | i18n }}</span>
+        }
+        @if (isLoading) {
+        <span class="flex items-center gap-2">
+          <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          {{ 'automation.loading_text' | i18n }}
+        </span>
+        }
+      </button>
+      }
+
+      @if (currentStep === 3) {
+      <button (click)="onSubmit()"
+        [disabled]="!canProceed() || isLoading"
+        class="px-6 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+        @if (!isLoading) {
+        <span>{{ 'automation.invia' | i18n }}</span>
+        }
+        @if (isLoading) {
+        <span>{{ 'automation.submitting_text' | i18n }}</span>
+        }
+      </button>
+      }
+    </div>
+
+  </div>
+</div>

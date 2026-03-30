@@ -21,6 +21,7 @@ export class PoliciesComponent implements OnInit {
   public policiesByClient: PolicyByClient[] = [];
   public contactname: string = '';
   public debug: any = {};
+  public loaded = false;
 
   constructor(
     private readonly auth: AuthService,
@@ -83,6 +84,7 @@ export class PoliciesComponent implements OnInit {
 
         this.loadAvatars();
 
+        this.loaded = true;
         this.loaderService.hide();
       });
   }

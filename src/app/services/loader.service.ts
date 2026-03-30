@@ -25,6 +25,6 @@ export class LoaderService {
   }
 
   private checkLoader(): void {
-    this.loading$.next(this.loadingCounter > 0);
+    queueMicrotask(() => this.loading$.next(this.loadingCounter > 0));
   }
 }

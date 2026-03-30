@@ -8,7 +8,11 @@ import { OneZoneService } from '../../services/onezone.service';
 import { BrokerstarService } from '../../services/brokerstar.service';
 import { I18nPipe } from '../../pipes/i18n.pipe';
 import { I18nService } from '../../services/i18n.service';
+import { AutomationService } from '../../services/automation.service';
 import { Quote } from '../../interfaces/quote.interface';
+import { StorageService } from '../../services/storage.service';
+import { firstValueFrom, timeout } from 'rxjs';
+import { ToasterService } from '../../services/toaster.service';
 
 @Component({
   selector: 'page-home',
@@ -27,6 +31,8 @@ export class HomeComponent {
     body: '',
     footer: '',
   };
+  public isConsultant: boolean = false;
+  public isVerifying: boolean = false;
 
   constructor(
     private readonly authService: AuthService,
@@ -34,9 +40,13 @@ export class HomeComponent {
     private readonly brokerstarService: BrokerstarService,
     private readonly oneZoneService: OneZoneService,
     private readonly loaderService: LoaderService,
-    public readonly i18n: I18nService
+    public readonly i18n: I18nService,
+    private readonly automationService: AutomationService,
+    private readonly storageService: StorageService,
+    private readonly toasterService: ToasterService
   ) {
     this.username = authService.getUserName();
+    this.isConsultant = isTrue(this.authService.userData.login?.isSharer);
 
     // load banner
     this.loaderService.show();
@@ -77,6 +87,51 @@ export class HomeComponent {
           response.data[Math.floor(Math.random() * response.data.length)];
       }
     });
+
+    // if consultant, fetch api_key from automation backend
+    if (this.isConsultant) {
+      const onezoneId = String(this.authService.userData?.contact?.id);
+      this.automationService.getConsultant(onezoneId).subscribe({
+        next: (res) => {
+          if (res.api_key) {
+            this.storageService.setItem('consultantApiKey', res.api_key);
+          }
+        },
+        error: () => {
+          // consultant not registered in automation system, ignore
+        },
+      });
+    }
+  }
+
+  public async onGeneraPreventivi(): Promise<void> {
+    const consultantId = this.authService.userData?.contact?.id;
+    if (!consultantId) return;
+
+    this.isVerifying = true;
+    try {
+      const result = await firstValueFrom(
+        this.automationService.checkLogin(String(consultantId)).pipe(
+          timeout(90000)
+        )
+      );
+      if (result.login_check) {
+        this.navigator.navigateTo('automation-form');
+      } else {
+        this.navigator.navigateTo('automation-setup');
+      }
+    } catch (err: any) {
+      if (err?.name === 'TimeoutError') {
+        this.toasterService.warn(
+          'Login su EcoHub FALLITO. Ripetere la procedura. Se il problema persiste, contattare il webmaster.'
+        );
+      } else {
+        // 404 = consulente non registrato, qualsiasi altro errore → setup
+        this.navigator.navigateTo('automation-setup');
+      }
+    } finally {
+      this.isVerifying = false;
+    }
   }
 
   public getLocalizedText(text: string | Record<string, string>): string {

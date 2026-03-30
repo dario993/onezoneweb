@@ -1,5 +1,15 @@
 # Regole di Sviluppo
 
+## Consultazione Documentazione Esistente
+
+**Prima di fare qualsiasi cosa**, è obbligatorio:
+
+1. **Listare sempre i file** nella cartella `/docs` e leggerne almeno i titoli
+2. **Se si implementa una nuova feature**, cercare un file in `/docs` che possa essere rilevante e leggerlo per capire il contesto già sviluppato
+3. I file in `/docs` documentano le feature già implementate: **evitare duplicati** e rispettare le scelte già fatte
+
+---
+
 ## Documento di Progetto Obbligatorio
 
 Ogni volta che viene richiesto di sviluppare una nuova funzionalità o implementazione, **prima di scrivere qualsiasi codice** è necessario:
@@ -11,6 +21,18 @@ Ogni volta che viene richiesto di sviluppare una nuova funzionalità o implement
 5. **Attendere la conferma esplicita dell'utente** prima di procedere con lo sviluppo
 
 > **IMPORTANTE**: Non procedere mai con l'implementazione del codice senza aver prima creato il documento di progetto e ricevuto conferma dall'utente.
+
+---
+
+## Conferma Prima di Iniziare
+
+Prima di iniziare qualsiasi lavoro:
+
+1. **Fornire un resoconto** di cosa verrà fatto (file da creare/modificare, funzionalità da implementare)
+2. **Chiedere conferma esplicita** all'utente prima di procedere
+3. **Non iniziare l'implementazione** finché l'utente non approva
+
+> **IMPORTANTE**: Queste tre regole si applicano a qualsiasi task, incluse modifiche minori. Nessuna eccezione.
 
 ---
 
@@ -1314,6 +1336,17 @@ Per supporto tecnico o domande:
 
 - `2026-01-29-00-00-assegnazione-consulente.md` — Piano di Implementazione: Assegnazione Consulente Tramite URL
 - `2026-02-11-17-41-fix-file-loading-flash.md` — Fix Flash "Not Supported" nel FileComponent
+- `docs/sviluppo-automatizzazione/2026-03-04-16-39-master-control-genera-preventivi.md` — Master Control: Feature "Genera Preventivi" con wizard EcoHub, form preventivi auto e modalità mock
+- `docs/sviluppo-automatizzazione/2026-03-09-16-30-riallineamento-endpoint-api.md` — Riallineamento Endpoint API AutomationService ai veri endpoint backend
+- `docs/sviluppo-automatizzazione/2026-03-09-17-38-autenticazione-due-livelli.md` — Autenticazione a 2 Livelli: ADMIN_API_KEY + Consultant api_key
+- `docs/sviluppo-automatizzazione/2026-03-09-17-52-flusso-registrazione-consulente.md` — Flusso Registrazione Consulente: allineamento interfacce, getConsultant(), gestione 404
+- `docs/sviluppo-automatizzazione/2026-03-09-17-59-extract-totp-multipart.md` — Conversione extract-totp-secret da JSON/base64 a multipart/form-data
+- `docs/sviluppo-automatizzazione/2026-03-09-18-03-polling-asincrono-generate-quotes.md` — Polling asincrono dopo generate-quotes (request_id → status tracking)
+- `docs/sviluppo-automatizzazione/2026-03-09-18-15-aggiornamento-interfacce-typescript.md` — Aggiornamento interfacce TypeScript per risposte reali del backend
+- `docs/2026-03-11-17-56-checklogin-dopo-setup.md` — CheckLogin dopo Setup Automazione: verifica login EcoHub post-setup con messaggio di attesa
+- `docs/2026-03-12-20-06-fix-electric-vehicle-payload.md` — Fix campo electric_vehicle: da stringa a oggetto con 4 checkbox booleane per l'API
+- `docs/2026-03-19-16-47-customers-lazy-loading-scroll.md` — Caricamento a scaglioni con scroll per la pagina Customers
+- `docs/2026-03-24-16-57-i18n-automation-form.md` — Internazionalizzazione del form preventivi auto (automation-form)
 
 ---
 

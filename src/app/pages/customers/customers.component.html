@@ -44,7 +44,7 @@
   </div>
 
   <!-- Customer List -->
-  <div class="flex-1 px-4 overflow-y-auto">
+  <div class="flex-1 px-4">
     <div class="space-y-3">
       @for (customer of customers; track customer.id) {
       <div
@@ -55,9 +55,9 @@
           <!-- Customer Name and Mandate -->
           <div class="flex items-start justify-between mb-3">
             <h3 class="text-lg font-bold text-gray-900 flex-1 pr-2">
-              {{ customer?.name }}
+              {{ customer.name }}
             </h3>
-            @if (customer.data?.hasMandatFile) {
+            @if (customer.hasMandateFile) {
             <span
               class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap"
             >
@@ -72,23 +72,23 @@
             <div class="space-y-1">
               <p class="text-sm text-gray-600">
                 {{ "customers.people" | i18n }} ({{
-                  customer.data?.subContactCount || 0
+                  customer.subContactCount
                 }})
               </p>
               <p class="text-sm text-gray-600">
                 {{ "customers.policies" | i18n }} ({{
-                  customer.data?.policyCount || 0
+                  customer.policyCount
                 }})
               </p>
             </div>
 
             <!-- Address -->
             <div class="space-y-1">
-              @if (customer.data?.address) {
-              <p class="text-sm text-gray-700">{{ customer.data?.address }}</p>
-              } @if (customer.data?.postcode || customer.data?.city) {
+              @if (customer.address) {
+              <p class="text-sm text-gray-700">{{ customer.address }}</p>
+              } @if (customer.postcode || customer.city) {
               <p class="text-sm text-gray-700">
-                {{ customer.data?.postcode }} {{ customer.data?.city }}
+                {{ customer.postcode }} {{ customer.city }}
               </p>
               }
             </div>
@@ -121,7 +121,9 @@
           </div>
         </div>
       </div>
-      } @if (customers.length === 0) {
+      }
+
+      @if (customers.length === 0 && !isLoadingPage) {
       <div class="text-center py-8">
         <p class="text-gray-500">No customers found</p>
       </div>

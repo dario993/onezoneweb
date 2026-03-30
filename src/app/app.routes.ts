@@ -31,6 +31,8 @@ import { ReportComponent } from './pages/report/report.component';
 import { AgreementComponent } from './pages/agreement/agreement.component';
 import { CustomersComponent } from './pages/customers/customers.component';
 import { FileComponent } from './pages/file/file.component';
+import { AutomationSetupComponent } from './pages/automation-setup/automation-setup.component';
+import { AutomationFormComponent } from './pages/automation-form/automation-form.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -68,6 +70,8 @@ export const routes: Routes = [
       { path: 'compare', component: PolicyCalculateComponent },
       { path: 'agreement', component: AgreementComponent },
       { path: 'customers', component: CustomersComponent },
+      { path: 'automation-setup', component: AutomationSetupComponent },
+      { path: 'automation-form', component: AutomationFormComponent },
     ],
     canActivate: [isAuthenticatedRoute],
   },

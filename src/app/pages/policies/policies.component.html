@@ -64,5 +64,11 @@
       </div>
     </div>
     }
+
+    @if (loaded && policiesByClient.length === 0) {
+    <div class="text-center py-8">
+      <p class="text-gray-500">{{ "policies.empty" | i18n }}</p>
+    </div>
+    }
   </div>
 </div>

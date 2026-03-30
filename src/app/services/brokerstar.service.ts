@@ -202,7 +202,7 @@ export class BrokerstarService {
     );
   }
 
-  private loadContactPage(
+  public loadContactPage(
     page: number,
     requestParams: Record<string, any> = {}
   ): Observable<any> {

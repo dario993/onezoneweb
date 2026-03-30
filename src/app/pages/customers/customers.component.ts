@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -16,11 +16,25 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
   styleUrls: ['./customers.component.scss'],
   imports: [CommonModule, FormsModule, I18nPipe],
 })
-export class CustomersComponent implements OnDestroy {
+export class CustomersComponent implements OnDestroy, AfterViewInit {
   public customers: any[] = [];
   public searchValueSubject: BehaviorSubject<string> =
     new BehaviorSubject<string>('');
   private readonly destroy$ = new Subject<void>();
+  private currentPage = 0;
+  private totalPages = 0;
+  public isLoadingPage = false;
+  public allPagesLoaded = false;
+
+  private scrollHandler: (() => void) | null = null;
+  private mainElement: HTMLElement | null = null;
+
+  private readonly requestParams: Record<string, any> = {
+    'filters[show_contacts]': 2,
+    'add[has_mandate_file]': true,
+    'add[policy_count]': true,
+    'add[sub_contact_count]': true,
+  };
 
   get searchvalue(): string {
     return this.searchValueSubject.value;
@@ -37,25 +51,45 @@ export class CustomersComponent implements OnDestroy {
     private readonly brokerstarService: BrokerstarService,
     private readonly loaderService: LoaderService
   ) {
-    // Initialer Load wird durch das BehaviorSubject mit leerem String getriggert
     this.searchValueSubject
       .pipe(
-        debounceTime(300), // Wartet 300ms nach dem letzten Tastendruck
-        distinctUntilChanged(), // Führt nur aus wenn sich der Wert geändert hat
-        takeUntil(this.destroy$) // Verhindert Memory Leaks
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
       )
       .subscribe((searchValue) => {
-        this.loadCustomers(searchValue);
+        this.resetAndLoad(searchValue);
       });
   }
 
+  ngAfterViewInit(): void {
+    this.mainElement = document.querySelector('main');
+    if (this.mainElement) {
+      this.scrollHandler = () => this.onMainScroll();
+      this.mainElement.addEventListener('scroll', this.scrollHandler);
+    }
+  }
+
   ngOnDestroy(): void {
+    if (this.mainElement && this.scrollHandler) {
+      this.mainElement.removeEventListener('scroll', this.scrollHandler);
+    }
     this.destroy$.next();
     this.destroy$.complete();
   }
 
+  private onMainScroll(): void {
+    if (!this.mainElement) {
+      return;
+    }
+    const nearBottom =
+      this.mainElement.scrollHeight - this.mainElement.scrollTop - this.mainElement.clientHeight < 200;
+    if (nearBottom && !this.isLoadingPage && !this.allPagesLoaded) {
+      this.loadNextPage();
+    }
+  }
+
   public addCustomer(): void {
-    // Navigate to customer creation page - implementation depends on your routing setup
     this.router.navigate(['/customer/add']);
   }
 
@@ -64,94 +98,93 @@ export class CustomersComponent implements OnDestroy {
   }
 
   public mail(customer: any): void {
-    if (customer.data?.mail) {
-      window.open(`mailto:${customer.data?.mail}`, '_blank');
-    } else if (customer.data?.mailPrivate) {
-      window.open(`mailto:${customer.data?.mailPrivate}`, '_blank');
+    if (customer.mail) {
+      window.open(`mailto:${customer.mail}`, '_blank');
+    } else if (customer.mailPrivate) {
+      window.open(`mailto:${customer.mailPrivate}`, '_blank');
     }
   }
 
   public phone(customer: any): void {
-    if (customer.data?.phoneDirect) {
-      window.open(`tel:${customer.data?.phoneDirect}`, '_blank');
-    } else if (customer.data?.phonePrivate) {
-      window.open(`tel:${customer.data?.phonePrivate}`, '_blank');
-    } else if (customer.data?.phoneWork) {
-      window.open(`tel:${customer.data?.phoneWork}`, '_blank');
-    } else if (customer.data?.mobile) {
-      window.open(`tel:${customer.data?.mobile}`, '_blank');
+    if (customer.phoneDirect) {
+      window.open(`tel:${customer.phoneDirect}`, '_blank');
+    } else if (customer.phonePrivate) {
+      window.open(`tel:${customer.phonePrivate}`, '_blank');
+    } else if (customer.phoneWork) {
+      window.open(`tel:${customer.phoneWork}`, '_blank');
+    } else if (customer.mobile) {
+      window.open(`tel:${customer.mobile}`, '_blank');
     }
   }
 
-  private loadCustomers(search: string = ''): void {
-    this.loaderService.show();
-    this.brokerstarService
-      .contactContactList({
-        q: search,
-        'filters[show_contacts]': 2,
-        'add[has_mandate_file]': true,
-        'add[policy_count]': true,
-        'add[sub_contact_count]': true,
-      })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((response: any): void => {
-        this.loaderService.hide();
-        if (response.data) {
-          this.customers = response.data.map((profile: any) => ({
-            id: profile.id,
-            data: null, // Explizit null setzen für bessere Typisierung
-          }));
-
-          // sort auth user to the top
-          this.customers.sort((a: any, b: any): number => {
-            if (a.id === this.auth.userData.contact.id) {
-              return -1;
-            }
-            if (b.id === this.auth.userData.contact.id) {
-              return 1;
-            }
-            return 0;
-          });
-
-          this.customers.forEach((profile: any) => {
-            this.loadCustomer(profile.id);
-          });
-
-          this.changeDetection.detectChanges();
-        }
-      });
+  private resetAndLoad(search: string): void {
+    this.customers = [];
+    this.currentPage = 0;
+    this.totalPages = 0;
+    this.allPagesLoaded = false;
+    this.loadNextPage(search);
   }
 
-  private loadCustomer(contactid: number): void {
-    // check if data is already set on profile
-    const profile = this.customers.find((item: any) => item.id === contactid);
-    if (profile?.data) {
+  private loadNextPage(search?: string): void {
+    if (this.isLoadingPage) {
       return;
     }
 
+    const nextPage = this.currentPage + 1;
+    this.isLoadingPage = true;
     this.loaderService.show();
+
+    const params: Record<string, any> = {
+      ...this.requestParams,
+      q: search ?? this.searchvalue,
+    };
+
     this.brokerstarService
-      .contact(contactid)
+      .loadContactPage(nextPage, params)
       .pipe(takeUntil(this.destroy$))
       .subscribe((response: any): void => {
+        this.isLoadingPage = false;
         this.loaderService.hide();
 
-        // update profile in profiles
-        const profileIndex = this.customers.findIndex(
-          (item: any) => item.id === contactid
-        );
+        if (response?.data) {
+          this.totalPages = response.pages || 1;
+          this.currentPage = nextPage;
+          this.allPagesLoaded = this.currentPage >= this.totalPages;
 
-        if (profileIndex !== -1) {
-          this.customers[profileIndex] = {
-            ...this.customers[profileIndex],
+          const newCustomers = response.data.map((contact: any) => ({
+            id: contact.id,
             name: this.auth.getUserName(
-              response.contactType.id as number,
-              String(response.name1),
-              String(response.name2)
+              contact.contactType?.id as number,
+              String(contact.name1),
+              String(contact.name2)
             ),
-            data: response,
-          };
+            address: contact.address,
+            postcode: contact.postcode,
+            city: contact.city,
+            mail: contact.mail,
+            mailPrivate: contact.mailPrivate,
+            phoneDirect: contact.phoneDirect,
+            phonePrivate: contact.phonePrivate,
+            phoneWork: contact.phoneWork,
+            mobile: contact.mobile,
+            hasMandateFile: contact.hasMandateFile,
+            policyCount: contact.policyCount || 0,
+            subContactCount: contact.subContactCount || 0,
+          }));
 
+          // On first page, sort auth user to the top
+          if (this.currentPage === 1) {
+            const authUserId = this.auth.userData?.contact?.id;
+            const authUserIndex = newCustomers.findIndex(
+              (c: any) => c.id === authUserId
+            );
+            if (authUserIndex > 0) {
+              const [authUser] = newCustomers.splice(authUserIndex, 1);
+              newCustomers.unshift(authUser);
+            }
+          }
+
+          this.customers = [...this.customers, ...newCustomers];
           this.changeDetection.detectChanges();
         }
       });
