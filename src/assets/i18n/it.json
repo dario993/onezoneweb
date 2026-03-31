@@ -232,7 +232,7 @@
     "retry": "Riprova",
     "error_pool_full": "Il pool di sessioni è pieno. Riprova tra qualche minuto.",
     "form_success_title": "Richiesta inviata correttamente",
-    "form_success_message": "La tua richiesta è stata inviata correttamente. Fra qualche minuto riceverai le offerte direttamente sulla tua mail",
+    "form_success_message": "La tua richiesta è stata inviata correttamente. Fra qualche minuto riceverai le offerte direttamente sulla mail associata all'account EcoHub",
     "form_test_button": "Compila dati test",
     "form_section_personal": "Informazioni Personali",
     "form_section_vehicle": "Veicolo",

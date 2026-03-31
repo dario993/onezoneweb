@@ -233,7 +233,7 @@
     "retry": "Retry",
     "error_pool_full": "The session pool is full. Please try again in a few minutes.",
     "form_success_title": "Request sent successfully",
-    "form_success_message": "Your request has been sent successfully. In a few minutes you will receive the quotes directly to your email",
+    "form_success_message": "Your request has been sent successfully. In a few minutes you will receive the quotes directly to the email associated with your EcoHub account",
     "form_test_button": "Fill test data",
     "form_section_personal": "Personal Information",
     "form_section_vehicle": "Vehicle",

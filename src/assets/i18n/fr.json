@@ -232,7 +232,7 @@
     "retry": "Réessayer",
     "error_pool_full": "Le pool de sessions est plein. Veuillez réessayer dans quelques minutes.",
     "form_success_title": "Demande envoyée avec succès",
-    "form_success_message": "Votre demande a été envoyée avec succès. Dans quelques minutes, vous recevrez les offres directement à votre e-mail",
+    "form_success_message": "Votre demande a été envoyée avec succès. Dans quelques minutes, vous recevrez les offres directement à l'e-mail associé à votre compte EcoHub",
     "form_test_button": "Remplir données de test",
     "form_section_personal": "Informations personnelles",
     "form_section_vehicle": "Véhicule",

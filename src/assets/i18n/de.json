@@ -269,7 +269,7 @@
     "retry": "Erneut versuchen",
     "error_pool_full": "Der Sitzungspool ist voll. Bitte versuchen Sie es in einigen Minuten erneut.",
     "form_success_title": "Anfrage erfolgreich gesendet",
-    "form_success_message": "Ihre Anfrage wurde erfolgreich gesendet. In wenigen Minuten erhalten Sie die Offerten direkt an Ihre E-Mail",
+    "form_success_message": "Ihre Anfrage wurde erfolgreich gesendet. In wenigen Minuten erhalten Sie die Offerten direkt an die E-Mail-Adresse Ihres EcoHub-Kontos",
     "form_test_button": "Testdaten ausfüllen",
     "form_section_personal": "Persönliche Informationen",
     "form_section_vehicle": "Fahrzeug",

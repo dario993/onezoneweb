@@ -245,15 +245,15 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   ];
   carBrandOptions = [
     'Alfa Romeo','Alpine','Aston Martin','Audi','Bentley','BMW','Bugatti','Buick',
-    'Cadillac','Chevrolet','Chrysler','Citroën','Cupra','Dacia','Daewoo','Daihatsu',
+    'Cadillac','Chevrolet','Chrysler','Citroen','Cupra','Dacia','Daewoo','Daihatsu',
     'Daimler','Dodge','Dongfeng','DS','Elaris','Ferrari','Fiat','Fisker','Ford',
-    'GMC','Genesis','Honda','Hummer','Hyundai','Infiniti','Isuzu','Iveco','Jaguar',
+    'General Motors Company','Genesis','Honda','Hummer','Hyundai','Infinity','Isuzu','Iveco','Jaguar',
     'Jeep','Kia','KTM','Lamborghini','Lancia','Land Rover','Lexus','Lincoln','Lotus',
     'Mazda','Maserati','Maybach','McLaren','Mercedes-Benz','Mercury','MG','Mini',
     'Mitsubishi','Morgan','Nissan','Oldsmobile','Opel','Panoz','Peugeot','Plymouth',
-    'Polestar','Pontiac','Porsche','Ram','Renault','Rolls-Royce','Rover','Saab',
-    'Ssang Yong','Seat','Smart','Škoda','Subaru','Suzuki','Puch','Tesla','Toyota',
-    'Triumph','TVR','VW - Volkswagen','Volvo','Wiesmann','Zagato',
+    'Polestar','Pontiac','Porsche','Ram','Renault','Rolls Royce','Rover','Saab',
+    'Ssang Yong','Seat','Smart','Skoda','Subaru','Susuki','Puch','Tesla','Toyota',
+    'Triumph','TVR','Volkswagen','Volvo','Wiesmann','Zagato',
   ];
   currentInsuranceOptions = [
     { value: 'keine', label: 'automation.opt_ins_none' },
@@ -358,7 +358,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     { value: 'Semestrale', label: 'automation.opt_payment_semi' },
   ];
   claimsOptions = ['0', '1', '2', '3'];
-  isTestMode = true;
+  isTestMode = false;
 
   // Autocomplete PLZ / Località
   plzSuggestions: LocalityEntry[] = [];
@@ -760,7 +760,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       n_glass_claims_5_years: '0',
       n_partial_comprehensive_claims_5_years: '0',
       other_questions: '',
-      recipient_email: 'dario.sgamba@gmail.com',
+      recipient_email: '',
       scrapers: [],
     });
     this.toasterService.success(this.i18nService.getTranslation('automation', 'form_test_loaded'));
