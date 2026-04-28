@@ -33,6 +33,7 @@ import { CustomersComponent } from './pages/customers/customers.component';
 import { FileComponent } from './pages/file/file.component';
 import { AutomationSetupComponent } from './pages/automation-setup/automation-setup.component';
 import { AutomationFormComponent } from './pages/automation-form/automation-form.component';
+import { FormMandateWefoxComponent } from './pages/form-mandate-wefox/form-mandate-wefox.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -44,7 +45,8 @@ export const routes: Routes = [
       { path: 'recover', component: RecoverComponent },
       { path: 'register', component: RegisterComponent },
       { path: 'register/:consultantCode', component: RegisterComponent },
-      { path: 'language_unauthed', component: LanguageComponent },
+      { path: 'language_unauthed', component: LanguageComponent }
+    
     ],
     canActivate: [isNonAuthenticatedRoute],
   },
@@ -72,6 +74,7 @@ export const routes: Routes = [
       { path: 'customers', component: CustomersComponent },
       { path: 'automation-setup', component: AutomationSetupComponent },
       { path: 'automation-form', component: AutomationFormComponent },
+      { path: 'form-mandate-wefox', component: FormMandateWefoxComponent },
     ],
     canActivate: [isAuthenticatedRoute],
   },

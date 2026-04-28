@@ -1,0 +1,268 @@
+<div class="max-w-3xl mx-auto p-4 pb-12">
+
+  <!-- Titolo -->
+  <h1 class="text-2xl font-bold text-gray-800 mb-8">
+    Mandate einreichen
+  </h1>
+
+  <!-- Messaggio di conferma dopo invio -->
+  @if (submitSuccess) {
+  <div class="rounded-2xl p-10 text-center border bg-green-50 border-green-200">
+    <div class="text-green-500 text-6xl mb-4">&#10003;</div>
+    <h2 class="text-2xl font-semibold text-green-700 mb-4">Mandat erfolgreich eingereicht</h2>
+    <p class="text-gray-600 text-lg">Ihr Mandat wurde erfolgreich eingereicht. Wir werden es so schnell wie möglich bearbeiten.</p>
+  </div>
+  }
+
+  <!-- Form -->
+  @if (!submitSuccess) {
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+    <!-- SEZIONE 1: Persönliche Daten -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+      <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Persönliche Daten</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <!-- Anrede -->
+        <div class="mb-4 md:col-span-2">
+          <label class="block text-sm font-medium text-gray-600 mb-1">Anrede <span class="text-red-500">*</span></label>
+          <select formControlName="anrede"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('anrede') ? 'border-red-500' : 'border-gray-300'">
+            <option value="Firma">Firma</option>
+            <option value="Mann">Mann</option>
+            <option value="Frau">Frau</option>
+          </select>
+        </div>
+
+        <!-- Firmenname (condizionale) -->
+        @if (showCompanyName) {
+        <div class="mb-4 md:col-span-2">
+          <label class="block text-sm font-medium text-gray-600 mb-1">Firmenname (gemäss HR-Auszug) <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="firmenname"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('firmenname') ? 'border-red-500' : 'border-gray-300'" />
+          @if (getError('firmenname')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('firmenname') }}</p>
+          }
+        </div>
+        }
+
+        <!-- Vorname -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">Vorname <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="vorname" placeholder="Vorname"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('vorname') ? 'border-red-500' : 'border-gray-300'" />
+          @if (getError('vorname')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('vorname') }}</p>
+          }
+        </div>
+
+        <!-- Nachname -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">Nachname <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="nachname" placeholder="Nachname"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('nachname') ? 'border-red-500' : 'border-gray-300'" />
+          @if (getError('nachname')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('nachname') }}</p>
+          }
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SEZIONE 2: Adresse -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+      <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Adresse</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <!-- Strasse -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">Strasse <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="strasse"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('strasse') ? 'border-red-500' : 'border-gray-300'" />
+          @if (getError('strasse')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('strasse') }}</p>
+          }
+        </div>
+
+        <!-- Hausnummer -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">Hausnummer <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="hausnummer"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('hausnummer') ? 'border-red-500' : 'border-gray-300'" />
+          @if (getError('hausnummer')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('hausnummer') }}</p>
+          }
+        </div>
+
+        <!-- PLZ -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">PLZ <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="plz"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('plz') ? 'border-red-500' : 'border-gray-300'" />
+          @if (getError('plz')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('plz') }}</p>
+          }
+        </div>
+
+        <!-- Ort -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">Ort <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="ort"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('ort') ? 'border-red-500' : 'border-gray-300'" />
+          @if (getError('ort')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('ort') }}</p>
+          }
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SEZIONE 3: Kontakt -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+      <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Kontakt</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <!-- Email -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">Email <span class="text-red-500">*</span></label>
+          <input type="email" formControlName="email" placeholder="Email"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('email') ? 'border-red-500' : 'border-gray-300'" />
+          @if (getError('email')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('email') }}</p>
+          }
+        </div>
+
+        <!-- Mobile -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">Mobile <span class="text-red-500">*</span></label>
+          <input type="tel" formControlName="mobile" placeholder="Telefonnummer"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('mobile') ? 'border-red-500' : 'border-gray-300'" />
+          @if (getError('mobile')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('mobile') }}</p>
+          }
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SEZIONE 4: Dokumente -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+      <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Dokumente</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <!-- Upload Mandat -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">Upload Mandat</label>
+          <div class="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 transition-colors"
+            [ngClass]="mandatFile ? 'border-green-400 bg-green-50' : 'border-gray-300'"
+            (click)="mandatInput.click()"
+            (dragover)="onDragOver($event)"
+            (drop)="onDrop($event, 'mandat')">
+            @if (mandatFile) {
+            <div class="flex items-center justify-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span class="text-sm text-green-700">{{ mandatFile.name }}</span>
+              <button type="button" (click)="removeFile('mandat', $event)" class="text-red-400 hover:text-red-600 ml-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            } @else {
+            <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+            <p class="text-sm text-gray-500">Datei hierher ziehen oder klicken zum Hochladen</p>
+            <p class="text-xs text-gray-400 mt-1">Nur PDF-Dateien</p>
+            }
+          </div>
+          <input #mandatInput type="file" accept=".pdf,application/pdf" class="hidden" (change)="onFileSelected($event, 'mandat')" />
+          <p class="text-xs text-gray-400 mt-1">Hier das unterschriebene Mandat hochladen</p>
+        </div>
+
+        <!-- Upload Ausweiskopie -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">Upload Ausweiskopie</label>
+          <div class="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 transition-colors"
+            [ngClass]="ausweisFile ? 'border-green-400 bg-green-50' : 'border-gray-300'"
+            (click)="ausweisInput.click()"
+            (dragover)="onDragOver($event)"
+            (drop)="onDrop($event, 'ausweis')">
+            @if (ausweisFile) {
+            <div class="flex items-center justify-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span class="text-sm text-green-700">{{ ausweisFile.name }}</span>
+              <button type="button" (click)="removeFile('ausweis', $event)" class="text-red-400 hover:text-red-600 ml-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            } @else {
+            <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+            <p class="text-sm text-gray-500">Datei hierher ziehen oder klicken zum Hochladen</p>
+            <p class="text-xs text-gray-400 mt-1">JPG, PNG oder GIF</p>
+            }
+          </div>
+          <input #ausweisInput type="file" accept="image/jpeg,image/png,image/gif,.jpg,.jpeg,.png,.gif" class="hidden" (change)="onFileSelected($event, 'ausweis')" />
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SEZIONE 5: Versicherungsgesellschaften -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+      <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Versicherungsgesellschaften</h2>
+      <p class="text-xs text-gray-400 mb-4">Bei welchen Gesellschaften soll das Mandat eingereicht werden?</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+        @for (company of insuranceCompanies; track company) {
+        <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-700 py-1">
+          <input type="checkbox" [value]="company" (change)="onInsuranceChange(company, $event)"
+            [checked]="selectedInsurances.includes(company)"
+            class="accent-blue-600 w-4 h-4" />
+          <span>{{ company }}</span>
+        </label>
+        }
+      </div>
+    </div>
+
+    <!-- SEZIONE 6: Berater -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+      <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Berater</h2>
+      <div>
+        <label class="block text-sm font-medium text-gray-600 mb-1">Berater</label>
+        <select formControlName="berater"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          @for (b of beraterOptions; track b) {
+          <option [value]="b">{{ b }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <button type="submit"
+      class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl text-lg transition-colors">
+      Mandat einreichen
+    </button>
+
+  </form>
+  }
+
+</div>
