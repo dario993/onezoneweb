@@ -109,7 +109,7 @@ src/app/
 | [06-i18n.md](wiki/06-i18n.md) | Internazionalizzazione, pipe i18n, cambio lingua runtime |
 | [07-api-state.md](wiki/07-api-state.md) | Integrazione API, operatori RxJS, gestione stato |
 | [08-build-deploy.md](wiki/08-build-deploy.md) | Build, deployment, configurazioni (TS, Tailwind, Prettier) |
-
+ 
 ---
 
 ## Documenti di Progetto (docs/)
