@@ -1,0 +1,24 @@
+// Custom styles for customers-mandate-policies component
+
+.policy-card {
+  transition: all 0.3s ease;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.policy-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.policy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.policy-image {
+  max-width: 100%;
+  max-height: 60px;
+  object-fit: contain;
+}

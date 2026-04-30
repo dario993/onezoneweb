@@ -141,6 +141,12 @@
     "people": "Person",
     "policies": "Contracts"
   },
+  "customersMandate": {
+    "title": "Submit mandate"
+  },
+  "home": {
+    "invia_mandato": "Submit mandate"
+  },
   "messages": {
     "title": "New message",
     "search": "Search message",

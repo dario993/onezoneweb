@@ -140,6 +140,12 @@
     "people": "Personnes",
     "policies": "Contrats"
   },
+  "customersMandate": {
+    "title": "Soumettre mandat"
+  },
+  "home": {
+    "invia_mandato": "Soumettre mandat"
+  },
   "messages": {
     "title": "Nouveau message",
     "search": "Chercher message",

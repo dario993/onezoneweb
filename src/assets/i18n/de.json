@@ -173,6 +173,12 @@
     "mandat": "Mandat",
     "search": "Kunde suchen..."
   },
+  "customersMandate": {
+    "title": "Mandat einreichen"
+  },
+  "home": {
+    "invia_mandato": "Mandat einreichen"
+  },
   "messages": {
     "title": "Nachrichten",
     "advisor": "Berater",

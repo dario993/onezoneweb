@@ -1,0 +1,133 @@
+<div class="flex flex-col h-full">
+  <!-- Header -->
+  <div class="relative">
+    <div class="h-24 bg-gradient-to-b from-blue-900 to-blue-700"></div>
+    <div class="absolute inset-0 flex items-center justify-center">
+      <h1 class="text-xl font-medium text-white px-4 text-center">
+        {{ "customersMandate.title" | i18n }}
+      </h1>
+    </div>
+  </div>
+
+  <!-- Add Customer Button -->
+  <div class="relative -mt-12 mx-4 mb-8 z-10">
+    <div class="flex items-center justify-end">
+      <button
+        class="flex items-center bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg hover:bg-opacity-30 transition-all duration-200 shadow-lg"
+        (click)="addCustomer()"
+      >
+        <img
+          src="/assets/icons/ozo/plus-light.png"
+          alt="Add"
+          class="w-4 h-4 mr-2"
+        />
+        <span class="text-sm font-medium">{{ "customers.add" | i18n }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="px-4 mb-4">
+    <div class="relative bg-white rounded-lg shadow-md">
+      <input
+        type="text"
+        [(ngModel)]="searchvalue"
+        placeholder="{{ 'customers.search' | i18n }}"
+        class="w-full px-4 py-3 pr-12 text-gray-900 bg-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <img
+        src="/assets/icons/ozo/search-light-blue.png"
+        alt="Search"
+        class="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5"
+      />
+    </div>
+  </div>
+
+  <!-- Customer List -->
+  <div class="flex-1 px-4">
+    <div class="space-y-3">
+      @for (customer of customers; track customer.id) {
+      <div
+        class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer"
+        (click)="openCustomer(customer)"
+      >
+        <div class="p-4">
+          <!-- Customer Name and Mandate -->
+          <div class="flex items-start justify-between mb-3">
+            <h3 class="text-lg font-bold text-gray-900 flex-1 pr-2">
+              {{ customer.name }}
+            </h3>
+            @if (customer.hasMandateFile) {
+            <span
+              class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap"
+            >
+              {{ "customers.mandat" | i18n }}
+            </span>
+            }
+          </div>
+
+          <!-- Customer Details -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Counts -->
+            <div class="space-y-1">
+              <p class="text-sm text-gray-600">
+                {{ "customers.people" | i18n }} ({{
+                  customer.subContactCount
+                }})
+              </p>
+              <p class="text-sm text-gray-600">
+                {{ "customers.policies" | i18n }} ({{
+                  customer.policyCount
+                }})
+              </p>
+            </div>
+
+            <!-- Address -->
+            <div class="space-y-1">
+              @if (customer.address) {
+              <p class="text-sm text-gray-700">{{ customer.address }}</p>
+              } @if (customer.postcode || customer.city) {
+              <p class="text-sm text-gray-700">
+                {{ customer.postcode }} {{ customer.city }}
+              </p>
+              }
+            </div>
+
+            <!-- Contact Actions -->
+            <div class="flex items-center justify-end space-x-3">
+              <button
+                class="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200"
+                (click)="phone(customer); $event.stopPropagation()"
+                title="Call customer"
+              >
+                <img
+                  src="/assets/icons/ozo/phone-flip-light-blue.png"
+                  alt="Phone"
+                  class="w-6 h-6"
+                />
+              </button>
+              <button
+                class="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200"
+                (click)="mail(customer); $event.stopPropagation()"
+                title="Email customer"
+              >
+                <img
+                  src="/assets/icons/ozo/envelope-light-blue.png"
+                  alt="Email"
+                  class="w-6 h-6"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+
+      @if (customers.length === 0 && !isLoadingPage) {
+      <div class="text-center py-8">
+        <p class="text-gray-500">No customers found</p>
+      </div>
+      }
+    </div>
+  </div>
+</div>

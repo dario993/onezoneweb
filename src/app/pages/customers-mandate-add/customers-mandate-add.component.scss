@@ -1,0 +1,35 @@
+.button {
+  background-color: #d4d5d7;
+  color: black;
+  font-size: 16;
+  padding: 10;
+  width: 50%;
+  margin: 0;
+}
+
+.button-submit {
+  color: white;
+  background-color: #eea400;
+}
+
+.label {
+  color: #203363;
+  font-weight: bold;
+  font-size: 15;
+  margin-bottom: 10;
+}
+
+.input {
+  color: #203363;
+  border-bottom-color: #203363;
+  border-bottom-width: 1;
+  margin: 0;
+  padding: 5;
+  margin-bottom: 15;
+  font-size: 14;
+}
+
+.input:focus {
+  border-bottom-color: #eea400;
+  border-bottom-width: 1;
+}

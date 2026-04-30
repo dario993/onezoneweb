@@ -140,6 +140,12 @@
     "people": "Persone",
     "policies": "Contratti"
   },
+  "customersMandate": {
+    "title": "Invia mandato"
+  },
+  "home": {
+    "invia_mandato": "Invia mandato"
+  },
   "messages": {
     "title": "Nuovi messaggi",
     "search": "Cerca messaggio",

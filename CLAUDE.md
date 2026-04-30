@@ -128,3 +128,4 @@ src/app/
 - `docs/2026-03-19-16-47-customers-lazy-loading-scroll.md` — Caricamento a scaglioni con scroll per la pagina Customers
 - `docs/2026-03-24-16-57-i18n-automation-form.md` — Internazionalizzazione del form preventivi auto (automation-form)
 - `docs/2026-03-31-19-07-form-mandate-wefox.md` — Nuova pagina Form Mandate Wefox: replica del form "Mandate einreichen"
+- `docs/2026-04-28-15-24-flusso-invia-mandato.md` — Flusso "Invia Mandato": bottone Home + pagine customers-mandate, customers-mandate-add, customers-mandate-policies/:id

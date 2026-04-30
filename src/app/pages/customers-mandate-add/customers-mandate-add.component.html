@@ -1,0 +1,292 @@
+<!-- Customers Mandate Add Page Container -->
+<div
+  class="flex flex-col items-center justify-start min-h-full p-6 text-blue-900"
+>
+  <!-- Header -->
+  <h1 class="text-lg font-bold mb-6 text-center">
+    {{ "register.registeras" | i18n }}
+  </h1>
+
+  <!-- Registration Type Toggle -->
+  <div class="flex w-full mb-8 rounded overflow-hidden border border-blue-900">
+    <button
+      type="button"
+      [class]="
+        'flex-1 p-3 font-bold text-sm transition-colors ' +
+        (registerType === 'person'
+          ? 'bg-yellow-500 text-white'
+          : 'bg-gray-200 text-blue-900')
+      "
+      (click)="registerType = 'person'"
+    >
+      {{ "register.headercustomer" | i18n }}
+    </button>
+    <button
+      type="button"
+      [class]="
+        'flex-1 p-3 font-bold text-sm transition-colors ' +
+        (registerType === 'company'
+          ? 'bg-yellow-500 text-white'
+          : 'bg-gray-200 text-blue-900')
+      "
+      (click)="registerType = 'company'"
+    >
+      {{ "register.headercompany" | i18n }}
+    </button>
+  </div>
+
+  <!-- Person Registration Form -->
+  <ng-container *ngIf="registerType === 'person'">
+    <!-- First Name -->
+    <div class="w-full mb-4">
+      <label class="block mb-2 text-sm font-bold">
+        {{ "register.firstname" | i18n }}
+      </label>
+      <input
+        type="text"
+        [(ngModel)]="registerData['name1']"
+        [class]="
+          'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
+          (hasError('name1') ? 'border-red-500' : 'border-blue-900')
+        "
+        autocomplete="given-name"
+      />
+      <div *ngIf="hasError('name1')" class="text-red-500 text-xs mt-1">
+        {{ getError("name1") }}
+      </div>
+    </div>
+
+    <!-- Last Name -->
+    <div class="w-full mb-4">
+      <label class="block mb-2 text-sm font-bold">
+        {{ "register.lastname" | i18n }}
+      </label>
+      <input
+        type="text"
+        [(ngModel)]="registerData['name2']"
+        [class]="
+          'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
+          (hasError('name2') ? 'border-red-500' : 'border-blue-900')
+        "
+        autocomplete="family-name"
+      />
+      <div *ngIf="hasError('name2')" class="text-red-500 text-xs mt-1">
+        {{ getError("name2") }}
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="w-full mb-4">
+      <label class="block mb-2 text-sm font-bold">
+        {{ "register.address" | i18n }}
+      </label>
+      <input
+        type="text"
+        [(ngModel)]="registerData['address']"
+        [class]="
+          'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
+          (hasError('address') ? 'border-red-500' : 'border-blue-900')
+        "
+        autocomplete="street-address"
+      />
+      <div *ngIf="hasError('address')" class="text-red-500 text-xs mt-1">
+        {{ getError("address") }}
+      </div>
+    </div>
+
+    <!-- ZIP Code -->
+    <div class="w-full mb-4">
+      <label class="block mb-2 text-sm font-bold">
+        {{ "register.zip" | i18n }}
+      </label>
+      <input
+        type="text"
+        [(ngModel)]="registerData['postCode']"
+        [class]="
+          'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
+          (hasError('postCode') ? 'border-red-500' : 'border-blue-900')
+        "
+        autocomplete="postal-code"
+      />
+      <div *ngIf="hasError('postCode')" class="text-red-500 text-xs mt-1">
+        {{ getError("postCode") }}
+      </div>
+    </div>
+
+    <!-- City -->
+    <div class="w-full mb-4">
+      <label class="block mb-2 text-sm font-bold">
+        {{ "register.city" | i18n }}
+      </label>
+      <input
+        type="text"
+        [(ngModel)]="registerData['city']"
+        [class]="
+          'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
+          (hasError('city') ? 'border-red-500' : 'border-blue-900')
+        "
+        autocomplete="address-level2"
+      />
+      <div *ngIf="hasError('city')" class="text-red-500 text-xs mt-1">
+        {{ getError("city") }}
+      </div>
+    </div>
+
+    <!-- Birthday -->
+    <div class="w-full mb-4">
+      <label class="block mb-2 text-sm font-bold">
+        {{ "register.birthday" | i18n }}
+      </label>
+      <input
+        type="date"
+        [(ngModel)]="registerData['birthday']"
+        [class]="
+          'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
+          (hasError('birthday') ? 'border-red-500' : 'border-blue-900')
+        "
+        autocomplete="bday"
+      />
+      <div *ngIf="hasError('birthday')" class="text-red-500 text-xs mt-1">
+        {{ getError("birthday") }}
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Company Registration Form -->
+  <ng-container *ngIf="registerType === 'company'">
+    <!-- Company Name -->
+    <div class="w-full mb-4">
+      <label class="block mb-2 text-sm font-bold">
+        {{ "register.company" | i18n }}
+      </label>
+      <input
+        type="text"
+        [(ngModel)]="registerData['name2']"
+        [class]="
+          'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
+          (hasError('name2') ? 'border-red-500' : 'border-blue-900')
+        "
+        autocomplete="organization"
+      />
+      <div *ngIf="hasError('name2')" class="text-red-500 text-xs mt-1">
+        {{ getError("name2") }}
+      </div>
+    </div>
+
+    <!-- Company Address -->
+    <div class="w-full mb-4">
+      <label class="block mb-2 text-sm font-bold">
+        {{ "register.address" | i18n }}
+      </label>
+      <input
+        type="text"
+        [(ngModel)]="registerData['address']"
+        [class]="
+          'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
+          (hasError('address') ? 'border-red-500' : 'border-blue-900')
+        "
+        autocomplete="street-address"
+      />
+      <div *ngIf="hasError('address')" class="text-red-500 text-xs mt-1">
+        {{ getError("address") }}
+      </div>
+    </div>
+
+    <!-- Company ZIP -->
+    <div class="w-full mb-4">
+      <label class="block mb-2 text-sm font-bold">
+        {{ "register.zip" | i18n }}
+      </label>
+      <input
+        type="text"
+        [(ngModel)]="registerData['postCode']"
+        [class]="
+          'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
+          (hasError('postCode') ? 'border-red-500' : 'border-blue-900')
+        "
+        autocomplete="postal-code"
+      />
+      <div *ngIf="hasError('postCode')" class="text-red-500 text-xs mt-1">
+        {{ getError("postCode") }}
+      </div>
+    </div>
+
+    <!-- Company City -->
+    <div class="w-full mb-4">
+      <label class="block mb-2 text-sm font-bold">
+        {{ "register.city" | i18n }}
+      </label>
+      <input
+        type="text"
+        [(ngModel)]="registerData['city']"
+        [class]="
+          'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
+          (hasError('city') ? 'border-red-500' : 'border-blue-900')
+        "
+        autocomplete="address-level2"
+      />
+      <div *ngIf="hasError('city')" class="text-red-500 text-xs mt-1">
+        {{ getError("city") }}
+      </div>
+    </div>
+
+    <!-- Company Founded Date -->
+    <div class="w-full mb-4">
+      <label class="block mb-2 text-sm font-bold">
+        {{ "register.birthdaycompany" | i18n }}
+      </label>
+      <input
+        type="date"
+        [(ngModel)]="registerData['birthday']"
+        [class]="
+          'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
+          (hasError('birthday') ? 'border-red-500' : 'border-blue-900')
+        "
+      />
+      <div *ngIf="hasError('birthday')" class="text-red-500 text-xs mt-1">
+        {{ getError("birthday") }}
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Email -->
+  <div class="w-full mb-4">
+    <label class="block mb-2 text-sm font-bold">
+      {{ "register.email" | i18n }}
+    </label>
+    <input
+      type="email"
+      [(ngModel)]="registerData['mail']"
+      [class]="
+        'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
+        (hasError('mail') ? 'border-red-500' : 'border-blue-900')
+      "
+      autocomplete="email"
+    />
+    <div *ngIf="hasError('mail')" class="text-red-500 text-xs mt-1">
+      {{ getError("mail") }}
+    </div>
+  </div>
+
+  <!-- Mobile (Optional) -->
+  <div class="w-full mb-8">
+    <label class="block mb-2 text-sm font-bold">
+      {{ "register.mobile" | i18n }} ({{ "register.optional" | i18n }})
+    </label>
+    <input
+      type="tel"
+      [(ngModel)]="registerData['mobile']"
+      class="w-full p-2 text-sm text-blue-900 border-0 border-b border-blue-900 bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2"
+      autocomplete="tel"
+    />
+  </div>
+
+  <!-- Submit Button -->
+  <button
+    type="button"
+    (click)="submit()"
+    class="w-full p-3 font-bold text-white bg-yellow-500 rounded hover:bg-yellow-600 transition-colors"
+  >
+    {{ "register.button" | i18n }}
+  </button>
+</div>

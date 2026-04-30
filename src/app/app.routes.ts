@@ -34,6 +34,9 @@ import { FileComponent } from './pages/file/file.component';
 import { AutomationSetupComponent } from './pages/automation-setup/automation-setup.component';
 import { AutomationFormComponent } from './pages/automation-form/automation-form.component';
 import { FormMandateWefoxComponent } from './pages/form-mandate-wefox/form-mandate-wefox.component';
+import { CustomersMandateComponent } from './pages/customers-mandate/customers-mandate.component';
+import { CustomersMandateAddComponent } from './pages/customers-mandate-add/customers-mandate-add.component';
+import { CustomersMandatePoliciesComponent } from './pages/customers-mandate-policies/customers-mandate-policies.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -75,6 +78,9 @@ export const routes: Routes = [
       { path: 'automation-setup', component: AutomationSetupComponent },
       { path: 'automation-form', component: AutomationFormComponent },
       { path: 'form-mandate-wefox', component: FormMandateWefoxComponent },
+      { path: 'customers-mandate', component: CustomersMandateComponent },
+      { path: 'customers-mandate-add', component: CustomersMandateAddComponent },
+      { path: 'customers-mandate-policies/:id', component: CustomersMandatePoliciesComponent },
     ],
     canActivate: [isAuthenticatedRoute],
   },
