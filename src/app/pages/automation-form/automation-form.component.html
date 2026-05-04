@@ -816,6 +816,28 @@
       </div>
     </div>
 
+    <!-- SEZIONE: Domande aggiuntive -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+      <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">{{ 'automation.form_section_other_questions' | i18n }}</h2>
+      <div class="space-y-3">
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" formControlName="other_q_1"
+            class="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+          <span class="text-sm text-gray-700">{{ 'automation.form_other_q_1' | i18n }}</span>
+        </label>
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" formControlName="other_q_2"
+            class="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+          <span class="text-sm text-gray-700">{{ 'automation.form_other_q_2' | i18n }}</span>
+        </label>
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" formControlName="other_q_3"
+            class="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+          <span class="text-sm text-gray-700">{{ 'automation.form_other_q_3' | i18n }}</span>
+        </label>
+      </div>
+    </div>
+
     <!-- Submit -->
     <button type="submit"
       class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl text-lg transition-colors">

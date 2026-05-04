@@ -453,6 +453,9 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
 
       // Campi aggiuntivi
       other_questions: [''],
+      other_q_1: [false],
+      other_q_2: [false],
+      other_q_3: [false],
       recipient_email: [''],
       scrapers: [[]],
     });
@@ -608,9 +611,15 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       this.toasterService.warn(this.i18nService.getTranslation('automation', 'form_err_fill_required'));
       return;
     }
-    const { ev_charging_station, ev_high_voltage_battery, ev_cyber_protection, ev_charging_cards_apps, ...rest } = this.form.value;
+    const { ev_charging_station, ev_high_voltage_battery, ev_cyber_protection, ev_charging_cards_apps, other_q_1, other_q_2, other_q_3, ...rest } = this.form.value;
+    const otherAnswers = [
+      other_q_1 ? 'Autoversicherung hat Vertrag gekündigt oder besondere Auflagen gemacht' : null,
+      other_q_2 ? 'Autoversicherung hat Antrag abgelehnt oder die Annahme an erschwerte Bedinungen geknüpft' : null,
+      other_q_3 ? 'Führerausweisentzug von mehr als 1 Monat' : null,
+    ].filter(Boolean).join(';');
     const payload = {
       ...rest,
+      other_questions: otherAnswers,
       electric_vehicle: {
         'stazione di ricarica e accessori': !!ev_charging_station,
         'batterie alta tensione': !!ev_high_voltage_battery,

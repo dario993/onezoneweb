@@ -128,3 +128,4 @@ src/app/
 - `docs/2026-03-19-16-47-customers-lazy-loading-scroll.md` — Caricamento a scaglioni con scroll per la pagina Customers
 - `docs/2026-03-24-16-57-i18n-automation-form.md` — Internazionalizzazione del form preventivi auto (automation-form)
 - `docs/2026-03-31-19-07-form-mandate-wefox.md` — Nuova pagina Form Mandate Wefox: replica del form "Mandate einreichen"
+- `docs/2026-05-04-16-45-other-questions-checkboxes.md` — Aggiunta 3 checkbox "situazioni ultimi 5 anni" nel form preventivi, valore in other_questions separato da ;
