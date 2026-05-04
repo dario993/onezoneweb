@@ -453,7 +453,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
 
       // Campi aggiuntivi
       other_questions: [''],
-      recipient_email: ['automate@onezone.ch'],
+      recipient_email: [''],
       scrapers: [[]],
     });
   }
