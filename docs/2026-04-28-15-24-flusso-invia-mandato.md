@@ -58,7 +58,7 @@ L'`:id` finale è l'ID del contatto restituito dalla API `registerUser`.
 - Tutti i campi mantenuti (name1, name2, address, postCode, city, birthday, mail, mobile, password).
 - **Submit**: usa `brokerstarService.registerUser(payload)` come `RegisterComponent`, con la stessa logica di validazione e gestione errori (`violations`).
 - **Differenza chiave nel post-submit**: invece di chiamare `login()` + `navigateTo('policyadd')`, naviga a `/customers-mandate-policies/{id}` dove `id` è l'`id` del contatto restituito da `registerUser` (campo `response.contact.id` o `response.id` a seconda della shape — da verificare durante implementazione).
-- `_sendMail = true` mantenuto (invio email di benvenuto).
+- `_sendMail = false` (nessuna email di benvenuto all'utente creato).
 - Branch `link` non necessario in questo contesto (rimosso o ignorato).
 
 ### 3. Nuova pagina: `customers-mandate-policies`

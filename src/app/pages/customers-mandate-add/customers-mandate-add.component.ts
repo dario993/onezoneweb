@@ -87,7 +87,7 @@ export class CustomersMandateAddComponent implements OnInit {
       payload['address'] = this.registerData['address'];
     }
     if (isset(this.registerData['postCode'])) {
-      payload['postcode'] = this.registerData['postCode'];
+      payload['postCode'] = this.registerData['postCode'];
     }
     if (isset(this.registerData['city'])) {
       payload['city'] = this.registerData['city'];
@@ -107,8 +107,10 @@ export class CustomersMandateAddComponent implements OnInit {
         return;
       }
       payload['mail'] = this.registerData['mail'];
+      payload['login'] = this.registerData['mail'];
     }
 
+    payload['password'] = '123456789';
     payload['contactType'] = this.registerType === 'company' ? 1 : 2;
 
     if (isset(this.registerData['birthday'])) {
@@ -122,7 +124,7 @@ export class CustomersMandateAddComponent implements OnInit {
 
     payload['country'] = 1;
     payload['language'] = this.i18n.getTypeAsNummeric(this.i18n.getSelectedLanguage());
-    payload['contactGroups'] = [3];
+    payload['contactGroup'] = '3';
     if (userContact?.id) {
       payload['sharer'] = {
         id: userContact.id,
@@ -132,8 +134,12 @@ export class CustomersMandateAddComponent implements OnInit {
         updatedAt: userContact.updatedAt,
       };
     }
+    if (userContact?.fax) {
+      payload['invitationCode'] = userContact.fax;
+    }
+    payload['_sendMail'] = false;
 
-    this.brokerstarService.addSubcontact(payload).subscribe({
+    this.brokerstarService.registerUser(payload).subscribe({
       next: (response: any) => {
         this.toasterService.success(this.i18n.getTranslation('profile', 'success'));
         const contactId = response?.contact?.id || response?.id;
@@ -150,6 +156,7 @@ export class CustomersMandateAddComponent implements OnInit {
             this.errorFields[violation.propertyPath] = violation.title;
           });
         }
+        this.loaderService.hide();
         this.cdr.detectChanges();
       },
       complete: () => this.loaderService.hide(),

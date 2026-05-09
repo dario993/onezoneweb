@@ -178,7 +178,10 @@
     "line7": "Io confermo di aver compreso il contenuto e le intenzioni del mandato del broker che ho firmato ",
     "line8": "(Le condizioni per il mandato del broker e formulari del cliente secondo art. VAG 45)",
     "line9": "e che la gestione ed il supporto delle mie assicurazioni attuali con questo passano con effetto immediato a oneZone.",
-    "send": "Invia"
+    "send": "Invia",
+    "uploadMandate": "Carica mandato (PDF)",
+    "uploadMandateHint": "Seleziona file PDF",
+    "selectInsurance": "Seleziona almeno una assicurazione"
   },
   "file": {
     "notsupported": "Tipo di file non supportato",

@@ -178,7 +178,10 @@
     "line7": "Je confirme avoir pris connaissance du contenu et de l'intention du mandat de courtier signé ",
     "line8": "(Conditions pour le mandat de courtier et le formulaire client selon l'art. 45 VAG)",
     "line9": "et que la gestion de mes polices d'assurance existantes sera transférée à oneZone avec effet immédiat.",
-    "send": "Envoyer"
+    "send": "Envoyer",
+    "uploadMandate": "Télécharger le mandat (PDF)",
+    "uploadMandateHint": "Sélectionner un fichier PDF",
+    "selectInsurance": "Veuillez sélectionner au moins une assurance"
   },
   "file": {
     "notsupported": "Type de fichier non pris en charge",

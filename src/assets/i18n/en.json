@@ -179,7 +179,10 @@
     "line7": "I confirm I understand the content and intention of the signed brokermandate",
     "line8": "(Conditons about brokermandate and all client information basing on art. VAG 45)",
     "line9": "and I agree that the supporting of my current insurances will pass over immediately to the supporting team of oneZone.",
-    "send": "Submit"
+    "send": "Submit",
+    "uploadMandate": "Upload mandate (PDF)",
+    "uploadMandateHint": "Select PDF file",
+    "selectInsurance": "Please select at least one insurance"
   },
   "file": {
     "notsupported": "File type not supported",

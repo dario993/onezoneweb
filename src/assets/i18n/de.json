@@ -215,7 +215,10 @@
     "line9": " verstanden zu haben, und dass die Betreuung meiner bestehenden Versicherungen dadurch ab sofort an die oneZone übergeht.",
     "send": "Abschicken",
     "signatureisrequired": "Unterschrift ist erforderlich",
-    "successsend": "Anfrage erfolgreich abgesendet"
+    "successsend": "Anfrage erfolgreich abgesendet",
+    "uploadMandate": "Mandat hochladen (PDF)",
+    "uploadMandateHint": "PDF-Datei auswählen",
+    "selectInsurance": "Bitte mindestens eine Versicherung auswählen"
   },
   "file": {
     "notsupported": "Dateityp wird nicht unterstützt",
