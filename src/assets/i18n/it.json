@@ -644,6 +644,22 @@
     "country_YE": "Yemen",
     "country_ZM": "Zambia",
     "country_ZW": "Zimbabwe",
-    "country_altro": "Altro"
+    "country_altro": "Altro",
+    "vehicle_search_btn": "Cerca Marca / Tipo",
+    "vehicle_search_title": "Cerca Marca / Tipo Omologazione",
+    "vehicle_search_brand_placeholder": "Marca (es. VW, BMW, Toyota...)",
+    "vehicle_search_model_placeholder": "Modello (es. T5 Multivan, X5...)",
+    "vehicle_search_btn_search": "Cerca",
+    "vehicle_search_loading": "Ricerca in corso...",
+    "vehicle_search_no_results": "Nessun risultato trovato.",
+    "vehicle_search_col_type_approval": "Ricezione per tipo",
+    "vehicle_search_col_fuel": "Carburante",
+    "vehicle_search_col_power": "Potenza",
+    "vehicle_search_col_date": "Data",
+    "vehicle_search_date_omol": "omol.",
+    "vehicle_search_results_total": "risultati totali",
+    "vehicle_search_serial_label": "Matricola (Stammnummer)",
+    "vehicle_search_serial_placeholder": "Es. 234675930",
+    "vehicle_search_or_divider": "oppure"
   }
 }
