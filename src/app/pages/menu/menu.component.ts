@@ -17,6 +17,7 @@ import statics from '../../../assets/statics.json';
 })
 export class MenuComponent {
   public menu: Array<Record<string, any>> = [];
+  public isAdminUser: boolean = false;
 
   constructor(
     public readonly navigator: NavigatorService,
@@ -25,6 +26,9 @@ export class MenuComponent {
     public readonly i18n: I18nService,
     private readonly loaderService: LoaderService
   ) {
+    const contactId = this.authService.userData?.contact?.id;
+    this.isAdminUser = contactId === 58 || contactId === 25755;
+
     // load menu
     this.loaderService.show();
     brokerstarService.customerportalmenu(2).subscribe((response: any): void => {

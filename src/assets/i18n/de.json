@@ -682,7 +682,7 @@
     "country_ZM": "Sambia",
     "country_ZW": "Simbabwe",
     "country_altro": "Andere",
-    "vehicle_search_btn": "Marke / Typ suchen",
+    "vehicle_search_btn": "Auto suchen",
     "vehicle_search_title": "Marke / Typengenehmigung suchen",
     "vehicle_search_brand_placeholder": "Marke (z.B. VW, BMW, Toyota...)",
     "vehicle_search_model_placeholder": "Modell (z.B. T5 Multivan, X5...)",
@@ -697,6 +697,8 @@
     "vehicle_search_results_total": "Ergebnisse gesamt",
     "vehicle_search_serial_label": "Stammnummer (Matricola)",
     "vehicle_search_serial_placeholder": "z.B. 234675930",
-    "vehicle_search_or_divider": "oder"
+    "vehicle_search_or_divider": "oder",
+    "vehicle_search_type_approval_label": "Typengenehmigung (N. Certificato)",
+    "vehicle_search_type_approval_placeholder": "z.B. 1PA537, e1*2007/46*1909*21"
   }
 }

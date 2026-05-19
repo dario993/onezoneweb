@@ -37,6 +37,7 @@ import { FormMandateWefoxComponent } from './pages/form-mandate-wefox/form-manda
 import { CustomersMandateComponent } from './pages/customers-mandate/customers-mandate.component';
 import { CustomersMandateAddComponent } from './pages/customers-mandate-add/customers-mandate-add.component';
 import { CustomersMandatePoliciesComponent } from './pages/customers-mandate-policies/customers-mandate-policies.component';
+import { ConsultantAutomationComponent } from './pages/consultant-automation/consultant-automation.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -81,6 +82,7 @@ export const routes: Routes = [
       { path: 'customers-mandate', component: CustomersMandateComponent },
       { path: 'customers-mandate-add', component: CustomersMandateAddComponent },
       { path: 'customers-mandate-policies/:id', component: CustomersMandatePoliciesComponent },
+      { path: 'consultant-automation', component: ConsultantAutomationComponent },
     ],
     canActivate: [isAuthenticatedRoute],
   },

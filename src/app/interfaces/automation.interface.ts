@@ -1,3 +1,37 @@
+export interface VehicleResult {
+  make: string;
+  commercial_name: string;
+  type_approval: string;
+  fuel_type?: string;
+  power_kw?: number;
+  power_hp?: number;
+  date_of_approval?: string;
+  source?: string;
+}
+
+export interface PatchConsultantPayload {
+  name?: string;
+  surname?: string;
+  ecohub_username?: string;
+  ecohub_password?: string;
+  commission_number?: string;
+  disabled_scrapers?: string[];
+  is_active?: boolean;
+}
+
+export interface ConsultantItem {
+  id: number;
+  onezone_id: string;
+  name: string;
+  surname: string;
+  ecohub_username: string;
+  ecohub_password: string;
+  commission_number: string;
+  login_check: boolean;
+  disabled_scrapers: string[];
+  is_active: boolean;
+}
+
 export interface LocalityEntry {
   locality: string;
   plz: string;

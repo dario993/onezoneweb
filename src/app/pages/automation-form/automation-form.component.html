@@ -265,25 +265,23 @@
           <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_deductible_under26_hint' | i18n }}</p>
         </div>
 
-        <!-- N Certificate 1 -->
+        <!-- Cerca Marca/Tipo Veicolo 1 -->
         <div class="mb-4 md:col-span-2">
-          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_n_certificate' | i18n }}</label>
-          <input type="text" formControlName="n_certificate_1" placeholder="1BA515"
-            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_n_certificate_hint' | i18n }}</p>
+          <button type="button" (click)="openVehicleModal(1)"
+            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg text-sm transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+            </svg>
+            {{ 'automation.vehicle_search_btn' | i18n }}
+          </button>
         </div>
 
         <!-- Car Brand 1 -->
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_brand' | i18n }} <span class="text-red-500">*</span></label>
-          <select formControlName="car_brand_1"
-            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            [ngClass]="isInvalid('car_brand_1') ? 'border-red-500' : 'border-gray-300'">
-            <option value="">{{ 'automation.form_select_placeholder' | i18n }}</option>
-            @for (b of carBrandOptions; track b) {
-            <option [value]="b">{{ b }}</option>
-            }
-          </select>
+          <input type="text" formControlName="car_brand_1" readonly
+            class="w-full border rounded-lg px-4 py-2 bg-gray-50 text-gray-600 cursor-default"
+            [ngClass]="isInvalid('car_brand_1') ? 'border-red-500' : 'border-gray-200'" />
           @if (getError('car_brand_1')) {
           <p class="text-xs text-red-500 mt-1">{{ getError('car_brand_1') }}</p>
           }
@@ -292,31 +290,32 @@
         <!-- Car Model 1 -->
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_model' | i18n }} <span class="text-red-500">*</span></label>
-          <input type="text" formControlName="car_model_1"
-            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            [ngClass]="isInvalid('car_model_1') ? 'border-red-500' : 'border-gray-300'" />
+          <input type="text" formControlName="car_model_1" readonly
+            class="w-full border rounded-lg px-4 py-2 bg-gray-50 text-gray-600 cursor-default"
+            [ngClass]="isInvalid('car_model_1') ? 'border-red-500' : 'border-gray-200'" />
           @if (getError('car_model_1')) {
           <p class="text-xs text-red-500 mt-1">{{ getError('car_model_1') }}</p>
-          } @else {
-          <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_model_hint' | i18n }}</p>
           }
+        </div>
+
+        <!-- N Certificate 1 -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_n_certificate' | i18n }}</label>
+          <input type="text" formControlName="n_certificate_1" readonly
+            class="w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-lg px-4 py-2 cursor-default" />
+          <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_n_certificate_hint' | i18n }}</p>
         </div>
 
         <!-- Serial Number 1 (Stammnummer) -->
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_serial_number' | i18n }} <span class="text-red-500">*</span></label>
-          <input type="text" formControlName="serial_number_1" maxlength="9"
-            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            [ngClass]="isInvalid('serial_number_1') ? 'border-red-500' : 'border-gray-300'" />
-          @if (getError('serial_number_1')) {
-          <p class="text-xs text-red-500 mt-1">{{ getError('serial_number_1') }}</p>
-          } @else {
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_serial_number' | i18n }}</label>
+          <input type="text" formControlName="serial_number_1" readonly
+            class="w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-lg px-4 py-2 cursor-default" />
           <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_serial_number_hint' | i18n }}</p>
-          }
         </div>
 
         <!-- Accessories 1 -->
-        <div class="mb-4">
+        <div class="mb-4 md:col-span-2">
           <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_accessories' | i18n }}</label>
           <div class="flex items-center">
             <span class="bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg px-3 py-2 text-gray-500 text-sm">CHF</span>
@@ -406,41 +405,55 @@
       <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">{{ 'automation.form_section_vehicle2' | i18n }}</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
+        <!-- Cerca Marca/Tipo Veicolo 2 -->
+        <div class="mb-4 md:col-span-2">
+          <button type="button" (click)="openVehicleModal(2)"
+            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg text-sm transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+            </svg>
+            {{ 'automation.vehicle_search_btn' | i18n }}
+          </button>
+        </div>
+
         <!-- Car Brand 2 -->
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_brand_v2' | i18n }} <span class="text-red-500">*</span></label>
-          <select formControlName="car_brand_2"
-            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            [ngClass]="isInvalid('car_brand_2') ? 'border-red-500' : 'border-gray-300'">
-            <option value="">{{ 'automation.form_select_placeholder' | i18n }}</option>
-            @for (b of carBrandOptions; track b) {
-            <option [value]="b">{{ b }}</option>
-            }
-          </select>
+          <input type="text" formControlName="car_brand_2" readonly
+            class="w-full border rounded-lg px-4 py-2 bg-gray-50 text-gray-600 cursor-default"
+            [ngClass]="isInvalid('car_brand_2') ? 'border-red-500' : 'border-gray-200'" />
           @if (getError('car_brand_2')) {
           <p class="text-xs text-red-500 mt-1">{{ getError('car_brand_2') }}</p>
+          }
+        </div>
+
+        <!-- Car Model 2 -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_model_v2' | i18n }} <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="car_model_2" readonly
+            class="w-full border rounded-lg px-4 py-2 bg-gray-50 text-gray-600 cursor-default"
+            [ngClass]="isInvalid('car_model_2') ? 'border-red-500' : 'border-gray-200'" />
+          @if (getError('car_model_2')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('car_model_2') }}</p>
+          } @else {
+          <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_model_v2_hint' | i18n }}</p>
           }
         </div>
 
         <!-- N Certificate 2 -->
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_n_certificate_v2' | i18n }}</label>
-          <input type="text" formControlName="n_certificate_2" placeholder="1AB151"
-            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input type="text" formControlName="n_certificate_2" readonly
+            class="w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-lg px-4 py-2 cursor-default" />
           <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_n_certificate_v2_hint' | i18n }}</p>
         </div>
 
-        <!-- Car Model 2 -->
+        <!-- Serial Number 2 -->
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_model_v2' | i18n }} <span class="text-red-500">*</span></label>
-          <input type="text" formControlName="car_model_2"
-            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            [ngClass]="isInvalid('car_model_2') ? 'border-red-500' : 'border-gray-300'" />
-          @if (getError('car_model_2')) {
-          <p class="text-xs text-red-500 mt-1">{{ getError('car_model_2') }}</p>
-          } @else {
-          <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_model_v2_hint' | i18n }}</p>
-          }
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_serial_number_v2' | i18n }}</label>
+          <input type="text" formControlName="serial_number_2" readonly
+            class="w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-lg px-4 py-2 cursor-default" />
+          <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_serial_number_v2_hint' | i18n }}</p>
         </div>
 
         <!-- Accessories 2 -->
@@ -452,19 +465,6 @@
               class="w-full border border-gray-300 rounded-r-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_accessories_v2_hint' | i18n }}</p>
-        </div>
-
-        <!-- Serial Number 2 -->
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_serial_number_v2' | i18n }} <span class="text-red-500">*</span></label>
-          <input type="text" formControlName="serial_number_2" maxlength="9"
-            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            [ngClass]="isInvalid('serial_number_2') ? 'border-red-500' : 'border-gray-300'" />
-          @if (getError('serial_number_2')) {
-          <p class="text-xs text-red-500 mt-1">{{ getError('serial_number_2') }}</p>
-          } @else {
-          <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_serial_number_v2_hint' | i18n }}</p>
-          }
         </div>
 
         <!-- First Registration Date 2 -->
@@ -825,3 +825,172 @@
   </form>
   }
 </div>
+
+<!-- ─── Modale Ricerca Veicolo ─────────────────────────────────────────────── -->
+@if (modal.open) {
+<div class="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-12 px-4 pb-4"
+     (click)="closeVehicleModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl flex flex-col max-h-[85vh]"
+       (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
+      <h2 class="text-base font-semibold text-gray-800">
+        {{ 'automation.vehicle_search_title' | i18n }}
+        <span class="ml-2 text-xs font-normal text-gray-400">{{ 'automation.form_section_vehicle' | i18n }} {{ modal.vehicleIndex }}</span>
+      </h2>
+      <button type="button" (click)="closeVehicleModal()"
+        class="text-gray-400 hover:text-gray-600 text-xl leading-none w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100">✕</button>
+    </div>
+
+    <!-- Campi di ricerca -->
+    <div class="px-6 py-4 border-b shrink-0">
+
+      <!-- Matricola -->
+      <div class="mb-3">
+        <label class="block text-xs font-medium text-gray-500 mb-1">{{ 'automation.vehicle_search_serial_label' | i18n }}</label>
+        <input type="text"
+          [value]="modal.serialQuery"
+          (input)="onModalSerialInput($any($event.target).value)"
+          (keydown.enter)="onSearchVehicles()"
+          [placeholder]="'automation.vehicle_search_serial_placeholder' | i18n"
+          maxlength="9"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+
+      <!-- Divisore -->
+      <div class="flex items-center my-3">
+        <div class="flex-1 border-t border-gray-200"></div>
+        <span class="px-3 text-xs text-gray-400">{{ 'automation.vehicle_search_or_divider' | i18n }}</span>
+        <div class="flex-1 border-t border-gray-200"></div>
+      </div>
+
+      <!-- N. Certificato / Type Approval -->
+      <div class="mb-3">
+        <label class="block text-xs font-medium text-gray-500 mb-1">{{ 'automation.vehicle_search_type_approval_label' | i18n }}</label>
+        <input type="text"
+          [value]="modal.typeApprovalQuery"
+          (input)="onModalTypeApprovalInput($any($event.target).value)"
+          (keydown.enter)="onSearchVehicles()"
+          [placeholder]="'automation.vehicle_search_type_approval_placeholder' | i18n"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+
+      <!-- Divisore -->
+      <div class="flex items-center my-3">
+        <div class="flex-1 border-t border-gray-200"></div>
+        <span class="px-3 text-xs text-gray-400">{{ 'automation.vehicle_search_or_divider' | i18n }}</span>
+        <div class="flex-1 border-t border-gray-200"></div>
+      </div>
+
+      <!-- Brand + Model + Cerca -->
+      <div class="flex gap-3">
+        <div class="flex-1 relative">
+          <input type="text"
+            [value]="modal.brandQuery"
+            (input)="onModalBrandInput($any($event.target).value)"
+            (blur)="hideModalBrandDropdown()"
+            (keydown.enter)="onSearchVehicles()"
+            [placeholder]="'automation.vehicle_search_brand_placeholder' | i18n"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          @if (modalBrandLoading) {
+          <span class="absolute right-3 top-2.5 text-gray-400 text-xs">...</span>
+          }
+          @if (showModalBrandDropdown) {
+          <ul class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+            @for (b of modalBrandSuggestions; track b) {
+            <li (mousedown)="selectModalBrand(b)"
+              class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm">{{ b }}</li>
+            }
+          </ul>
+          }
+        </div>
+        <input type="text"
+          [value]="modal.modelQuery"
+          (input)="onModalModelInput($any($event.target).value)"
+          (keydown.enter)="onSearchVehicles()"
+          [placeholder]="'automation.vehicle_search_model_placeholder' | i18n"
+          class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <button type="button" (click)="onSearchVehicles()"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg text-sm transition-colors shrink-0">
+          {{ 'automation.vehicle_search_btn_search' | i18n }}
+        </button>
+      </div>
+    </div>
+
+
+    <!-- Tabella risultati -->
+    <div class="overflow-auto flex-1">
+      @if (modal.loading) {
+        <div class="p-10 text-center text-gray-400 text-sm">{{ 'automation.vehicle_search_loading' | i18n }}</div>
+      } @else if (modal.searched && modal.results.length === 0) {
+        <div class="p-10 text-center text-gray-400 text-sm">{{ 'automation.vehicle_search_no_results' | i18n }}</div>
+      } @else if (modal.results.length > 0) {
+        <table class="w-full text-sm">
+          <thead class="sticky top-0">
+            <tr class="bg-blue-600 text-white">
+              <th class="px-4 py-3 text-left font-medium whitespace-nowrap">{{ 'automation.form_brand' | i18n }}</th>
+              <th class="px-4 py-3 text-left font-medium">{{ 'automation.form_model' | i18n }}</th>
+              <th class="px-4 py-3 text-left font-medium whitespace-nowrap">{{ 'automation.vehicle_search_col_type_approval' | i18n }}</th>
+              <th class="px-4 py-3 text-left font-medium whitespace-nowrap">{{ 'automation.vehicle_search_col_fuel' | i18n }}</th>
+              <th class="px-4 py-3 text-left font-medium whitespace-nowrap">{{ 'automation.vehicle_search_col_power' | i18n }}</th>
+              <th class="px-4 py-3 text-left font-medium whitespace-nowrap">{{ 'automation.vehicle_search_col_date' | i18n }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of modal.results; track r.type_approval + r.commercial_name) {
+            <tr (click)="selectVehicleResult(r)"
+              class="border-b border-gray-100 cursor-pointer transition-colors hover:bg-blue-600 hover:text-white group">
+              <td class="px-4 py-3 font-semibold whitespace-nowrap">{{ r.make }}</td>
+              <td class="px-4 py-3">{{ r.commercial_name }}</td>
+              <td class="px-4 py-3">
+                <span class="text-orange-500 font-medium group-hover:text-orange-200">{{ r.type_approval }}</span>
+              </td>
+              <td class="px-4 py-3">
+                @if (r.fuel_type) {
+                <span class="bg-gray-700 text-white text-xs px-2 py-0.5 rounded group-hover:bg-white group-hover:text-gray-700">{{ r.fuel_type }}</span>
+                }
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                @if (r.power_kw) {
+                  {{ r.power_kw }} kW @if (r.power_hp) {<span class="opacity-70">({{ r.power_hp }} cv)</span>}
+                }
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                @if (r.date_of_approval) {
+                <div>{{ formatDate(r.date_of_approval) }}</div>
+                <div class="text-xs opacity-60">{{ 'automation.vehicle_search_date_omol' | i18n }}</div>
+                }
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <!-- Paginazione -->
+    @if (totalPages > 1) {
+    <div class="px-6 py-3 border-t shrink-0 flex items-center justify-center gap-1">
+      <button type="button" (click)="goToPage(modal.page - 1)" [disabled]="modal.page === 1"
+        class="px-3 py-1.5 rounded border border-gray-300 text-sm text-gray-600 disabled:opacity-40 hover:bg-gray-50 transition-colors">
+        ‹
+      </button>
+      @for (p of visiblePages; track p) {
+      <button type="button" (click)="goToPage(p)"
+        class="px-3 py-1.5 rounded border text-sm transition-colors"
+        [ngClass]="p === modal.page ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'">
+        {{ p }}
+      </button>
+      }
+      <button type="button" (click)="goToPage(modal.page + 1)" [disabled]="modal.page === totalPages"
+        class="px-3 py-1.5 rounded border border-gray-300 text-sm text-gray-600 disabled:opacity-40 hover:bg-gray-50 transition-colors">
+        ›
+      </button>
+      <span class="ml-3 text-xs text-gray-400">{{ modal.total }} {{ 'automation.vehicle_search_results_total' | i18n }}</span>
+    </div>
+    }
+
+  </div>
+</div>
+}

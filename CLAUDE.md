@@ -129,3 +129,6 @@ src/app/
 - `docs/2026-03-24-16-57-i18n-automation-form.md` — Internazionalizzazione del form preventivi auto (automation-form)
 - `docs/2026-03-31-19-07-form-mandate-wefox.md` — Nuova pagina Form Mandate Wefox: replica del form "Mandate einreichen"
 - `docs/2026-04-28-15-24-flusso-invia-mandato.md` — Flusso "Invia Mandato": bottone Home + pagine customers-mandate, customers-mandate-add, customers-mandate-policies/:id
+- `docs/2026-05-12-16-24-pannello-gestione-consulenti.md` — Tasto "Gestione consulenti" nel Menu: visibile solo agli account con contact.id 58 o 25755
+- `docs/2026-05-14-17-47-veicoli-json-statico.md` — Marca/Modello auto da CSV svizzero: JSON statico 55k coppie uniche in assets, select dinamici nel form automation
+- `docs/2026-05-18-17-00-marca-modello-api-swisscarinfo.md` — Integrazione SwissCarInfo v3 per autocomplete marca/modello con pre-compilazione type_approval

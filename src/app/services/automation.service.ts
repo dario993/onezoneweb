@@ -6,6 +6,8 @@ import { environment } from '../../environments/environment';
 import { StorageService } from './storage.service';
 import {
   CheckLoginResponse,
+  ConsultantItem,
+  PatchConsultantPayload,
   ConsultantRegistrationPayload,
   ConsultantRegistrationResponse,
   CredentialsUpdateResponse,
@@ -153,6 +155,21 @@ export class AutomationService {
     return this.http.get<QuoteRequestStatus>(
       `${this.baseUrl}/quote-requests/${requestId}`,
       { headers: this.consultantHeaders }
+    );
+  }
+
+  public patchConsultant(id: number, payload: PatchConsultantPayload): Observable<ConsultantItem> {
+    return this.http.patch<ConsultantItem>(
+      `${this.baseUrl}/consultants/${id}`,
+      payload,
+      { headers: this.adminHeaders }
+    );
+  }
+
+  public getConsultants(): Observable<ConsultantItem[]> {
+    return this.http.get<ConsultantItem[]>(
+      `${this.baseUrl}/consultants`,
+      { headers: this.adminHeaders }
     );
   }
 

@@ -9,12 +9,14 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { AutomationService } from '../../services/automation.service';
+import { SwissCarInfoService } from '../../services/swiss-car-info.service';
 import { ToasterService } from '../../services/toaster.service';
 import { LoaderService } from '../../services/loader.service';
 import { I18nService } from '../../services/i18n.service';
 import { I18nPipe } from '../../pipes/i18n.pipe';
-import { firstValueFrom } from 'rxjs';
-import { LocalityEntry } from '../../interfaces/automation.interface';
+import { firstValueFrom, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
+import { LocalityEntry, VehicleResult } from '../../interfaces/automation.interface';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
@@ -29,6 +31,147 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   submitSuccess = false;
   submittedEmail = '';
 
+  // ─── Stato modale ricerca veicolo ───────────────────────────────────────────
+  modal = {
+    open: false,
+    vehicleIndex: 1 as 1 | 2,
+    typeApprovalQuery: '',
+    brandQuery: '',
+    modelQuery: '',
+    serialQuery: '',
+    results: [] as VehicleResult[],
+    page: 1,
+    total: 0,
+    loading: false,
+    searched: false,
+    perPage: 10,
+    lastSearchType: 'brand_model' as 'brand_model' | 'variant' | 'matricule',
+  };
+
+  get totalPages(): number {
+    return Math.ceil(this.modal.total / this.modal.perPage);
+  }
+
+  get visiblePages(): number[] {
+    const total = this.totalPages;
+    const current = this.modal.page;
+    const start = Math.max(1, current - 2);
+    const end = Math.min(total, current + 2);
+    const pages: number[] = [];
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+  }
+
+  openVehicleModal(vehicleIndex: 1 | 2): void {
+    this.modal = {
+      open: true,
+      vehicleIndex,
+      typeApprovalQuery: '',
+      brandQuery: '',
+      modelQuery: '',
+      serialQuery: '',
+      results: [],
+      page: 1,
+      total: 0,
+      loading: false,
+      searched: false,
+      perPage: 10,
+      lastSearchType: 'brand_model',
+    };
+    this.form.patchValue({
+      [`car_brand_${vehicleIndex}`]: '',
+      [`car_model_${vehicleIndex}`]: '',
+      [`n_certificate_${vehicleIndex}`]: '',
+      [`serial_number_${vehicleIndex}`]: '',
+    });
+  }
+
+  closeVehicleModal(): void {
+    this.modal.open = false;
+  }
+
+  onSearchVehicles(): void {
+    const lang = this.i18nService.currentLanguage;
+    const typeApproval = this.modal.typeApprovalQuery.trim();
+    if (typeApproval) {
+      this.modal.page = 1;
+      this.modal.searched = true;
+      this.modal.loading = true;
+      this.modal.lastSearchType = 'variant';
+      this.swissCarInfoService
+        .searchByTypeApproval(typeApproval, 1, this.modal.perPage, lang)
+        .subscribe(({ results, total }) => {
+          this.modal.results = results;
+          this.modal.total = total;
+          this.modal.loading = false;
+        });
+      return;
+    }
+    const serial = this.modal.serialQuery.trim();
+    if (serial) {
+      this.modal.searched = true;
+      this.modal.loading = true;
+      this.modal.lastSearchType = 'matricule';
+      this.swissCarInfoService.searchBySerial(serial, lang).subscribe((result) => {
+        this.modal.loading = false;
+        if (result) {
+          this.modal.results = [result];
+          this.modal.total = 1;
+        } else {
+          this.modal.results = [];
+          this.modal.total = 0;
+        }
+      });
+      return;
+    }
+    if (!this.modal.brandQuery.trim() && !this.modal.modelQuery.trim()) return;
+    this.modal.page = 1;
+    this.modal.searched = true;
+    this.modal.loading = true;
+    this.modal.lastSearchType = 'brand_model';
+    this.swissCarInfoService
+      .searchVehicles(this.modal.brandQuery, this.modal.modelQuery, 1, this.modal.perPage, lang)
+      .subscribe(({ results, total }) => {
+        this.modal.results = results;
+        this.modal.total = total;
+        this.modal.loading = false;
+      });
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages || page === this.modal.page) return;
+    this.modal.loading = true;
+    const lang = this.i18nService.currentLanguage;
+    const source$ = this.modal.lastSearchType === 'variant'
+      ? this.swissCarInfoService.searchByTypeApproval(this.modal.typeApprovalQuery, page, this.modal.perPage, lang)
+      : this.swissCarInfoService.searchVehicles(this.modal.brandQuery, this.modal.modelQuery, page, this.modal.perPage, lang);
+    source$.subscribe(({ results, total }) => {
+      this.modal.results = results;
+      this.modal.total = total;
+      this.modal.page = page;
+      this.modal.loading = false;
+    });
+  }
+
+  selectVehicleResult(result: VehicleResult): void {
+    this.form.patchValue({
+      [`car_brand_${this.modal.vehicleIndex}`]: result.make,
+      [`car_model_${this.modal.vehicleIndex}`]: result.commercial_name,
+      [`n_certificate_${this.modal.vehicleIndex}`]: result.type_approval,
+      ...(this.modal.lastSearchType === 'matricule'
+        ? { [`serial_number_${this.modal.vehicleIndex}`]: this.modal.serialQuery.trim() }
+        : {}),
+    });
+    this.closeVehicleModal();
+  }
+
+  formatDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const [year, month, day] = dateStr.split('-');
+    return `${day}.${month}.${year}`;
+  }
+
+  // ─── Opzioni form ────────────────────────────────────────────────────────────
   genderOptions = ['Maschio', 'Femmina', 'Azienda'];
   languageOptions = [
     { value: 'de', label: 'Deutsch' },
@@ -243,18 +386,6 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     { value: 'ZW', label: 'Zimbabwe' },
     { value: 'altro', label: 'Altro' },
   ];
-  carBrandOptions = [
-    'Alfa Romeo','Alpine','Aston Martin','Audi','Bentley','BMW','Bugatti','Buick',
-    'Cadillac','Chevrolet','Chrysler','Citroen','Cupra','Dacia','Daewoo','Daihatsu',
-    'Daimler','Dodge','Dongfeng','DS','Elaris','Ferrari','Fiat','Fisker','Ford',
-    'General Motors Company','Genesis','Honda','Hummer','Hyundai','Infinity','Isuzu','Iveco','Jaguar',
-    'Jeep','Kia','KTM','Lamborghini','Lancia','Land Rover','Lexus','Lincoln','Lotus',
-    'Mazda','Maserati','Maybach','McLaren','Mercedes-Benz','Mercury','MG','Mini',
-    'Mitsubishi','Morgan','Nissan','Oldsmobile','Opel','Panoz','Peugeot','Plymouth',
-    'Polestar','Pontiac','Porsche','Ram','Renault','Rolls Royce','Rover','Saab',
-    'Ssang Yong','Seat','Smart','Skoda','Subaru','Susuki','Puch','Tesla','Toyota',
-    'Triumph','TVR','Volkswagen','Volvo','Wiesmann','Zagato',
-  ];
   currentInsuranceOptions = [
     { value: 'keine', label: 'automation.opt_ins_none' },
     { value: 'neu in der Schweiz', label: 'automation.opt_ins_new_ch' },
@@ -360,6 +491,15 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   claimsOptions = ['0', '1', '2', '3'];
   isTestMode = false;
 
+  // Autocomplete marca nella modale
+  modalBrandSuggestions: string[] = [];
+  showModalBrandDropdown = false;
+  modalBrandLoading = false;
+  private readonly modalBrandInput$ = new Subject<string>();
+  private readonly modalTypeApprovalInput$ = new Subject<string>();
+  private readonly modalSerialInput$ = new Subject<string>();
+  private readonly destroy$ = new Subject<void>();
+
   // Autocomplete PLZ / Località
   plzSuggestions: LocalityEntry[] = [];
   areaSuggestions: LocalityEntry[] = [];
@@ -369,6 +509,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   constructor(
     private readonly fb: FormBuilder,
     private readonly automationService: AutomationService,
+    private readonly swissCarInfoService: SwissCarInfoService,
     private readonly toasterService: ToasterService,
     private readonly loaderService: LoaderService,
     private readonly i18nService: I18nService
@@ -377,11 +518,98 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.buildForm();
     this.setupConditionalFields();
+    this.setupModalBrandStream();
+    this.setupModalTypeApprovalStream();
+    this.setupModalSerialStream();
+  }
+
+  private setupModalBrandStream(): void {
+    this.modalBrandInput$
+      .pipe(
+        debounceTime(350),
+        distinctUntilChanged(),
+        switchMap((q) => {
+          this.modalBrandLoading = true;
+          return this.swissCarInfoService.searchBrands(q, this.i18nService.currentLanguage);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((brands) => {
+        this.modalBrandSuggestions = brands;
+        this.showModalBrandDropdown = brands.length > 0;
+        this.modalBrandLoading = false;
+      });
+  }
+
+  private setupModalTypeApprovalStream(): void {
+    this.modalTypeApprovalInput$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        filter((v) => v.length >= 6),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => this.onSearchVehicles());
+  }
+
+  private setupModalSerialStream(): void {
+    this.modalSerialInput$
+      .pipe(
+        filter((v) => v.length === 9),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => this.onSearchVehicles());
+  }
+
+  onModalTypeApprovalInput(value: string): void {
+    this.modal.typeApprovalQuery = value;
+    if (value.length > 0) {
+      this.modal.brandQuery = '';
+      this.modal.modelQuery = '';
+      this.modal.serialQuery = '';
+      this.modalBrandSuggestions = [];
+      this.showModalBrandDropdown = false;
+    }
+    this.modalTypeApprovalInput$.next(value);
+  }
+
+  onModalBrandInput(value: string): void {
+    this.modal.brandQuery = value;
+    if (value.length > 0) { this.modal.serialQuery = ''; this.modal.typeApprovalQuery = ''; }
+    if (value.length >= 2) this.modalBrandInput$.next(value);
+    else { this.modalBrandSuggestions = []; this.showModalBrandDropdown = false; }
+  }
+
+  onModalSerialInput(value: string): void {
+    this.modal.serialQuery = value;
+    if (value.length > 0) {
+      this.modal.typeApprovalQuery = '';
+      this.modal.brandQuery = '';
+      this.modal.modelQuery = '';
+      this.modalBrandSuggestions = [];
+      this.showModalBrandDropdown = false;
+    }
+    this.modalSerialInput$.next(value);
+  }
+
+  onModalModelInput(value: string): void {
+    this.modal.modelQuery = value;
+    if (value.length > 0) { this.modal.serialQuery = ''; this.modal.typeApprovalQuery = ''; }
+  }
+
+  selectModalBrand(brand: string): void {
+    this.modal.brandQuery = brand;
+    this.modalBrandSuggestions = [];
+    this.showModalBrandDropdown = false;
+  }
+
+  hideModalBrandDropdown(): void {
+    setTimeout(() => this.showModalBrandDropdown = false, 200);
   }
 
   private buildForm(): void {
     this.form = this.fb.group({
-      // Sezione 1: Info Personali
       gender: ['Maschio', Validators.required],
       company_name: [''],
       first_name: ['', Validators.required],
@@ -398,12 +626,11 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       foreigners_id_type: [''],
       language: ['de', Validators.required],
 
-      // Sezione 2: Veicolo 1
       deductible_under_26: ['0'],
       n_certificate_1: [''],
       car_brand_1: ['', Validators.required],
       car_model_1: ['', Validators.required],
-      serial_number_1: ['', Validators.required],
+      serial_number_1: [''],
       accessories_1: [null],
       canton: ['ZH', Validators.required],
       license_plate: [''],
@@ -412,7 +639,6 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       garage_parking_1: ['Si', Validators.required],
       interchangeable_plate: ['No', Validators.required],
 
-      // Sezione 3: Veicolo 2
       n_certificate_2: [''],
       car_brand_2: [''],
       car_model_2: [''],
@@ -422,7 +648,6 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       leasing_2: ['No'],
       garage_parking_2: ['Si'],
 
-      // Sezione 4: Opzioni Assicurative
       vehicle_usage: ['nessun uso specifico', Validators.required],
       civil_insurance: ['Si inclusi alla mia proprieta', Validators.required],
       comprehensive_insurance: ['Totale', Validators.required],
@@ -443,7 +668,6 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       ev_charging_cards_apps: [false],
       payment_mode: ['Annuale', Validators.required],
 
-      // Sezione 5: Storico Sinistri
       current_insurance: ['Baloise', Validators.required],
       n_rc_claims_5_years: ['0', Validators.required],
       n_collisions_claims_5_years: ['0', Validators.required],
@@ -451,7 +675,6 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       n_glass_claims_5_years: ['0', Validators.required],
       n_partial_comprehensive_claims_5_years: ['0', Validators.required],
 
-      // Campi aggiuntivi
       other_questions: [''],
       recipient_email: [''],
       scrapers: [[]],
@@ -459,109 +682,62 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   }
 
   private setupConditionalFields(): void {
-    // company_name obbligatorio se gender = Azienda
     this.form.get('gender')!.valueChanges.subscribe((val) => {
       const ctrl = this.form.get('company_name')!;
-      if (val === 'Azienda') {
-        ctrl.setValidators(Validators.required);
-      } else {
-        ctrl.clearValidators();
-        ctrl.setValue('');
-      }
+      if (val === 'Azienda') ctrl.setValidators(Validators.required);
+      else { ctrl.clearValidators(); ctrl.setValue(''); }
       ctrl.updateValueAndValidity();
     });
 
-    // foreigners_id_type obbligatorio se nationality != CH
     this.form.get('nationality')!.valueChanges.subscribe((val) => {
       const ctrl = this.form.get('foreigners_id_type')!;
-      if (val && val.toUpperCase() !== 'CH') {
-        ctrl.setValidators(Validators.required);
-      } else {
-        ctrl.clearValidators();
-        ctrl.setValue('');
-      }
+      if (val && val.toUpperCase() !== 'CH') ctrl.setValidators(Validators.required);
+      else { ctrl.clearValidators(); ctrl.setValue(''); }
       ctrl.updateValueAndValidity();
     });
 
-    // Veicolo 2: campi obbligatori se interchangeable_plate = Si
     this.form.get('interchangeable_plate')!.valueChanges.subscribe((val) => {
-      const fields = [
-        'car_brand_2','car_model_2','serial_number_2',
-        'first_registration_date_2','leasing_2','garage_parking_2',
-      ];
+      const fields = ['car_brand_2','car_model_2','serial_number_2','first_registration_date_2','leasing_2','garage_parking_2'];
       fields.forEach((f) => {
         const ctrl = this.form.get(f)!;
-        if (val === 'Si') {
-          ctrl.setValidators(Validators.required);
-        } else {
-          ctrl.clearValidators();
-        }
+        if (val === 'Si') ctrl.setValidators(Validators.required);
+        else ctrl.clearValidators();
         ctrl.updateValueAndValidity();
       });
     });
 
-    // Leasing forza comprehensive_insurance = Totale
     const checkLeasing = () => {
-      const l1 = this.form.get('leasing_1')!.value;
-      const l2 = this.form.get('leasing_2')!.value;
-      if (l1 === 'Si' || l2 === 'Si') {
+      if (this.form.get('leasing_1')!.value === 'Si' || this.form.get('leasing_2')!.value === 'Si') {
         this.form.get('comprehensive_insurance')!.setValue('Totale');
       }
     };
     this.form.get('leasing_1')!.valueChanges.subscribe(checkLeasing);
     this.form.get('leasing_2')!.valueChanges.subscribe(checkLeasing);
 
-    // Deductible condizionali su comprehensive_insurance
     this.form.get('comprehensive_insurance')!.valueChanges.subscribe((val) => {
       const total = this.form.get('deductible_total_insurance')!;
       const partial = this.form.get('deductible_partial_insurance')!;
-      if (val === 'Totale') {
-        total.setValidators(Validators.required);
-        partial.setValidators(Validators.required);
-      } else if (val === 'Parziale') {
-        total.clearValidators();
-        partial.setValidators(Validators.required);
-      } else {
-        total.clearValidators();
-        partial.clearValidators();
-      }
+      if (val === 'Totale') { total.setValidators(Validators.required); partial.setValidators(Validators.required); }
+      else if (val === 'Parziale') { total.clearValidators(); partial.setValidators(Validators.required); }
+      else { total.clearValidators(); partial.clearValidators(); }
       total.updateValueAndValidity();
       partial.updateValueAndValidity();
     });
 
-    // Deductible parking condizionale
     this.form.get('parking_damage_coverage')!.valueChanges.subscribe((val) => {
       const ctrl = this.form.get('deductible_parking_damage')!;
-      if (val && val !== 'No') {
-        ctrl.setValidators(Validators.required);
-      } else {
-        ctrl.clearValidators();
-      }
+      if (val && val !== 'No') ctrl.setValidators(Validators.required);
+      else ctrl.clearValidators();
       ctrl.updateValueAndValidity();
     });
   }
 
-  get showVehicle2(): boolean {
-    return this.form.get('interchangeable_plate')?.value === 'Si';
-  }
-  get showForeignersId(): boolean {
-    const val = this.form.get('nationality')?.value;
-    return val && val.toUpperCase() !== 'CH';
-  }
-  get showCompanyName(): boolean {
-    return this.form.get('gender')?.value === 'Azienda';
-  }
-  get showDeductibleTotal(): boolean {
-    return this.form.get('comprehensive_insurance')?.value === 'Totale';
-  }
-  get showDeductiblePartial(): boolean {
-    return ['Totale', 'Parziale'].includes(
-      this.form.get('comprehensive_insurance')?.value
-    );
-  }
-  get showDeductibleParking(): boolean {
-    return this.form.get('parking_damage_coverage')?.value !== 'No';
-  }
+  get showVehicle2(): boolean { return this.form.get('interchangeable_plate')?.value === 'Si'; }
+  get showForeignersId(): boolean { const v = this.form.get('nationality')?.value; return v && v.toUpperCase() !== 'CH'; }
+  get showCompanyName(): boolean { return this.form.get('gender')?.value === 'Azienda'; }
+  get showDeductibleTotal(): boolean { return this.form.get('comprehensive_insurance')?.value === 'Totale'; }
+  get showDeductiblePartial(): boolean { return ['Totale','Parziale'].includes(this.form.get('comprehensive_insurance')?.value); }
+  get showDeductibleParking(): boolean { return this.form.get('parking_damage_coverage')?.value !== 'No'; }
 
   isInvalid(name: string): boolean {
     const ctrl = this.form.get(name);
@@ -576,7 +752,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     if (ctrl.hasError('areaNotFound')) return this.i18nService.getTranslation('automation', 'form_err_area_not_found');
     if (ctrl.hasError('email')) return this.i18nService.getTranslation('automation', 'form_err_email');
     if (ctrl.hasError('pattern')) {
-      const dateFields = ['birth_date', 'first_driving_license_date', 'first_registration_date_1', 'first_registration_date_2'];
+      const dateFields = ['birth_date','first_driving_license_date','first_registration_date_1','first_registration_date_2'];
       if (dateFields.includes(name)) return this.i18nService.getTranslation('automation', 'form_err_date_format');
       return this.i18nService.getTranslation('automation', 'form_err_invalid_format');
     }
@@ -593,14 +769,15 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       if (i === 2 || i === 4) formatted += '.';
       formatted += digits[i];
     }
-    if (inputEvent.inputType !== 'deleteContentBackward' && (digits.length === 2 || digits.length === 4)) {
-      formatted += '.';
-    }
+    if (inputEvent.inputType !== 'deleteContentBackward' && (digits.length === 2 || digits.length === 4)) formatted += '.';
     input.value = formatted;
     this.form.get(controlName)?.setValue(formatted, { emitEvent: false });
   }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   async onSubmit(): Promise<void> {
     this.submitted = true;
@@ -618,25 +795,18 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
         'protezione carte ricarica e app': !!ev_charging_cards_apps,
       },
     };
-
     this.loaderService.show();
     try {
-      await firstValueFrom(
-        this.automationService.submitQuoteRequest(payload)
-      );
+      await firstValueFrom(this.automationService.submitQuoteRequest(payload));
       this.submittedEmail = this.form.get('email')?.value || '';
       this.submitSuccess = true;
       this.loaderService.hide();
     } catch (err) {
       this.loaderService.hide();
       if (err instanceof HttpErrorResponse && err.status === 429) {
-        this.toasterService.warn(
-          this.i18nService.getTranslation('automation', 'error_pool_full')
-        );
+        this.toasterService.warn(this.i18nService.getTranslation('automation', 'error_pool_full'));
       } else {
-        this.toasterService.warn(
-          this.i18nService.getTranslation('automation', 'error_generic')
-        );
+        this.toasterService.warn(this.i18nService.getTranslation('automation', 'error_generic'));
       }
     }
   }
@@ -647,15 +817,13 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     const plz = this.form?.get('zip_code')?.value?.toString() || '';
     if (plz.length !== 4) return null;
     const localities = this.automationService.getLocalitiesByPlz(plz);
-    const found = localities.some((l) => l.locality === area);
-    return found ? null : { areaNotFound: true };
+    return localities.some((l) => l.locality === area) ? null : { areaNotFound: true };
   }
 
   private plzExistsValidator(control: AbstractControl): ValidationErrors | null {
     const val = control.value?.toString() || '';
     if (val.length !== 4) return null;
-    const results = this.automationService.getLocalitiesByPlz(val);
-    return results.length > 0 ? null : { plzNotFound: true };
+    return this.automationService.getLocalitiesByPlz(val).length > 0 ? null : { plzNotFound: true };
   }
 
   onPlzInput(): void {
@@ -671,11 +839,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   }
 
   selectPlz(entry: LocalityEntry): void {
-    this.form.patchValue({
-      zip_code: entry.plz,
-      area: entry.locality,
-      canton: entry.canton,
-    });
+    this.form.patchValue({ zip_code: entry.plz, area: entry.locality, canton: entry.canton });
     this.showPlzDropdown = false;
     this.plzSuggestions = [];
   }
@@ -689,81 +853,39 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   }
 
   selectArea(entry: LocalityEntry): void {
-    this.form.patchValue({
-      area: entry.locality,
-      canton: entry.canton,
-    });
+    this.form.patchValue({ area: entry.locality, canton: entry.canton });
     this.showAreaDropdown = false;
     this.areaSuggestions = [];
   }
 
-  hidePlzDropdown(): void {
-    setTimeout(() => this.showPlzDropdown = false, 200);
-  }
-
-  hideAreaDropdown(): void {
-    setTimeout(() => this.showAreaDropdown = false, 200);
-  }
+  hidePlzDropdown(): void { setTimeout(() => this.showPlzDropdown = false, 200); }
+  hideAreaDropdown(): void { setTimeout(() => this.showAreaDropdown = false, 200); }
 
   fillTestData(): void {
     this.form.patchValue({
-      gender: 'Maschio',
-      company_name: '',
-      first_name: 'Dario',
-      last_name: 'Sgamba',
-      birth_date: '06.11.1993',
-      first_driving_license_date: '01.08.2010',
-      zip_code: '8001',
-      area: 'Zürich',
-      address: 'Via Roma',
-      address_number: '1',
-      email: 'dario.sgamba@gmail.com',
-      phone: '0791234567',
-      nationality: 'CH',
-      foreigners_id_type: 'C',
-      language: 'it',
-      deductible_under_26: '5000',
-      n_certificate_1: '',
-      car_brand_1: 'VW - Volkswagen',
-      car_model_1: 'Multivan T7',
-      serial_number_1: '149447880',
-      accessories_1: null,
-      canton: 'ZH',
-      license_plate: '711121',
-      first_registration_date_1: '05.05.2021',
-      leasing_1: 'Si',
-      garage_parking_1: 'Si',
-      interchangeable_plate: 'No',
-      vehicle_usage: 'nessun uso specifico',
-      civil_insurance: 'Si inclusi alla mia proprieta',
-      comprehensive_insurance: 'Totale',
-      deductible_total_insurance: '1000',
-      deductible_partial_insurance: '0',
-      parking_damage_coverage: 'Illimitato',
-      deductible_parking_damage: '200',
-      headlights_mirrors: 'Si',
-      personal_belongings_coverage: '2000',
-      tires_damage: 'Si',
-      bonus_protection: 'Si',
-      roadside_assistance: 'Si',
-      garage_free_choice: 'fissa',
-      passenger_injury: 'No',
-      ev_charging_station: false,
-      ev_high_voltage_battery: false,
-      ev_cyber_protection: false,
-      ev_charging_cards_apps: false,
-      payment_mode: 'Annuale',
-      current_insurance: 'AXA',
-      n_rc_claims_5_years: '0',
-      n_collisions_claims_5_years: '0',
-      n_parking_claims_5_years: '0',
-      n_glass_claims_5_years: '0',
+      gender: 'Maschio', company_name: '', first_name: 'Dario', last_name: 'Sgamba',
+      birth_date: '06.11.1993', first_driving_license_date: '01.08.2010',
+      zip_code: '8001', area: 'Zürich', address: 'Via Roma', address_number: '1',
+      email: 'dario.sgamba@gmail.com', phone: '0791234567', nationality: 'CH',
+      foreigners_id_type: 'C', language: 'it', deductible_under_26: '5000',
+      n_certificate_1: '1PA537', car_brand_1: 'BMW', car_model_1: 'X5 xDrive40i',
+      serial_number_1: '149447880', accessories_1: null, canton: 'ZH',
+      license_plate: '711121', first_registration_date_1: '05.05.2021',
+      leasing_1: 'Si', garage_parking_1: 'Si', interchangeable_plate: 'No',
+      vehicle_usage: 'nessun uso specifico', civil_insurance: 'Si inclusi alla mia proprieta',
+      comprehensive_insurance: 'Totale', deductible_total_insurance: '1000',
+      deductible_partial_insurance: '0', parking_damage_coverage: 'Illimitato',
+      deductible_parking_damage: '200', headlights_mirrors: 'Si',
+      personal_belongings_coverage: '2000', tires_damage: 'Si', bonus_protection: 'Si',
+      roadside_assistance: 'Si', garage_free_choice: 'fissa', passenger_injury: 'No',
+      ev_charging_station: false, ev_high_voltage_battery: false,
+      ev_cyber_protection: false, ev_charging_cards_apps: false,
+      payment_mode: 'Annuale', current_insurance: 'AXA',
+      n_rc_claims_5_years: '0', n_collisions_claims_5_years: '0',
+      n_parking_claims_5_years: '0', n_glass_claims_5_years: '0',
       n_partial_comprehensive_claims_5_years: '0',
-      other_questions: '',
-      recipient_email: '',
-      scrapers: [],
+      other_questions: '', recipient_email: '', scrapers: [],
     });
     this.toasterService.success(this.i18nService.getTranslation('automation', 'form_test_loaded'));
   }
-
 }

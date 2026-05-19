@@ -645,7 +645,7 @@
     "country_ZM": "Zambia",
     "country_ZW": "Zimbabwe",
     "country_altro": "Altro",
-    "vehicle_search_btn": "Cerca Marca / Tipo",
+    "vehicle_search_btn": "Cerca auto",
     "vehicle_search_title": "Cerca Marca / Tipo Omologazione",
     "vehicle_search_brand_placeholder": "Marca (es. VW, BMW, Toyota...)",
     "vehicle_search_model_placeholder": "Modello (es. T5 Multivan, X5...)",
@@ -660,6 +660,8 @@
     "vehicle_search_results_total": "risultati totali",
     "vehicle_search_serial_label": "Matricola (Stammnummer)",
     "vehicle_search_serial_placeholder": "Es. 234675930",
-    "vehicle_search_or_divider": "oppure"
+    "vehicle_search_or_divider": "oppure",
+    "vehicle_search_type_approval_label": "N. Certificato (Typengenehmigung)",
+    "vehicle_search_type_approval_placeholder": "Es. 1PA537, e1*2007/46*1909*21"
   }
 }

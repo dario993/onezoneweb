@@ -645,7 +645,7 @@
     "country_ZM": "Zambie",
     "country_ZW": "Zimbabwe",
     "country_altro": "Autre",
-    "vehicle_search_btn": "Rechercher Marque / Type",
+    "vehicle_search_btn": "Rechercher véhicule",
     "vehicle_search_title": "Rechercher Marque / Type d'homologation",
     "vehicle_search_brand_placeholder": "Marque (ex. VW, BMW, Toyota...)",
     "vehicle_search_model_placeholder": "Modèle (ex. T5 Multivan, X5...)",
@@ -660,6 +660,8 @@
     "vehicle_search_results_total": "résultats au total",
     "vehicle_search_serial_label": "Matricule (Stammnummer)",
     "vehicle_search_serial_placeholder": "ex. 234675930",
-    "vehicle_search_or_divider": "ou"
+    "vehicle_search_or_divider": "ou",
+    "vehicle_search_type_approval_label": "N° d'homologation (N. Certificato)",
+    "vehicle_search_type_approval_placeholder": "ex. 1PA537, e1*2007/46*1909*21"
   }
 }
