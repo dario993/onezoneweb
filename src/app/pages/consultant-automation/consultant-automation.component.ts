@@ -5,8 +5,7 @@ import { AutomationService } from '../../services/automation.service';
 import { NavigatorService } from '../../services/navigator.service';
 import { LoaderService } from '../../services/loader.service';
 import { ConsultantItem } from '../../interfaces/automation.interface';
-
-const ALL_SCRAPERS = ['axa', 'Allianz', 'Helvetia', 'Generali', 'Simpego', 'Zurich', 'Vaudoise', 'Automate', 'Mobiliar'];
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'page-consultant-automation',
@@ -20,7 +19,7 @@ export class ConsultantAutomationComponent {
   public searchvalue: string = '';
   public isLoading: boolean = false;
   public selectedConsultant: ConsultantItem | null = null;
-  public readonly allScrapers = ALL_SCRAPERS;
+  public readonly allScrapers = environment.automationScrapers;
 
   constructor(
     private readonly automationService: AutomationService,

@@ -34,6 +34,7 @@ export class StorageService {
   public clear(): void {
     try {
       localStorage.clear();
+      sessionStorage.clear();
     } catch (error) {
       console.error('Error clearing localStorage:', error);
     }

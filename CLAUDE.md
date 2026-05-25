@@ -45,6 +45,41 @@ Prima di iniziare qualsiasi lavoro:
 
 ---
 
+## Regole di Stesura del Codice
+
+Queste regole valgono **dopo** che l'utente ha approvato il documento di progetto (vedi sopra) e durante la scrittura del codice.
+
+### 1. Pensare prima di scrivere
+
+- Esplicitare le assunzioni. Se incerto, chiedere.
+- Se esistono più interpretazioni, presentarle — non scegliere in silenzio.
+- Se esiste un approccio più semplice, dirlo.
+
+### 2. Semplicità
+
+- Codice minimo che risolve il problema, niente di speculativo.
+- No feature non richieste, no astrazioni per codice usato una sola volta.
+- No gestione errori per scenari impossibili.
+- Se hai scritto 200 righe e potevano essere 50, riscrivile.
+
+### 3. Modifiche chirurgiche
+
+- Toccare solo ciò che serve. Non "migliorare" codice adiacente, commenti o formattazione.
+- Rispettare lo stile esistente anche se faresti diversamente.
+- Rimuovere import/variabili resi inutilizzati **dalle tue modifiche**; non rimuovere dead code preesistente senza chiedere.
+- Test: ogni riga modificata deve essere riconducibile alla richiesta dell'utente.
+
+### 4. Criteri di successo verificabili
+
+Per task non banali, formulare un piano breve con verifica per ogni step:
+
+```
+1. [Step] → verifica: [come controllo]
+2. [Step] → verifica: [come controllo]
+```
+
+---
+
 # OneZone Web — Documentazione Tecnica
 
 **OneZone Web** è una SPA Angular 20 che funge da portale clienti per la gestione di polizze assicurative, offerte e comunicazioni con i consulenti. Il backend è **BrokerStar** (`https://onezone.brokerstar.biz/api/v3`), autenticazione via Bearer JWT con validità 24h.
@@ -132,3 +167,10 @@ src/app/
 - `docs/2026-05-12-16-24-pannello-gestione-consulenti.md` — Tasto "Gestione consulenti" nel Menu: visibile solo agli account con contact.id 58 o 25755
 - `docs/2026-05-14-17-47-veicoli-json-statico.md` — Marca/Modello auto da CSV svizzero: JSON statico 55k coppie uniche in assets, select dinamici nel form automation
 - `docs/2026-05-18-17-00-marca-modello-api-swisscarinfo.md` — Integrazione SwissCarInfo v3 per autocomplete marca/modello con pre-compilazione type_approval
+- `docs/2026-05-21-21-23-cache-sessionstorage-customers-mandate.md` — Cache sessionStorage con stale-while-revalidate per customers-mandate
+- `docs/2026-05-21-22-12-fix-mandate-inform-insurances-isnew.md` — Fix payload `mandateInformInsurances`: campo `new_mandate` → `isNew` per allineamento allo schema Swagger
+- `docs/2026-05-22-15-17-struttura-app-per-redesign.md` — Documento struttura app e inventario UI funzionale (senza stile grafico) per redesign from-scratch
+- `docs/2026-05-25-19-05-scrapers-environment-checkbox-form.md` — Centralizzazione lista assicurazioni in `environment` + checkbox selezione scrapers nel form automation, filtrate per `disabled_scrapers` del consulente
+- `docs/2026-05-25-20-20-cache-consultant-home.md` — Cache-first in Home della GET `/consultants/{id}`: chiave `consultantData` in localStorage, salta chiamata API se presente
+- `docs/2026-05-25-20-25-cache-banner-home.md` — Cache-first in Home della GET `wp/v2/banner`: chiave `bannerData` in localStorage
+- `docs/2026-05-25-20-30-cache-verify-login-home.md` — Cache-first in Home della POST `/consultants/{id}/verify-login`: chiave `consultantLoginCheck` in localStorage

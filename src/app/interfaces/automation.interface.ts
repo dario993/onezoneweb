@@ -62,6 +62,7 @@ export interface GetConsultantResponse {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  disabled_scrapers?: string[];
 }
 
 export interface ExtractTotpPayload {

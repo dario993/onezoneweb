@@ -48,24 +48,42 @@ export class HomeComponent {
     this.username = authService.getUserName();
     this.isConsultant = isTrue(this.authService.userData.login?.isSharer);
 
-    // load banner
-    this.loaderService.show();
-    oneZoneService.banner().subscribe({
-      next: (response: any): void => {
-        if (isArray(response)) {
-          this.slider = response.map((slide: any, idx: number): any => {
-            slide.app_data.id = idx;
-            return slide.app_data;
-          });
-        }
-      },
-      error: (error: any): void => {
-        console.log(error);
-      },
-      complete: (): void => {
-        this.loaderService.hide();
-      },
-    });
+    // load banner (cache-first)
+    const cachedBannerRaw = this.storageService.getItem('bannerData');
+    let cachedBanner: any = null;
+    if (cachedBannerRaw) {
+      try {
+        cachedBanner = JSON.parse(cachedBannerRaw);
+      } catch {
+        cachedBanner = null;
+      }
+    }
+
+    if (isArray(cachedBanner)) {
+      this.slider = cachedBanner.map((slide: any, idx: number): any => {
+        slide.app_data.id = idx;
+        return slide.app_data;
+      });
+    } else {
+      this.loaderService.show();
+      oneZoneService.banner().subscribe({
+        next: (response: any): void => {
+          if (isArray(response)) {
+            this.storageService.setItem('bannerData', JSON.stringify(response));
+            this.slider = response.map((slide: any, idx: number): any => {
+              slide.app_data.id = idx;
+              return slide.app_data;
+            });
+          }
+        },
+        error: (error: any): void => {
+          console.log(error);
+        },
+        complete: (): void => {
+          this.loaderService.hide();
+        },
+      });
+    }
 
     // load menu
     let menuType: number = 1;
@@ -88,25 +106,67 @@ export class HomeComponent {
       }
     });
 
-    // if consultant, fetch api_key from automation backend
+    // if consultant, fetch api_key from automation backend (cache-first)
     if (this.isConsultant) {
       const onezoneId = String(this.authService.userData?.contact?.id);
-      this.automationService.getConsultant(onezoneId).subscribe({
-        next: (res) => {
-          if (res.api_key) {
-            this.storageService.setItem('consultantApiKey', res.api_key);
-          }
-        },
-        error: () => {
-          // consultant not registered in automation system, ignore
-        },
-      });
+      const cachedRaw = this.storageService.getItem('consultantData');
+      let cached: any = null;
+      if (cachedRaw) {
+        try {
+          cached = JSON.parse(cachedRaw);
+        } catch {
+          cached = null;
+        }
+      }
+
+      if (cached && cached.api_key) {
+        this.storageService.setItem('consultantApiKey', cached.api_key);
+        this.storageService.setItem(
+          'consultantDisabledScrapers',
+          JSON.stringify(cached.disabled_scrapers || [])
+        );
+      } else {
+        this.automationService.getConsultant(onezoneId).subscribe({
+          next: (res) => {
+            this.storageService.setItem('consultantData', JSON.stringify(res));
+            if (res.api_key) {
+              this.storageService.setItem('consultantApiKey', res.api_key);
+            }
+            this.storageService.setItem(
+              'consultantDisabledScrapers',
+              JSON.stringify(res.disabled_scrapers || [])
+            );
+          },
+          error: () => {
+            // consultant not registered in automation system, ignore
+          },
+        });
+      }
     }
   }
 
   public async onGeneraPreventivi(): Promise<void> {
     const consultantId = this.authService.userData?.contact?.id;
     if (!consultantId) return;
+
+    // cache-first: skip verify-login if previous result is cached
+    const cachedRaw = this.storageService.getItem('consultantLoginCheck');
+    let cached: any = null;
+    if (cachedRaw) {
+      try {
+        cached = JSON.parse(cachedRaw);
+      } catch {
+        cached = null;
+      }
+    }
+    if (cached && typeof cached.login_check === 'boolean') {
+      if (cached.login_check) {
+        this.navigator.navigateTo('automation-form');
+      } else {
+        this.navigator.navigateTo('automation-setup');
+      }
+      return;
+    }
 
     this.isVerifying = true;
     try {
@@ -115,6 +175,7 @@ export class HomeComponent {
           timeout(90000)
         )
       );
+      this.storageService.setItem('consultantLoginCheck', JSON.stringify(result));
       if (result.login_check) {
         this.navigator.navigateTo('automation-form');
       } else {

@@ -9,6 +9,15 @@ import { I18nPipe } from '../../pipes/i18n.pipe';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
+interface CacheEntry {
+  timestamp: number;
+  totalPages: number;
+  pages: Record<number, any[]>;
+}
+
+const CACHE_KEY = 'customers-mandate-cache';
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
 @Component({
   selector: 'page-customers-mandate',
   standalone: true,
@@ -29,12 +38,43 @@ export class CustomersMandateComponent implements OnDestroy, AfterViewInit {
   private scrollHandler: (() => void) | null = null;
   private mainElement: HTMLElement | null = null;
 
-  private readonly requestParams: Record<string, any> = {
+  private readonly baseParams: Record<string, any> = {
     'filters[show_contacts]': 2,
+    limit: 15,
+  };
+
+  private readonly enrichParams: Record<string, any> = {
+    ...{ 'filters[show_contacts]': 2, limit: 50 },
     'add[has_mandate_file]': true,
     'add[policy_count]': true,
     'add[sub_contact_count]': true,
   };
+
+  private readCache(): CacheEntry | null {
+    try {
+      const raw = sessionStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      const entry: CacheEntry = JSON.parse(raw);
+      if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+        sessionStorage.removeItem(CACHE_KEY);
+        return null;
+      }
+      return entry;
+    } catch {
+      return null;
+    }
+  }
+
+  private writeCachePage(page: number, customers: any[], totalPages: number): void {
+    try {
+      const existing = this.readCache() ?? { timestamp: Date.now(), totalPages, pages: {} };
+      existing.totalPages = totalPages;
+      existing.pages[page] = customers;
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify(existing));
+    } catch {
+      // sessionStorage potrebbe essere pieno o disabilitato
+    }
+  }
 
   get searchvalue(): string {
     return this.searchValueSubject.value;
@@ -131,16 +171,31 @@ export class CustomersMandateComponent implements OnDestroy, AfterViewInit {
     }
 
     const nextPage = this.currentPage + 1;
+    const q = search ?? this.searchvalue;
+
+    // Con ricerca attiva non usiamo la cache
+    if (!q) {
+      const cache = this.readCache();
+      const cachedPage = cache?.pages[nextPage];
+
+      if (cachedPage) {
+        this.totalPages = cache!.totalPages;
+        this.currentPage = nextPage;
+        this.allPagesLoaded = this.currentPage >= this.totalPages;
+        this.customers = [...this.customers, ...cachedPage];
+        this.changeDetection.detectChanges();
+
+        // Revalidate in background
+        this.enrichPage(nextPage, q, false);
+        return;
+      }
+    }
+
     this.isLoadingPage = true;
     this.loaderService.show();
 
-    const params: Record<string, any> = {
-      ...this.requestParams,
-      q: search ?? this.searchvalue,
-    };
-
     this.brokerstarService
-      .loadContactPage(nextPage, params)
+      .loadContactPage(nextPage, { ...this.baseParams, q })
       .pipe(takeUntil(this.destroy$))
       .subscribe((response: any): void => {
         this.isLoadingPage = false;
@@ -167,9 +222,10 @@ export class CustomersMandateComponent implements OnDestroy, AfterViewInit {
             phonePrivate: contact.phonePrivate,
             phoneWork: contact.phoneWork,
             mobile: contact.mobile,
-            hasMandateFile: contact.hasMandateFile,
-            policyCount: contact.policyCount || 0,
-            subContactCount: contact.subContactCount || 0,
+            enriched: false,
+            hasMandateFile: false,
+            policyCount: 0,
+            subContactCount: 0,
           }));
 
           if (this.currentPage === 1) {
@@ -185,6 +241,35 @@ export class CustomersMandateComponent implements OnDestroy, AfterViewInit {
 
           this.customers = [...this.customers, ...newCustomers];
           this.changeDetection.detectChanges();
+
+          this.enrichPage(nextPage, q, !q);
+        }
+      });
+  }
+
+  private enrichPage(page: number, q: string, saveToCache: boolean): void {
+    this.brokerstarService
+      .loadContactPage(page, { ...this.enrichParams, q })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((response: any): void => {
+        if (response?.data) {
+          response.data.forEach((contact: any) => {
+            const customer = this.customers.find((c) => c.id === contact.id);
+            if (customer) {
+              customer.hasMandateFile = contact.hasMandateFile;
+              customer.policyCount = contact.policyCount || 0;
+              customer.subContactCount = contact.subContactCount || 0;
+              customer.enriched = true;
+            }
+          });
+          this.changeDetection.detectChanges();
+
+          if (saveToCache) {
+            const pageCustomers = this.customers.filter((c) =>
+              response.data.some((contact: any) => contact.id === c.id)
+            );
+            this.writeCachePage(page, pageCustomers, this.totalPages);
+          }
         }
       });
   }

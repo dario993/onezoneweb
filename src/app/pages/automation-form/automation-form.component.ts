@@ -18,6 +18,8 @@ import { firstValueFrom, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
 import { LocalityEntry, VehicleResult } from '../../interfaces/automation.interface';
 import { HttpErrorResponse } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { StorageService } from '../../services/storage.service';
 
 @Component({
   selector: 'page-automation-form',
@@ -506,21 +508,66 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   showPlzDropdown = false;
   showAreaDropdown = false;
 
+  // Scrapers/assicurazioni disponibili (env meno disabled_scrapers del consulente)
+  public availableScrapers: string[] = [];
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly automationService: AutomationService,
     private readonly swissCarInfoService: SwissCarInfoService,
     private readonly toasterService: ToasterService,
     private readonly loaderService: LoaderService,
-    private readonly i18nService: I18nService
+    private readonly i18nService: I18nService,
+    private readonly storageService: StorageService
   ) {}
 
   ngOnInit(): void {
+    this.computeAvailableScrapers();
     this.buildForm();
+    this.form.get('scrapers')?.setValue([...this.availableScrapers]);
     this.setupConditionalFields();
     this.setupModalBrandStream();
     this.setupModalTypeApprovalStream();
     this.setupModalSerialStream();
+  }
+
+  private computeAvailableScrapers(): void {
+    let disabled: string[] = [];
+    try {
+      const raw = this.storageService.getItem('consultantDisabledScrapers') || '[]';
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        disabled = parsed.map((s: string) => String(s).toLowerCase());
+      }
+    } catch {
+      disabled = [];
+    }
+    this.availableScrapers = environment.automationScrapers.filter(
+      (s) => !disabled.includes(s.toLowerCase())
+    );
+  }
+
+  public isScraperSelected(name: string): boolean {
+    const arr: string[] = this.form?.get('scrapers')?.value || [];
+    return arr.includes(name);
+  }
+
+  public toggleScraper(name: string): void {
+    const ctrl = this.form.get('scrapers');
+    if (!ctrl) return;
+    const current: string[] = Array.isArray(ctrl.value) ? [...ctrl.value] : [];
+    const idx = current.indexOf(name);
+    if (idx >= 0) current.splice(idx, 1);
+    else current.push(name);
+    ctrl.setValue(current);
+    ctrl.markAsTouched();
+  }
+
+  private minArrayLength(min: number) {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const v = control.value;
+      return Array.isArray(v) && v.length >= min ? null : { minArrayLength: { required: min, actual: Array.isArray(v) ? v.length : 0 } };
+    };
   }
 
   private setupModalBrandStream(): void {
@@ -677,7 +724,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
 
       other_questions: [''],
       recipient_email: [''],
-      scrapers: [[]],
+      scrapers: [[], this.minArrayLength(1)],
     });
   }
 
@@ -884,7 +931,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       n_rc_claims_5_years: '0', n_collisions_claims_5_years: '0',
       n_parking_claims_5_years: '0', n_glass_claims_5_years: '0',
       n_partial_comprehensive_claims_5_years: '0',
-      other_questions: '', recipient_email: '', scrapers: [],
+      other_questions: '', recipient_email: '', scrapers: [...this.availableScrapers],
     });
     this.toasterService.success(this.i18nService.getTranslation('automation', 'form_test_loaded'));
   }

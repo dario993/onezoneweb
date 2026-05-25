@@ -816,6 +816,26 @@
       </div>
     </div>
 
+    <!-- Scrapers / Assicurazioni da interrogare -->
+    <div class="bg-white rounded-2xl shadow p-6 mb-6">
+      <h2 class="text-lg font-semibold text-gray-800 mb-3">{{ 'automation.scrapers_title' | i18n }}</h2>
+      <p class="text-sm text-gray-500 mb-4">{{ 'automation.scrapers_hint' | i18n }}</p>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+        @for (s of availableScrapers; track s) {
+        <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+          <input type="checkbox"
+                 [checked]="isScraperSelected(s)"
+                 (change)="toggleScraper(s)"
+                 class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+          <span>{{ s }}</span>
+        </label>
+        }
+      </div>
+      @if (submitted && form.get('scrapers')?.invalid) {
+      <p class="text-red-600 text-sm mt-3">{{ 'automation.scrapers_required' | i18n }}</p>
+      }
+    </div>
+
     <!-- Submit -->
     <button type="submit"
       class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl text-lg transition-colors">

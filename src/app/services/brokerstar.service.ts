@@ -657,7 +657,7 @@ export class BrokerstarService {
       .post(
         environment.apiEndpoint + '/mandate/inform-insurances',
         {
-          new_mandate: newMandate,
+          isNew: newMandate,
           _sendMail: true,
           insurances: insurances,
         },
