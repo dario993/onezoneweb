@@ -5,7 +5,8 @@
     "lang": "Languages",
     "faq": "FAQ",
     "home": "Home",
-    "messages": "Messages"
+    "messages": "Messages",
+    "consultantManagement": "Consultant management"
   },
   "login": {
     "email": "Email",
@@ -25,6 +26,12 @@
     "firstname": "Name",
     "lastname": "Surname",
     "company": "Businessname",
+    "address": "Address",
+    "zip": "ZIP",
+    "city": "City",
+    "mobile": "Mobile",
+    "optional": "optional",
+    "relationship": "Relationship to main policyholder",
     "email": "Email",
     "birthday": "Birthday",
     "birthdaycompany": "Foundation date",
@@ -139,10 +146,21 @@
     "add": "Register client",
     "open": "Open client",
     "people": "Person",
-    "policies": "Contracts"
+    "policies": "Contracts",
+    "mandat": "Mandate",
+    "search": "Search client..."
   },
   "customersMandate": {
     "title": "Submit mandate"
+  },
+  "consultantAutomation": {
+    "searchPlaceholder": "Search by name, surname or username...",
+    "disabled": "Disabled",
+    "login": "Login",
+    "empty": "No consultant found",
+    "active": "Active",
+    "inactive": "Disabled",
+    "close": "Close"
   },
   "home": {
     "invia_mandato": "Submit mandate"
@@ -252,6 +270,13 @@
     "form_section_vehicle2": "Vehicle 2 (Interchangeable Plate)",
     "form_section_usage": "Usage and Coverage",
     "form_section_claims": "Claims History (last 5 years)",
+    "form_section_claims_description": "No comparison possible with more than 3 claims — a claims performance report is required.",
+    "form_section_other_questions": "In the last 5 years, have you been in any of the following situations?",
+    "form_other_q_terminated": "The car insurer terminated the contract or imposed special conditions",
+    "form_other_q_refused": "The car insurer refused the application or accepted it under aggravated conditions",
+    "form_other_q_license_suspension": "Driving licence withdrawal of more than 1 month",
+    "block_offer_title": "It is not possible to calculate the offer",
+    "block_offer_close": "Close",
     "form_gender": "Gender",
     "form_gender_male": "Male",
     "form_gender_female": "Female",
@@ -364,6 +389,7 @@
     "form_err_area_not_found": "City not found for this postal code",
     "form_err_email": "Please enter a valid email address",
     "form_err_date_format": "Required format: DD.MM.YYYY",
+    "form_err_min_age_18": "The driving license date must be at least 18 years after the birth date",
     "form_err_invalid_format": "Invalid format",
     "form_err_invalid_value": "Invalid value",
     "form_err_fill_required": "Please fill in all required fields.",

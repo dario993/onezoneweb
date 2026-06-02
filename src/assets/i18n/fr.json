@@ -5,7 +5,8 @@
     "lang": "Langues",
     "faq": "Questions fréquemment posées",
     "home": "Page d'accueil",
-    "messages": "Messages"
+    "messages": "Messages",
+    "consultantManagement": "Gestion des conseillers"
   },
   "login": {
     "email": "E-mail",
@@ -25,6 +26,12 @@
     "firstname": "Prénom",
     "lastname": "Nom",
     "company": "Nom de l'entreprise",
+    "address": "Adresse",
+    "zip": "NPA",
+    "city": "Localité",
+    "mobile": "Mobile",
+    "optional": "facultatif",
+    "relationship": "Relation avec le preneur d'assurance principal",
     "email": "E-mail",
     "birthday": "Date de naissance",
     "birthdaycompany": "Date de fondation",
@@ -138,10 +145,21 @@
     "add": "Enregistrer client",
     "open": "Ouvrir client",
     "people": "Personnes",
-    "policies": "Contrats"
+    "policies": "Contrats",
+    "mandat": "Mandat",
+    "search": "Rechercher client..."
   },
   "customersMandate": {
     "title": "Soumettre mandat"
+  },
+  "consultantAutomation": {
+    "searchPlaceholder": "Rechercher par prénom, nom ou nom d'utilisateur...",
+    "disabled": "Désactivé",
+    "login": "Login",
+    "empty": "Aucun conseiller trouvé",
+    "active": "Actif",
+    "inactive": "Désactivé",
+    "close": "Fermer"
   },
   "home": {
     "invia_mandato": "Soumettre mandat"
@@ -251,6 +269,13 @@
     "form_section_vehicle2": "Véhicule 2 (Plaque interchangeable)",
     "form_section_usage": "Utilisation et couvertures",
     "form_section_claims": "Historique des sinistres (5 dernières années)",
+    "form_section_claims_description": "Aucune comparaison possible avec plus de 3 sinistres — un rendement de sinistres est requis.",
+    "form_section_other_questions": "Au cours des 5 dernières années, vous êtes-vous trouvé dans l'une des situations suivantes ?",
+    "form_other_q_terminated": "L'assurance auto a résilié le contrat ou imposé des conditions particulières",
+    "form_other_q_refused": "L'assurance auto a refusé la demande ou l'a acceptée sous conditions aggravées",
+    "form_other_q_license_suspension": "Retrait du permis de conduire de plus d'1 mois",
+    "block_offer_title": "Il n'est pas possible de calculer l'offre",
+    "block_offer_close": "Fermer",
     "form_gender": "Genre",
     "form_gender_male": "Homme",
     "form_gender_female": "Femme",
@@ -363,6 +388,7 @@
     "form_err_area_not_found": "Localité non trouvée pour ce code postal",
     "form_err_email": "Veuillez entrer une adresse e-mail valide",
     "form_err_date_format": "Format requis : JJ.MM.AAAA",
+    "form_err_min_age_18": "La date du permis doit être d'au moins 18 ans après la date de naissance",
     "form_err_invalid_format": "Format invalide",
     "form_err_invalid_value": "Valeur invalide",
     "form_err_fill_required": "Veuillez remplir tous les champs obligatoires.",

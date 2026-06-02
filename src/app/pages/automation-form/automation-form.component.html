@@ -735,6 +735,7 @@
     <!-- SEZIONE 5: Storico Sinistri -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
       <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">{{ 'automation.form_section_claims' | i18n }}</h2>
+      <p class="text-sm text-gray-500 mb-4 -mt-2">{{ 'automation.form_section_claims_description' | i18n }}</p>
       <div class="space-y-4">
 
         <!-- Current Insurance -->
@@ -813,6 +814,28 @@
 
 
 
+      </div>
+    </div>
+
+    <!-- SEZIONE 6: Altre domande -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+      <h2 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">{{ 'automation.form_section_other_questions' | i18n }}</h2>
+      <div class="space-y-2">
+        <label class="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
+          <input type="checkbox" formControlName="other_q_terminated"
+                 class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+          <span>{{ 'automation.form_other_q_terminated' | i18n }}</span>
+        </label>
+        <label class="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
+          <input type="checkbox" formControlName="other_q_refused"
+                 class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+          <span>{{ 'automation.form_other_q_refused' | i18n }}</span>
+        </label>
+        <label class="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
+          <input type="checkbox" formControlName="other_q_license_suspension"
+                 class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+          <span>{{ 'automation.form_other_q_license_suspension' | i18n }}</span>
+        </label>
       </div>
     </div>
 
@@ -1011,6 +1034,29 @@
     </div>
     }
 
+  </div>
+</div>
+}
+
+<!-- ─── Modale Blocco Offerta (Altre domande) ─────────────────────────────── -->
+@if (blockOfferModal.open) {
+<div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4"
+     (click)="closeBlockOfferModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6"
+       (click)="$event.stopPropagation()">
+    <h2 class="text-lg font-bold text-red-600 mb-4 text-center uppercase">
+      {{ 'automation.block_offer_title' | i18n }}
+    </h2>
+    <ul class="list-disc pl-5 space-y-2 text-sm text-gray-700 mb-6">
+      @for (item of blockOfferModal.items; track item) {
+      <li>{{ item }}</li>
+      }
+    </ul>
+    <button type="button"
+            (click)="closeBlockOfferModal()"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg">
+      {{ 'automation.block_offer_close' | i18n }}
+    </button>
   </div>
 </div>
 }

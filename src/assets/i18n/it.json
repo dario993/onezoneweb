@@ -5,7 +5,8 @@
     "lang": "Lingue",
     "faq": "Domande Frequenti",
     "home": "Home",
-    "messages": "Messaggi"
+    "messages": "Messaggi",
+    "consultantManagement": "Gestione consulenti"
   },
   "login": {
     "email": "Email",
@@ -25,6 +26,12 @@
     "firstname": "Nome",
     "lastname": "Cognome",
     "company": "Nome ditta",
+    "address": "Indirizzo",
+    "zip": "CAP",
+    "city": "Località",
+    "mobile": "Cellulare",
+    "optional": "facoltativo",
+    "relationship": "Relazione con il contraente principale",
     "email": "Email",
     "birthday": "Data di nascita",
     "birthdaycompany": "Data di fondazione",
@@ -138,10 +145,21 @@
     "add": "Registra cliente",
     "open": "Apri cliente",
     "people": "Persone",
-    "policies": "Contratti"
+    "policies": "Contratti",
+    "mandat": "Mandato",
+    "search": "Cerca cliente..."
   },
   "customersMandate": {
     "title": "Invia mandato"
+  },
+  "consultantAutomation": {
+    "searchPlaceholder": "Cerca per nome, cognome o username...",
+    "disabled": "Disabilitato",
+    "login": "Login",
+    "empty": "Nessun consulente trovato",
+    "active": "Attivo",
+    "inactive": "Disabilitato",
+    "close": "Chiudi"
   },
   "home": {
     "invia_mandato": "Invia mandato"
@@ -251,6 +269,13 @@
     "form_section_vehicle2": "Veicolo 2 (Targa Intercambiabile)",
     "form_section_usage": "Utilizzo e Coperture",
     "form_section_claims": "Storico Sinistri (ultimi 5 anni)",
+    "form_section_claims_description": "Nessun confronto possibile con più di 3 sinistri — in tal caso è necessario un rendimento sinistri.",
+    "form_section_other_questions": "Negli ultimi 5 anni si è trovato in una delle seguenti situazioni?",
+    "form_other_q_terminated": "L'assicurazione auto ha disdetto il contratto o imposto condizioni particolari",
+    "form_other_q_refused": "L'assicurazione auto ha rifiutato la richiesta o ha subordinato l'accettazione a condizioni aggravate",
+    "form_other_q_license_suspension": "Ritiro della patente per più di 1 mese",
+    "block_offer_title": "Non è possibile calcolare l'offerta",
+    "block_offer_close": "Chiudi",
     "form_gender": "Genere",
     "form_gender_male": "Uomo",
     "form_gender_female": "Donna",
@@ -363,6 +388,7 @@
     "form_err_area_not_found": "Località non trovata per questo PLZ",
     "form_err_email": "Inserisci un indirizzo email valido",
     "form_err_date_format": "Formato richiesto: GG.MM.AAAA",
+    "form_err_min_age_18": "La data della patente deve essere di almeno 18 anni successiva alla data di nascita",
     "form_err_invalid_format": "Formato non valido",
     "form_err_invalid_value": "Valore non valido",
     "form_err_fill_required": "Compila tutti i campi obbligatori.",

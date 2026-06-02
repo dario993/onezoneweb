@@ -58,16 +58,23 @@ export class I18nService {
     const storageLanguage: string = this.storage.getItem('selectedLanguage');
     if (storageLanguage) {
       switch (storageLanguage) {
+        case 'en':
         case 'english': {
           sLanguage = 'en';
           break;
         }
+        case 'fr':
         case 'french': {
           sLanguage = 'fr';
           break;
         }
+        case 'it':
         case 'italian': {
           sLanguage = 'it';
+          break;
+        }
+        case 'de': {
+          sLanguage = 'de';
           break;
         }
       }

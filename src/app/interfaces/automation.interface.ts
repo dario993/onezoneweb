@@ -180,7 +180,7 @@ export interface QuoteRequestPayload {
   n_parking_claims_5_years: string;
   n_glass_claims_5_years: string;
   n_partial_comprehensive_claims_5_years: string;
-  other_questions?: string;
+  other_questions: string[];
   // Opzionale
   recipient_email?: string;
   scrapers?: string[];

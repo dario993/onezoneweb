@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class StorageService {
-  private readonly currentVersion = '2.0.0'; // Update this as needed
+  private readonly currentVersion = '2.0.1'; // Update this as needed
 
   public setItem(field: string, value: string): void {
     try {

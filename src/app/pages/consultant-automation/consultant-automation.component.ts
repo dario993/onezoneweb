@@ -6,12 +6,13 @@ import { NavigatorService } from '../../services/navigator.service';
 import { LoaderService } from '../../services/loader.service';
 import { ConsultantItem } from '../../interfaces/automation.interface';
 import { environment } from '../../../environments/environment';
+import { I18nPipe } from '../../pipes/i18n.pipe';
 
 @Component({
   selector: 'page-consultant-automation',
   templateUrl: './consultant-automation.component.html',
   styleUrls: ['./consultant-automation.component.scss'],
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, I18nPipe],
   standalone: true,
 })
 export class ConsultantAutomationComponent {

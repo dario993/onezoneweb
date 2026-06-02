@@ -85,7 +85,7 @@ export class LanguageComponent {
       this.saveLanguageToUser();
     } else {
       this.loaderService.hide();
-      this.navigator.back();
+      window.location.reload();
     }
   }
 
@@ -122,7 +122,7 @@ export class LanguageComponent {
             this.i18n.getTranslation('profile', 'success')
           );
           this.loaderService.hide();
-          this.navigator.back();
+          window.location.reload();
         },
         error: (error: any) => {
           this.toasterService.alert(

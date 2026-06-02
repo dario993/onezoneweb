@@ -33,6 +33,12 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   submitSuccess = false;
   submittedEmail = '';
 
+  blockOfferModal = { open: false, items: [] as string[] };
+
+  closeBlockOfferModal(): void {
+    this.blockOfferModal = { open: false, items: [] };
+  }
+
   // ─── Stato modale ricerca veicolo ───────────────────────────────────────────
   modal = {
     open: false,
@@ -662,7 +668,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       first_name: ['', Validators.required],
       last_name: ['', Validators.required],
       birth_date: ['', [Validators.required, Validators.pattern(/^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.(19\d{2}|20[0-2]\d)$/)]],
-      first_driving_license_date: ['', [Validators.required, Validators.pattern(/^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.(19\d{2}|20[0-2]\d)$/)]],
+      first_driving_license_date: ['', [Validators.required, Validators.pattern(/^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.(19\d{2}|20[0-2]\d)$/), this.minAgeValidator(18)]],
       zip_code: ['', [Validators.required, Validators.pattern(/^\d{4}$/), this.plzExistsValidator.bind(this)]],
       area: ['', [Validators.required, this.areaExistsValidator.bind(this)]],
       address: ['', Validators.required],
@@ -722,7 +728,10 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       n_glass_claims_5_years: ['0', Validators.required],
       n_partial_comprehensive_claims_5_years: ['0', Validators.required],
 
-      other_questions: [''],
+      other_q_terminated: [false],
+      other_q_refused: [false],
+      other_q_license_suspension: [false],
+
       recipient_email: [''],
       scrapers: [[], this.minArrayLength(1)],
     });
@@ -771,6 +780,10 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       partial.updateValueAndValidity();
     });
 
+    this.form.get('birth_date')!.valueChanges.subscribe(() => {
+      this.form.get('first_driving_license_date')?.updateValueAndValidity({ emitEvent: false });
+    });
+
     this.form.get('parking_damage_coverage')!.valueChanges.subscribe((val) => {
       const ctrl = this.form.get('deductible_parking_damage')!;
       if (val && val !== 'No') ctrl.setValidators(Validators.required);
@@ -785,6 +798,32 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   get showDeductibleTotal(): boolean { return this.form.get('comprehensive_insurance')?.value === 'Totale'; }
   get showDeductiblePartial(): boolean { return ['Totale','Parziale'].includes(this.form.get('comprehensive_insurance')?.value); }
   get showDeductibleParking(): boolean { return this.form.get('parking_damage_coverage')?.value !== 'No'; }
+
+  private parseDdMmYyyy(value: string): Date | null {
+    if (!value) return null;
+    const match = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(value);
+    if (!match) return null;
+    const dd = Number(match[1]);
+    const mm = Number(match[2]);
+    const yyyy = Number(match[3]);
+    const d = new Date(yyyy, mm - 1, dd);
+    if (d.getFullYear() !== yyyy || d.getMonth() !== mm - 1 || d.getDate() !== dd) return null;
+    return d;
+  }
+
+  private minAgeValidator(minAge: number) {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const parent = control.parent;
+      if (!parent) return null;
+      const licenseDate = this.parseDdMmYyyy(control.value);
+      const birthDate = this.parseDdMmYyyy(parent.get('birth_date')?.value);
+      if (!licenseDate || !birthDate) return null;
+      let age = licenseDate.getFullYear() - birthDate.getFullYear();
+      const monthDiff = licenseDate.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && licenseDate.getDate() < birthDate.getDate())) age--;
+      return age < minAge ? { minAge: { requiredAge: minAge, actualAge: age } } : null;
+    };
+  }
 
   isInvalid(name: string): boolean {
     const ctrl = this.form.get(name);
@@ -803,6 +842,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       if (dateFields.includes(name)) return this.i18nService.getTranslation('automation', 'form_err_date_format');
       return this.i18nService.getTranslation('automation', 'form_err_invalid_format');
     }
+    if (ctrl.hasError('minAge')) return this.i18nService.getTranslation('automation', 'form_err_min_age_18');
     return this.i18nService.getTranslation('automation', 'form_err_invalid_value');
   }
 
@@ -832,7 +872,19 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       this.toasterService.warn(this.i18nService.getTranslation('automation', 'form_err_fill_required'));
       return;
     }
-    const { ev_charging_station, ev_high_voltage_battery, ev_cyber_protection, ev_charging_cards_apps, ...rest } = this.form.value;
+    const {
+      ev_charging_station, ev_high_voltage_battery, ev_cyber_protection, ev_charging_cards_apps,
+      other_q_terminated, other_q_refused, other_q_license_suspension,
+      ...rest
+    } = this.form.value;
+    const otherQuestions: string[] = [];
+    if (other_q_terminated) otherQuestions.push(this.i18nService.getTranslation('automation', 'form_other_q_terminated'));
+    if (other_q_refused) otherQuestions.push(this.i18nService.getTranslation('automation', 'form_other_q_refused'));
+    if (other_q_license_suspension) otherQuestions.push(this.i18nService.getTranslation('automation', 'form_other_q_license_suspension'));
+    if (otherQuestions.length > 0) {
+      this.blockOfferModal = { open: true, items: otherQuestions };
+      return;
+    }
     const payload = {
       ...rest,
       electric_vehicle: {
@@ -841,6 +893,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
         'protezione informatica': !!ev_cyber_protection,
         'protezione carte ricarica e app': !!ev_charging_cards_apps,
       },
+      other_questions: otherQuestions,
     };
     this.loaderService.show();
     try {
@@ -931,7 +984,8 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       n_rc_claims_5_years: '0', n_collisions_claims_5_years: '0',
       n_parking_claims_5_years: '0', n_glass_claims_5_years: '0',
       n_partial_comprehensive_claims_5_years: '0',
-      other_questions: '', recipient_email: '', scrapers: [...this.availableScrapers],
+      other_q_terminated: false, other_q_refused: false, other_q_license_suspension: false,
+      recipient_email: '', scrapers: [...this.availableScrapers],
     });
     this.toasterService.success(this.i18nService.getTranslation('automation', 'form_test_loaded'));
   }

@@ -5,7 +5,8 @@
     "lang": "Sprachen",
     "faq": "FAQ",
     "home": "Home",
-    "messages": "Nachrichten"
+    "messages": "Nachrichten",
+    "consultantManagement": "Beraterverwaltung"
   },
   "login": {
     "email": "Email",
@@ -176,6 +177,15 @@
   "customersMandate": {
     "title": "Mandat einreichen"
   },
+  "consultantAutomation": {
+    "searchPlaceholder": "Suche nach Vorname, Nachname oder Benutzername...",
+    "disabled": "Deaktiviert",
+    "login": "Login",
+    "empty": "Kein Berater gefunden",
+    "active": "Aktiv",
+    "inactive": "Deaktiviert",
+    "close": "Schließen"
+  },
   "home": {
     "invia_mandato": "Mandat einreichen"
   },
@@ -288,6 +298,13 @@
     "form_section_vehicle2": "Fahrzeug 2 (Wechselnummernschild)",
     "form_section_usage": "Nutzung und Deckungen",
     "form_section_claims": "Schadenhistorie (letzte 5 Jahre)",
+    "form_section_claims_description": "kein Vergleich möglich bei mehr als 3 Schadenfälle - hier wird ein Schadenrendement benötigt",
+    "form_section_other_questions": "Sind Sie in den letzten 5 Jahren in eine der folgenden Situationen geraten?",
+    "form_other_q_terminated": "Autoversicherung hat Vertrag gekündigt oder besondere Auflagen gemacht",
+    "form_other_q_refused": "Autoversicherung hat Antrag abgelehnt oder die Annahme an erschwerte Bedinungen geknüpft",
+    "form_other_q_license_suspension": "Führerausweisentzug von mehr als 1 Monat",
+    "block_offer_title": "Das Angebot kann nicht berechnet werden",
+    "block_offer_close": "Schliessen",
     "form_gender": "Geschlecht",
     "form_gender_male": "Mann",
     "form_gender_female": "Frau",
@@ -400,6 +417,7 @@
     "form_err_area_not_found": "Ortschaft für diese PLZ nicht gefunden",
     "form_err_email": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
     "form_err_date_format": "Erforderliches Format: TT.MM.JJJJ",
+    "form_err_min_age_18": "Das Datum des Führerscheins muss mindestens 18 Jahre nach dem Geburtsdatum liegen",
     "form_err_invalid_format": "Ungültiges Format",
     "form_err_invalid_value": "Ungültiger Wert",
     "form_err_fill_required": "Bitte füllen Sie alle Pflichtfelder aus.",

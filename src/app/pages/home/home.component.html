@@ -84,8 +84,16 @@
       </p>
     </div>
 
-    <!-- Bottoni consulente (Genera Preventivi) -->
+    <!-- Bottoni consulente (Invia mandato + Genera Preventivi) -->
     @if (isConsultant) {
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
+      <button
+        (click)="navigator.navigateTo('/customers-mandate')"
+        class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
+        <span class="text-gray-800 font-medium">{{ 'home.invia_mandato' | i18n }}</span>
+        <img src="assets/icons/ozo/chevron-right-solid.png" alt="Go to" class="h-3 opacity-60" />
+      </button>
+    </div>
     <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
       <button
         (click)="onGeneraPreventivi()"

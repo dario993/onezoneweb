@@ -35,7 +35,9 @@
         (click)="navigator.navigateTo('consultant-automation')"
         class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors text-left border-b border-gray-200"
       >
-        <span class="text-gray-800 font-semibold text-sm">Gestione consulenti</span>
+        <span class="text-gray-800 font-semibold text-sm">{{
+          "menu.consultantManagement" | i18n
+        }}</span>
         <img
           src="assets/icons/ozo/chevron-right-solid.png"
           alt="Go to"

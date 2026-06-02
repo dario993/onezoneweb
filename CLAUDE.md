@@ -174,3 +174,9 @@ src/app/
 - `docs/2026-05-25-20-20-cache-consultant-home.md` — Cache-first in Home della GET `/consultants/{id}`: chiave `consultantData` in localStorage, salta chiamata API se presente
 - `docs/2026-05-25-20-25-cache-banner-home.md` — Cache-first in Home della GET `wp/v2/banner`: chiave `bannerData` in localStorage
 - `docs/2026-05-25-20-30-cache-verify-login-home.md` — Cache-first in Home della POST `/consultants/{id}/verify-login`: chiave `consultantLoginCheck` in localStorage
+- `docs/2026-05-25-21-04-fix-cambio-lingua-reload.md` — Fix cambio lingua: switch `getSelectedLanguage()` per codici corti + `window.location.reload()` in `selectLanguage()`
+- `docs/2026-05-26-16-22-validator-eta-patente.md` — Validator custom su `first_driving_license_date`: età calcolata deve essere ≥ 18 anni
+- `docs/2026-05-26-18-04-descrizione-storico-sinistri.md` — Descrizione informativa sotto il titolo "Storico Sinistri" nel form automation (i18n it/en/de/fr)
+- `docs/2026-05-26-18-31-other-questions-checkbox.md` — Nuova sezione "Altre domande" con 3 checkbox; campo API `other_questions` come array di stringhe tradotte nella lingua corrente
+- `docs/2026-05-26-18-57-block-offer-other-questions.md` — Blocco submit + modal "Non possibile calcolare l'offerta" se almeno una checkbox della Sezione 6 è selezionata
+- `docs/2026-06-02-15-27-bottone-invia-mandato-home.md` — Bottone "Invia mandato" in Home (solo consulenti), sopra "Genera Preventivi", link a `/customers-mandate`
