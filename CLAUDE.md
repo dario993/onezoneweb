@@ -180,3 +180,8 @@ src/app/
 - `docs/2026-05-26-18-31-other-questions-checkbox.md` — Nuova sezione "Altre domande" con 3 checkbox; campo API `other_questions` come array di stringhe tradotte nella lingua corrente
 - `docs/2026-05-26-18-57-block-offer-other-questions.md` — Blocco submit + modal "Non possibile calcolare l'offerta" se almeno una checkbox della Sezione 6 è selezionata
 - `docs/2026-06-02-15-27-bottone-invia-mandato-home.md` — Bottone "Invia mandato" in Home (solo consulenti), sopra "Genera Preventivi", link a `/customers-mandate`
+- `docs/2026-06-11-18-14-allineamento-form-automation-api.md` — Allineamento del form automation al contratto API `POST /generate-quotes`: nuovi campi V1/V2/Sinistri, sub-form `main_driver`, `recipient_email` da `consultantData.ecohub_username`, auto-fill in dev mode
+- `docs/2026-06-11-18-26-automation-form-public-route.md` — Rotta pubblica `/automation-form-generic-client`: stesso form senza login, `recipient_email` dal form, consulente fisso con apiKey `valeman` da environment
+- `docs/2026-06-12-21-37-autocomplete-indirizzo-openplz.md` — Autocomplete campo `address` nel form automation via OpenPLZ API (CH): abilitato solo con `zip_code`+`area` validi, ≥3 char, validator "from API"
+- `docs/2026-06-16-18-23-lang-query-param-automation-form-public.md` — Query param `?lang=it|de|fr|en` sulla rotta pubblica `automation-form-generic-client` per forzare la lingua del form
+- `docs/2026-06-17-16-33-mandate-add-autocomplete-indirizzo.md` — Riordino campi `customers-mandate-add` (CAP → Località → Indirizzo) + autocomplete CH (JSON locale + OpenPLZ) come in `automation-form`

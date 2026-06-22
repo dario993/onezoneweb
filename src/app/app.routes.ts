@@ -50,9 +50,16 @@ export const routes: Routes = [
       { path: 'register', component: RegisterComponent },
       { path: 'register/:consultantCode', component: RegisterComponent },
       { path: 'language_unauthed', component: LanguageComponent }
-    
+
     ],
     canActivate: [isNonAuthenticatedRoute],
+  },
+  {
+    path: '',
+    component: LayoutUnauthedComponent,
+    children: [
+      { path: 'automation-form-generic-client', component: AutomationFormComponent, data: { publicMode: true } },
+    ],
   },
   {
     path: '',

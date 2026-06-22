@@ -1,0 +1,3062 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Insurance Scraping API",
+    "description": "Multi-tenant quote automation with per-consultant authentication",
+    "version": "2.0.0"
+  },
+  "paths": {
+    "/consultants": {
+      "get": {
+        "tags": [
+          "Consultants"
+        ],
+        "summary": "List Consultants",
+        "description": "Return all consultants with full data (admin only).\n\nIncludes sensitive fields: ecohub_password, disabled_scrapers.",
+        "operationId": "list_consultants_consultants_get",
+        "responses": {
+          "200": {
+            "description": "List of all consultants with full data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ConsultantListItem"
+                  },
+                  "type": "array",
+                  "title": "Response List Consultants Consultants Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Consultants"
+        ],
+        "summary": "Create Consultant",
+        "description": "Create a new consultant with auto-generated API key.\n\nEcoHub credentials are optional. If not provided, the consultant\nwill use the fallback (global) EcoHub account for quote generation.\n\nReturns the generated api_key — store it securely, it cannot be retrieved later.",
+        "operationId": "create_consultant_consultants_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsultantCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Consultant created successfully",
+            "content": {
+              "application/json": {
+                "schema": {},
+                "example": {
+                  "status": "created",
+                  "onezone_id": "user123",
+                  "api_key": "abc123def456..."
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Consultant already exists",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Consultant configuration already exists"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Failed to create consultant"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/consultants/{consultant_id}": {
+      "patch": {
+        "tags": [
+          "Consultants"
+        ],
+        "summary": "Patch Consultant",
+        "description": "Partially update a consultant by integer ID.\n\nOnly fields present in the request body are updated.\ndisabled_scrapers accepts any subset of:\n[\"axa\", \"Allianz\", \"Helvetia\", \"Generali\", \"Simpego\", \"Zurich\", \"Vaudoise\", \"Automate\", \"Mobiliar\"]\nor an empty list [].",
+        "operationId": "patch_consultant_consultants__consultant_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "consultant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Consultant Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsultantPatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Consultant updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsultantListItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No fields provided"
+          },
+          "404": {
+            "description": "Consultant not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/consultants/{onezone_id}": {
+      "get": {
+        "tags": [
+          "Consultants"
+        ],
+        "summary": "Get Consultant",
+        "description": "Get full consultant record by onezone_id (admin only).\n\nReturns all fields including sensitive data: api_key, ecohub_password,\necohub_totp_secret, disabled_scrapers.",
+        "operationId": "get_consultant_consultants__onezone_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "onezone_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Onezone Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsultantResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Consultant not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Consultant not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/consultants/{onezone_id}/credentials": {
+      "post": {
+        "tags": [
+          "Consultants"
+        ],
+        "summary": "Update Credentials",
+        "description": "Update EcoHub credentials for a consultant. Evicts any active browser session\nso the next request re-authenticates with the new credentials.",
+        "operationId": "update_credentials_consultants__onezone_id__credentials_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "onezone_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Onezone Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Credentials updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {},
+                "example": {
+                  "status": "updated",
+                  "onezone_id": "user123"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Consultant not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Consultant not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions": {
+      "get": {
+        "tags": [
+          "Consultants"
+        ],
+        "summary": "Get Sessions",
+        "description": "Get session pool status snapshot.",
+        "operationId": "get_sessions_sessions_get",
+        "responses": {
+          "200": {
+            "description": "Session pool status",
+            "content": {
+              "application/json": {
+                "schema": {},
+                "example": {
+                  "max_sessions": 5,
+                  "active_sessions": 2,
+                  "reserved_sessions": 1,
+                  "available_slots": 3,
+                  "sessions": [
+                    {
+                      "onezone_id": "user123",
+                      "last_used": "2023-10-27T10:00:00",
+                      "task_locked": true
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/consultants/{onezone_id}/verify-login": {
+      "post": {
+        "tags": [
+          "Consultants"
+        ],
+        "summary": "Verify Login",
+        "description": "Verify a consultant's EcoHub credentials by attempting an actual login.\n\nReturns the verification result:\n- {\"status\": \"already_verified\", \"login_check\": true} — already passed\n- {\"status\": \"verified\", \"login_check\": true} — login succeeded, flag updated\n- {\"status\": \"failed\", \"login_check\": false, \"error\": \"...\"} — login failed\n- {\"status\": \"error\", \"login_check\": false, \"error\": \"...\"} — missing credentials or consultant",
+        "operationId": "verify_login_consultants__onezone_id__verify_login_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "onezone_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Onezone Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login verification result",
+            "content": {
+              "application/json": {
+                "schema": {},
+                "examples": {
+                  "already_verified": {
+                    "summary": "Already verified",
+                    "value": {
+                      "status": "already_verified",
+                      "login_check": true
+                    }
+                  },
+                  "verified": {
+                    "summary": "Verification successful",
+                    "value": {
+                      "status": "verified",
+                      "login_check": true
+                    }
+                  },
+                  "failed": {
+                    "summary": "Login failed",
+                    "value": {
+                      "status": "failed",
+                      "login_check": false,
+                      "error": "Invalid credentials"
+                    }
+                  },
+                  "error": {
+                    "summary": "Error",
+                    "value": {
+                      "status": "error",
+                      "login_check": false,
+                      "error": "Missing credentials"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Consultant not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Consultant not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/extract-totp-secret": {
+      "post": {
+        "tags": [
+          "TOTP"
+        ],
+        "summary": "Extract Totp Secret",
+        "description": "Extract the TOTP secret from an authenticator QR code image.",
+        "operationId": "extract_totp_secret_extract_totp_secret_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_extract_totp_secret_extract_totp_secret_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully extracted TOTP secret",
+            "content": {
+              "application/json": {
+                "schema": {},
+                "example": {
+                  "secret": "JBSWY3DPEHPK3PXP",
+                  "issuer": "EcoHub",
+                  "name": "user@example.com"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid file type or format",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "File must be an image"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable image content",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "No QR code found in image"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/generate-quotes": {
+      "post": {
+        "tags": [
+          "Quotes"
+        ],
+        "summary": "Generate Quotes",
+        "description": "Generate insurance quotes for a user.\n\nRequires a valid consultant API key in the Authorization header:\n    Authorization: Bearer <consultant_api_key>\n\nThe consultant's EcoHub credentials are used for scraping. If the consultant\nhas no EcoHub credentials, the fallback (global) account is used.",
+        "operationId": "generate_quotes_generate_quotes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteRequest"
+              },
+              "examples": {
+                "single_vehicle": {
+                  "summary": "Single vehicle — full quote",
+                  "description": "One vehicle (`interchangeable_plate: \"No\"`, no Vehicle 2 fields). Runs the selected scrapers and emails a quote.",
+                  "value": {
+                    "gender": "Maschio",
+                    "first_name": "Pete",
+                    "last_name": "Künzi",
+                    "birth_date": "20.06.1968",
+                    "first_driving_license_date": "12.12.1989",
+                    "zip_code": "5413",
+                    "canton": "AG",
+                    "area": "Birmenstorf",
+                    "address": "Rietereweg",
+                    "address_number": "5",
+                    "email": "val.mannucci@gmail.com",
+                    "phone": "0794232907",
+                    "nationality": "CH",
+                    "language": "de",
+                    "main_driver": {
+                      "driver_type": "user"
+                    },
+                    "deductible_under_26": "0",
+                    "car_brand_1": "volkswagen",
+                    "car_model_1": "id.3",
+                    "vehicle_type_1": "passenger_car",
+                    "drive_1": "Electric",
+                    "accessories_1": 1500,
+                    "serial_number_1": "123456786",
+                    "first_registration_date_1": "01.09.2020",
+                    "purchase_date_1": "09.2020",
+                    "kilometers_per_year_1": "10000",
+                    "current_mileage_1": 35000,
+                    "leasing_1": "No",
+                    "garage_parking_1": "Si",
+                    "submit_vehicle_proof_1": "No",
+                    "license_plate": "123456",
+                    "interchangeable_plate": "No",
+                    "vehicle_usage": "nessun uso specifico",
+                    "civil_insurance": "Si inclusi alla mia proprieta",
+                    "comprehensive_insurance": "Totale",
+                    "deductible_partial_insurance": "0",
+                    "deductible_total_insurance": "500",
+                    "parking_damage_coverage": "Illimitato",
+                    "deductible_parking_damage": "200",
+                    "headlights_mirrors": "Si",
+                    "personal_belongings_coverage": "No",
+                    "tires_damage": "No",
+                    "bonus_protection": "Si",
+                    "roadside_assistance": "Si",
+                    "garage_free_choice": "fissa",
+                    "passenger_injury": "No",
+                    "electric_vehicle": {
+                      "batterie_alta_tensione": true,
+                      "protezione_informatica": true,
+                      "protezione_carte_ricarica_e_app": false,
+                      "stazione_di_ricarica_e_accessori": false
+                    },
+                    "payment_mode": "Annuale",
+                    "current_insurance": "Vaudoise",
+                    "n_rc_claims_5_years": "0",
+                    "n_collisions_claims_5_years": "0",
+                    "n_parking_claims_5_years": "0",
+                    "n_glass_claims_5_years": "0",
+                    "n_partial_comprehensive_claims_5_years": "0",
+                    "n_rc_claims_3_years": "0",
+                    "n_collisions_claims_3_years": "0",
+                    "n_parking_claims_3_years": "0",
+                    "n_glass_claims_3_years": "0",
+                    "n_partial_comprehensive_claims_3_years": "0",
+                    "other_questions": "",
+                    "source_user": "Mario Rossi",
+                    "scrapers": [
+                      "zurich",
+                      "axa",
+                      "automate"
+                    ],
+                    "recipient_email": "consultant@example.com",
+                    "registration_scraper": "",
+                    "registration_only": false,
+                    "request_source": "api",
+                    "source": "api",
+                    "insurance_companies": [
+                      "Zurich",
+                      "AXA",
+                      "Automate"
+                    ],
+                    "invite_customer": "No",
+                    "customer_email": "",
+                    "customer_message": ""
+                  }
+                },
+                "two_vehicles": {
+                  "summary": "Two vehicles (interchangeable plate)",
+                  "description": "Two vehicles sharing an interchangeable plate (`interchangeable_plate: \"Si\"`, Vehicle 2 block required).",
+                  "value": {
+                    "gender": "Maschio",
+                    "first_name": "Pete",
+                    "last_name": "Künzi",
+                    "birth_date": "20.06.1968",
+                    "first_driving_license_date": "12.12.1989",
+                    "zip_code": "5413",
+                    "canton": "AG",
+                    "area": "Birmenstorf",
+                    "address": "Rietereweg",
+                    "address_number": "5",
+                    "email": "val.mannucci@gmail.com",
+                    "phone": "0794232907",
+                    "nationality": "CH",
+                    "language": "de",
+                    "main_driver": {
+                      "driver_type": "user"
+                    },
+                    "deductible_under_26": "0",
+                    "car_brand_1": "volkswagen",
+                    "car_model_1": "id.3",
+                    "vehicle_type_1": "passenger_car",
+                    "drive_1": "Electric",
+                    "accessories_1": 1500,
+                    "serial_number_1": "123456786",
+                    "first_registration_date_1": "01.09.2020",
+                    "purchase_date_1": "09.2020",
+                    "kilometers_per_year_1": "10000",
+                    "current_mileage_1": 35000,
+                    "leasing_1": "No",
+                    "garage_parking_1": "Si",
+                    "submit_vehicle_proof_1": "No",
+                    "license_plate": "123456",
+                    "interchangeable_plate": "Si",
+                    "car_brand_2": "Audi",
+                    "car_model_2": "A3",
+                    "vehicle_type_2": "passenger_car",
+                    "drive_2": "Benzin",
+                    "accessories_2": 0,
+                    "serial_number_2": "987654321",
+                    "first_registration_date_2": "15.03.2019",
+                    "purchase_date_2": "03.2019",
+                    "kilometers_per_year_2": "15000",
+                    "current_mileage_2": 60000,
+                    "leasing_2": "No",
+                    "garage_parking_2": "No",
+                    "submit_vehicle_proof_2": "No",
+                    "vehicle_usage": "nessun uso specifico",
+                    "civil_insurance": "Si inclusi alla mia proprieta",
+                    "comprehensive_insurance": "Totale",
+                    "deductible_partial_insurance": "0",
+                    "deductible_total_insurance": "500",
+                    "parking_damage_coverage": "Illimitato",
+                    "deductible_parking_damage": "200",
+                    "headlights_mirrors": "Si",
+                    "personal_belongings_coverage": "No",
+                    "tires_damage": "No",
+                    "bonus_protection": "Si",
+                    "roadside_assistance": "Si",
+                    "garage_free_choice": "fissa",
+                    "passenger_injury": "No",
+                    "electric_vehicle": {
+                      "batterie_alta_tensione": true,
+                      "protezione_informatica": true,
+                      "protezione_carte_ricarica_e_app": false,
+                      "stazione_di_ricarica_e_accessori": false
+                    },
+                    "payment_mode": "Annuale",
+                    "current_insurance": "Vaudoise",
+                    "n_rc_claims_5_years": "0",
+                    "n_collisions_claims_5_years": "0",
+                    "n_parking_claims_5_years": "0",
+                    "n_glass_claims_5_years": "0",
+                    "n_partial_comprehensive_claims_5_years": "0",
+                    "n_rc_claims_3_years": "0",
+                    "n_collisions_claims_3_years": "0",
+                    "n_parking_claims_3_years": "0",
+                    "n_glass_claims_3_years": "0",
+                    "n_partial_comprehensive_claims_3_years": "0",
+                    "other_questions": "",
+                    "source_user": "Mario Rossi",
+                    "scrapers": [
+                      "zurich",
+                      "axa",
+                      "automate"
+                    ],
+                    "recipient_email": "consultant@example.com",
+                    "registration_scraper": "",
+                    "registration_only": false,
+                    "request_source": "api",
+                    "source": "api",
+                    "insurance_companies": [
+                      "Zurich",
+                      "AXA",
+                      "Automate"
+                    ],
+                    "invite_customer": "No",
+                    "customer_email": "",
+                    "customer_message": ""
+                  }
+                },
+                "registration_only": {
+                  "summary": "Immatricolazione only (eVN, Zurich)",
+                  "description": "Registration only: `registration_scraper: \"zurich\"`, `registration_only: true`. Produces the eVN code, no quote PDF. Needs `submit_vehicle_proof_1: \"Yes\"` + `reasons_for_redemption_1`.",
+                  "value": {
+                    "gender": "Maschio",
+                    "first_name": "Pete",
+                    "last_name": "Künzi",
+                    "birth_date": "20.06.1968",
+                    "first_driving_license_date": "12.12.1989",
+                    "zip_code": "5413",
+                    "canton": "AG",
+                    "area": "Birmenstorf",
+                    "address": "Rietereweg",
+                    "address_number": "5",
+                    "email": "val.mannucci@gmail.com",
+                    "phone": "0794232907",
+                    "nationality": "CH",
+                    "language": "de",
+                    "main_driver": {
+                      "driver_type": "user"
+                    },
+                    "deductible_under_26": "0",
+                    "car_brand_1": "volkswagen",
+                    "car_model_1": "id.3",
+                    "vehicle_type_1": "passenger_car",
+                    "drive_1": "Electric",
+                    "accessories_1": 1500,
+                    "serial_number_1": "123456786",
+                    "first_registration_date_1": "01.09.2020",
+                    "purchase_date_1": "09.2020",
+                    "kilometers_per_year_1": "10000",
+                    "current_mileage_1": 35000,
+                    "reasons_for_redemption_1": "New redemption",
+                    "leasing_1": "No",
+                    "garage_parking_1": "Si",
+                    "submit_vehicle_proof_1": "Yes",
+                    "license_plate": "123456",
+                    "interchangeable_plate": "No",
+                    "vehicle_usage": "nessun uso specifico",
+                    "civil_insurance": "Si inclusi alla mia proprieta",
+                    "comprehensive_insurance": "Totale",
+                    "deductible_partial_insurance": "0",
+                    "deductible_total_insurance": "500",
+                    "parking_damage_coverage": "Illimitato",
+                    "deductible_parking_damage": "200",
+                    "headlights_mirrors": "Si",
+                    "personal_belongings_coverage": "No",
+                    "tires_damage": "No",
+                    "bonus_protection": "Si",
+                    "roadside_assistance": "Si",
+                    "garage_free_choice": "fissa",
+                    "passenger_injury": "No",
+                    "electric_vehicle": {
+                      "batterie_alta_tensione": true,
+                      "protezione_informatica": true,
+                      "protezione_carte_ricarica_e_app": false,
+                      "stazione_di_ricarica_e_accessori": false
+                    },
+                    "payment_mode": "Annuale",
+                    "current_insurance": "Vaudoise",
+                    "n_rc_claims_5_years": "0",
+                    "n_collisions_claims_5_years": "0",
+                    "n_parking_claims_5_years": "0",
+                    "n_glass_claims_5_years": "0",
+                    "n_partial_comprehensive_claims_5_years": "0",
+                    "n_rc_claims_3_years": "0",
+                    "n_collisions_claims_3_years": "0",
+                    "n_parking_claims_3_years": "0",
+                    "n_glass_claims_3_years": "0",
+                    "n_partial_comprehensive_claims_3_years": "0",
+                    "other_questions": "",
+                    "source_user": "Mario Rossi",
+                    "scrapers": [
+                      "zurich"
+                    ],
+                    "recipient_email": "consultant@example.com",
+                    "registration_scraper": "zurich",
+                    "registration_only": true,
+                    "request_source": "api",
+                    "source": "api",
+                    "insurance_companies": [
+                      "Zurich"
+                    ],
+                    "invite_customer": "No",
+                    "customer_email": "",
+                    "customer_message": ""
+                  }
+                },
+                "registration_and_quote": {
+                  "summary": "Immatricolazione + preventivo (Zurich)",
+                  "description": "Quote **and** registration in one run: `registration_scraper: \"zurich\"`, `registration_only: false`. Returns the quote PDF/price plus the eVN code.",
+                  "value": {
+                    "gender": "Maschio",
+                    "first_name": "Pete",
+                    "last_name": "Künzi",
+                    "birth_date": "20.06.1968",
+                    "first_driving_license_date": "12.12.1989",
+                    "zip_code": "5413",
+                    "canton": "AG",
+                    "area": "Birmenstorf",
+                    "address": "Rietereweg",
+                    "address_number": "5",
+                    "email": "val.mannucci@gmail.com",
+                    "phone": "0794232907",
+                    "nationality": "CH",
+                    "language": "de",
+                    "main_driver": {
+                      "driver_type": "user"
+                    },
+                    "deductible_under_26": "0",
+                    "car_brand_1": "volkswagen",
+                    "car_model_1": "id.3",
+                    "vehicle_type_1": "passenger_car",
+                    "drive_1": "Electric",
+                    "accessories_1": 1500,
+                    "serial_number_1": "123456786",
+                    "first_registration_date_1": "01.09.2020",
+                    "purchase_date_1": "09.2020",
+                    "kilometers_per_year_1": "10000",
+                    "current_mileage_1": 35000,
+                    "reasons_for_redemption_1": "New redemption",
+                    "leasing_1": "No",
+                    "garage_parking_1": "Si",
+                    "submit_vehicle_proof_1": "Yes",
+                    "license_plate": "123456",
+                    "interchangeable_plate": "No",
+                    "vehicle_usage": "nessun uso specifico",
+                    "civil_insurance": "Si inclusi alla mia proprieta",
+                    "comprehensive_insurance": "Totale",
+                    "deductible_partial_insurance": "0",
+                    "deductible_total_insurance": "500",
+                    "parking_damage_coverage": "Illimitato",
+                    "deductible_parking_damage": "200",
+                    "headlights_mirrors": "Si",
+                    "personal_belongings_coverage": "No",
+                    "tires_damage": "No",
+                    "bonus_protection": "Si",
+                    "roadside_assistance": "Si",
+                    "garage_free_choice": "fissa",
+                    "passenger_injury": "No",
+                    "electric_vehicle": {
+                      "batterie_alta_tensione": true,
+                      "protezione_informatica": true,
+                      "protezione_carte_ricarica_e_app": false,
+                      "stazione_di_ricarica_e_accessori": false
+                    },
+                    "payment_mode": "Annuale",
+                    "current_insurance": "Vaudoise",
+                    "n_rc_claims_5_years": "0",
+                    "n_collisions_claims_5_years": "0",
+                    "n_parking_claims_5_years": "0",
+                    "n_glass_claims_5_years": "0",
+                    "n_partial_comprehensive_claims_5_years": "0",
+                    "n_rc_claims_3_years": "0",
+                    "n_collisions_claims_3_years": "0",
+                    "n_parking_claims_3_years": "0",
+                    "n_glass_claims_3_years": "0",
+                    "n_partial_comprehensive_claims_3_years": "0",
+                    "other_questions": "",
+                    "source_user": "Mario Rossi",
+                    "scrapers": [
+                      "zurich"
+                    ],
+                    "recipient_email": "consultant@example.com",
+                    "registration_scraper": "zurich",
+                    "registration_only": false,
+                    "request_source": "api",
+                    "source": "api",
+                    "insurance_companies": [
+                      "Zurich"
+                    ],
+                    "invite_customer": "No",
+                    "customer_email": "",
+                    "customer_message": ""
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Quote request accepted and processing queued",
+            "content": {
+              "application/json": {
+                "schema": {},
+                "example": {
+                  "status": "accepted",
+                  "request_id": 42,
+                  "message": "Quote request saved and processing queued"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Session pool full",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Session pool full. Try again later."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Database error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Database error: connection failed"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/test-by-request-id/{request_id}": {
+      "post": {
+        "tags": [
+          "Testing & Debug"
+        ],
+        "summary": "Test By Request Id Endpoint",
+        "description": "Re-run scraping for an existing request ID from the database.\nUseful for retrying failed requests or testing with real data.\n\nAuthenticated with the admin API key only. If `consultant_onezone_id` is provided the\nrun impersonates that consultant (uses their EcoHub credentials/session);\notherwise it runs as the default admin consultant. An impersonated\nconsultant without verified own credentials is rejected.",
+        "operationId": "test_by_request_id_endpoint_test_by_request_id__request_id__post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Request Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestByRequestIdRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Test task queued by request ID",
+            "content": {
+              "application/json": {
+                "schema": {},
+                "example": {
+                  "status": "accepted",
+                  "request_id": 123,
+                  "message": "Test task queued for request 123 (Scrapers: all)"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Body_extract_totp_secret_extract_totp_secret_post": {
+        "properties": {
+          "qr_image": {
+            "type": "string",
+            "format": "binary",
+            "title": "Qr Image"
+          }
+        },
+        "type": "object",
+        "required": [
+          "qr_image"
+        ],
+        "title": "Body_extract_totp_secret_extract_totp_secret_post"
+      },
+      "Canton": {
+        "type": "string",
+        "enum": [
+          "AG",
+          "AI",
+          "AR",
+          "BE",
+          "BL",
+          "BS",
+          "FR",
+          "GE",
+          "GL",
+          "GR",
+          "JU",
+          "LU",
+          "NE",
+          "NW",
+          "OW",
+          "SG",
+          "SH",
+          "SO",
+          "SZ",
+          "TG",
+          "TI",
+          "UR",
+          "VD",
+          "VS",
+          "ZG",
+          "ZH"
+        ],
+        "title": "Canton"
+      },
+      "CivilInsurance": {
+        "type": "string",
+        "enum": [
+          "Si esclusi alla mia proprieta",
+          "Si inclusi alla mia proprieta",
+          "No"
+        ],
+        "title": "CivilInsurance"
+      },
+      "ClaimsCount": {
+        "type": "string",
+        "enum": [
+          "0",
+          "1",
+          "2",
+          "3"
+        ],
+        "title": "ClaimsCount"
+      },
+      "ComprehensiveInsurance": {
+        "type": "string",
+        "enum": [
+          "Totale",
+          "Parziale",
+          "Nessuna"
+        ],
+        "title": "ComprehensiveInsurance"
+      },
+      "ConsultantCreateRequest": {
+        "properties": {
+          "onezone_id": {
+            "type": "string",
+            "title": "Onezone Id",
+            "default": ""
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": ""
+          },
+          "surname": {
+            "type": "string",
+            "title": "Surname",
+            "default": ""
+          },
+          "ecohub_username": {
+            "type": "string",
+            "title": "Ecohub Username",
+            "default": ""
+          },
+          "ecohub_password": {
+            "type": "string",
+            "title": "Ecohub Password",
+            "default": ""
+          },
+          "ecohub_totp_secret": {
+            "type": "string",
+            "title": "Ecohub Totp Secret",
+            "default": ""
+          },
+          "commission_number": {
+            "type": "string",
+            "title": "Commission Number",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "ConsultantCreateRequest"
+      },
+      "ConsultantListItem": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "onezone_id": {
+            "type": "string",
+            "title": "Onezone Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "default": ""
+          },
+          "surname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Surname",
+            "default": ""
+          },
+          "ecohub_username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ecohub Username",
+            "default": ""
+          },
+          "ecohub_password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ecohub Password",
+            "default": ""
+          },
+          "commission_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Commission Number",
+            "default": ""
+          },
+          "login_check": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Login Check",
+            "default": false
+          },
+          "disabled_scrapers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Disabled Scrapers"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "onezone_id",
+          "is_active"
+        ],
+        "title": "ConsultantListItem"
+      },
+      "ConsultantPatchRequest": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "surname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Surname"
+          },
+          "ecohub_username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ecohub Username"
+          },
+          "ecohub_password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ecohub Password"
+          },
+          "commission_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Commission Number"
+          },
+          "disabled_scrapers": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disabled Scrapers"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "title": "ConsultantPatchRequest"
+      },
+      "ConsultantResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "onezone_id": {
+            "type": "string",
+            "title": "Onezone Id"
+          },
+          "api_key": {
+            "type": "string",
+            "title": "Api Key"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "default": ""
+          },
+          "surname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Surname",
+            "default": ""
+          },
+          "ecohub_username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ecohub Username",
+            "default": ""
+          },
+          "ecohub_password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ecohub Password",
+            "default": ""
+          },
+          "ecohub_totp_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ecohub Totp Secret",
+            "default": ""
+          },
+          "commission_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Commission Number",
+            "default": ""
+          },
+          "login_check": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Login Check",
+            "default": false
+          },
+          "disabled_scrapers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Disabled Scrapers"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "onezone_id",
+          "api_key",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ConsultantResponse"
+      },
+      "CredentialUpdateRequest": {
+        "properties": {
+          "ecohub_username": {
+            "type": "string",
+            "title": "Ecohub Username"
+          },
+          "ecohub_password": {
+            "type": "string",
+            "title": "Ecohub Password"
+          },
+          "ecohub_totp_secret": {
+            "type": "string",
+            "title": "Ecohub Totp Secret",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "ecohub_username",
+          "ecohub_password"
+        ],
+        "title": "CredentialUpdateRequest"
+      },
+      "CurrentInsurer": {
+        "type": "string",
+        "enum": [
+          "keine",
+          "neu in der Schweiz",
+          "Automate",
+          "Allianz Suisse",
+          "AXA",
+          "Baloise",
+          "Belsura",
+          "Elvia",
+          "Generali",
+          "Helvetia",
+          "Migros",
+          "Mobiliar",
+          "Postfinance",
+          "smile.direct",
+          "Simpego",
+          "TCS",
+          "TSM",
+          "Vaudoise",
+          "Visana",
+          "Zürich",
+          "Andere Versicherung",
+          "Versicherung im Ausland"
+        ],
+        "title": "CurrentInsurer"
+      },
+      "DeductibleParking": {
+        "type": "string",
+        "enum": [
+          "0",
+          "200",
+          "500"
+        ],
+        "title": "DeductibleParking"
+      },
+      "DeductiblePartial": {
+        "type": "string",
+        "enum": [
+          "0",
+          "200",
+          "500",
+          "1000"
+        ],
+        "title": "DeductiblePartial"
+      },
+      "DeductibleTotal": {
+        "type": "string",
+        "enum": [
+          "500",
+          "1000",
+          "2000"
+        ],
+        "title": "DeductibleTotal"
+      },
+      "DeductibleUnder26": {
+        "type": "string",
+        "enum": [
+          "Si",
+          "0",
+          "1000",
+          "2000",
+          "3000",
+          "5000"
+        ],
+        "title": "DeductibleUnder26"
+      },
+      "Drive": {
+        "type": "string",
+        "enum": [
+          "Benzin",
+          "Diesel",
+          "Hybrid-Benzin",
+          "Hybrid-Diesel",
+          "Electric"
+        ],
+        "title": "Drive",
+        "description": "Fuel / drive type."
+      },
+      "DriverType": {
+        "type": "string",
+        "enum": [
+          "user",
+          "other",
+          "multiple"
+        ],
+        "title": "DriverType",
+        "description": "Who actually drives the insured vehicle."
+      },
+      "ElectricVehicleOptions": {
+        "properties": {
+          "stazione di ricarica e accessori": {
+            "type": "boolean",
+            "title": "Stazione Di Ricarica E Accessori",
+            "default": false
+          },
+          "batterie alta tensione": {
+            "type": "boolean",
+            "title": "Batterie Alta Tensione",
+            "default": false
+          },
+          "protezione informatica": {
+            "type": "boolean",
+            "title": "Protezione Informatica",
+            "default": false
+          },
+          "protezione carte ricarica e app": {
+            "type": "boolean",
+            "title": "Protezione Carte Ricarica E App",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ElectricVehicleOptions"
+      },
+      "ForeignersIdType": {
+        "type": "string",
+        "enum": [
+          "B",
+          "C",
+          "S",
+          "Ci",
+          "F",
+          "G",
+          "N"
+        ],
+        "title": "ForeignersIdType"
+      },
+      "GarageFreeChoice": {
+        "type": "string",
+        "enum": [
+          "fissa",
+          "scelta"
+        ],
+        "title": "GarageFreeChoice"
+      },
+      "Gender": {
+        "type": "string",
+        "enum": [
+          "Maschio",
+          "Femmina",
+          "Azienda"
+        ],
+        "title": "Gender"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "InsuranceCompany": {
+        "type": "string",
+        "enum": [
+          "Automate",
+          "Allianz",
+          "AXA",
+          "Baloise",
+          "Belsura",
+          "Generali",
+          "Helvetia",
+          "Mobiliar",
+          "Smile",
+          "Simpego",
+          "Vaudoise",
+          "Zurich"
+        ],
+        "title": "InsuranceCompany"
+      },
+      "KilometersPerYear": {
+        "type": "string",
+        "enum": [
+          "5000",
+          "7000",
+          "10000",
+          "15000",
+          "20000",
+          "25000",
+          "30000",
+          "+30000"
+        ],
+        "title": "KilometersPerYear"
+      },
+      "Language": {
+        "type": "string",
+        "enum": [
+          "it",
+          "en",
+          "de",
+          "fr"
+        ],
+        "title": "Language"
+      },
+      "LeasingCompany": {
+        "type": "string",
+        "enum": [
+          "A+A Leasing AG",
+          "a2B Leasing & Finance AG",
+          "AGCO Finance AG",
+          "AGLF AG for Agricultural Financing",
+          "AIL Swiss-Austria Leasing AG",
+          "ALB AG Car Leasing & Consulting",
+          "ALD Automotive AG",
+          "Allane Schweiz AG",
+          "ALLMECO Leasing GmH, Unterhaching",
+          "Alphabet Fleet Management Switzerland Ltd.",
+          "Alphera Financial Services",
+          "AMAG Leasing AG",
+          "ARVAL (Switzerland) AG",
+          "ASL Auto Service-Leasing AG",
+          "Audi Leasing branch office, D-Braunschweig",
+          "Auto-Interleasing AG, 4132 Muttenz",
+          "Auto-Interleasing AG, 8902 Urdorf",
+          "Ayvens Switzerland AG",
+          "Bank11 for Private Customers and Trade GmbH, D-Neuss",
+          "Bank-now AG",
+          "Banque cantonale de Genève",
+          "Banque CIC (Suisse) SA",
+          "BAWAG PSK Leasing GmbH, A-Vienna",
+          "Binelli & Ehrsam AG",
+          "BMW Financial Services (Switzerland) AG",
+          "BNP Paribas Leasing Solutions Suisse SA",
+          "BPCE Equipment Solutions Switzerland AG",
+          "BTV Leasing Switzerland AG",
+          "BUGA Finanz AG",
+          "CA Auto Finance Suisse SA",
+          "Carauktion AG",
+          "Cariva AG",
+          "Caterpillar Financial Services GmbH, D-Ismaning",
+          "Cembra Money Bank (ex Cashgate AG)",
+          "Cembra Money Bank AG",
+          "CoOpera Leasing AG",
+          "Credit Suisse",
+          "Credit Suisse (Switzerland) AG, 1003 Lausanne",
+          "DL Location Leasing SA",
+          "EFL Autoleasing AG",
+          "Emil Frey AG, 8048 Zurich",
+          "Emil Frey AG, 8050 Zurich",
+          "Erste Bank und Sparkassen Leasing GmbH, A-Vienna",
+          "Europa-Leasing GmbH, D-Kieselbronn",
+          "Ferrari Financial Services AG, D-Grünwald/Munich",
+          "FGA Bank Germany GmbH, D-Heilbronn",
+          "Fical Finance AG, 5432, Neuenhof",
+          "Fire Auto Leasing AG",
+          "Flexikredit AG",
+          "FML Leasing AG",
+          "Ford Credit (Switzerland) GmbH",
+          "Ford Credit Europe (FCE)",
+          "Fortis Lease Suisse SA",
+          "Franz AG",
+          "General Motors Financial Suisse SA",
+          "Genève Crédit & Leasing SA",
+          "HARLA Leasing AG",
+          "HIL Mobilienleasing GmbH & Co KG, A-Dornbirn",
+          "Honda (Suisse) SA",
+          "Hypo Immobilien & Leasing GmbH, A-Dornbirn",
+          "Hypo SüdLeasing GmbH, A-Dornbirn",
+          "IG Leasing AG (ex Siemens Leasing AG)",
+          "IMPA Leasing AG",
+          "IVECO FINANCE AG",
+          "LeaseForce AG",
+          "lease it ag",
+          "Lease Plan (Switzerland) AG",
+          "LeaseTeq AG",
+          "Leasfinanz GmbH, A-Vienna",
+          "Leasing-west GmbH, D-Kiefersfelden",
+          "Leasinvest AG, 9496 Balzers",
+          "Leasinvest AG (Switzerland), 9477 Trübbach",
+          "Lepo Leasing AG",
+          "Loancar AG",
+          "MAN Financial Services GmbH, D-Munich",
+          "Maserati Financial Services",
+          "Mercedes-Benz Bank AG, D-Saarbrücken",
+          "Mercedes-Benz Financial Services Switzerland AG",
+          "MF Fleetmanagement AG",
+          "Migros Bank AG",
+          "Mobility Solutions AG",
+          "movon AG, 6330 Cham",
+          "Multilease AG, 1110 Morges",
+          "Multilease AG, 4624 Härkingen",
+          "Multilease AG, 8152 Glattbrugg",
+          "Multilease AG, 9000 St. Gallen",
+          "Multilease AG (Toyota Prius), 8048 Zurich",
+          "N+C Leasing AG",
+          "Neumühle Handels AG",
+          "Nissan Finance",
+          "Norddeutsche Landesbank, D-Hannover",
+          "Opel Finance AG",
+          "PhG LeasCo",
+          "Pierre Sudan Leasing and Finance AG",
+          "Porsche Financial Services Switzerland AG",
+          "Post Company Cars AG",
+          "PSA Finance Belux SA, B-Bruxelles",
+          "Raiffeisen Leasing",
+          "RCI Finance SA",
+          "Renault Trucks Financial Services (trucks only)",
+          "SAM Swiss AG for Mobility",
+          "Santander Consumer Bank, D-Mönchengladbach",
+          "Santander Consumer Finance Switzerland AG",
+          "Scania Finance Switzerland AG",
+          "Scania Leasing Austria Ltd.",
+          "Settelen AG",
+          "SG Equipment Finance Switzerland AG",
+          "Sixt Leasing (Switzerland) AG",
+          "SüdLeasing Suisse AG",
+          "Swiss Car Finance AG / SsangYong Switzerland AG",
+          "Swissquote Bank SA",
+          "TIBERIS AG",
+          "UBS Leasing AG",
+          "Unifin 98 AG",
+          "Valiant Bank AG",
+          "Volksbank Rottweil eG, D-Rottweil",
+          "Volksbank Vorarlberg Anlagen-Leasing GmbH, A-Rankweil",
+          "Volkswagen Leasing GmbH, D-Braunschweig",
+          "Volvo Finance (Switzerland) AG (trucks only)",
+          "Vorarlberg State and Mortgage Bank AG, A-Bregenz",
+          "Windlin Leasing AG",
+          "Würth Leasing AG",
+          "Zurich Cantonal Bank Leasing FS"
+        ],
+        "title": "LeasingCompany"
+      },
+      "MainDriver": {
+        "properties": {
+          "driver_type": {
+            "$ref": "#/components/schemas/DriverType",
+            "default": "user"
+          },
+          "driver": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "MainDriver",
+        "description": "Who drives the insured vehicle.\n- user: the policy holder drives (no extra data needed)\n- other: a different person drives -> `driver` holds their full PersonData\n- multiple: several drivers"
+      },
+      "ParkingDamageCoverage": {
+        "type": "string",
+        "enum": [
+          "Illimitato",
+          "2000",
+          "1000",
+          "No"
+        ],
+        "title": "ParkingDamageCoverage"
+      },
+      "PaymentMode": {
+        "type": "string",
+        "enum": [
+          "Annuale",
+          "Semestrale"
+        ],
+        "title": "PaymentMode"
+      },
+      "PersonData": {
+        "properties": {
+          "gender": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Gender"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "company_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name"
+          },
+          "first_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Name"
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name"
+          },
+          "birth_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth Date"
+          },
+          "first_driving_license_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Driving License Date"
+          },
+          "zip_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zip Code"
+          },
+          "canton": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Canton"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "address_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address Number"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "nationality": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nationality"
+          },
+          "foreigners_id_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ForeignersIdType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "language": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Language"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "PersonData",
+        "description": "Personal data of a driver. Mirrors the Personal Info fields of UserSchema.\nUsed only inside MainDriver when driver_type == 'other'. All optional."
+      },
+      "PersonalBelongings": {
+        "type": "string",
+        "enum": [
+          "No",
+          "2000",
+          "3000",
+          "5000"
+        ],
+        "title": "PersonalBelongings"
+      },
+      "QuoteRequest": {
+        "properties": {
+          "gender": {
+            "$ref": "#/components/schemas/Gender"
+          },
+          "company_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name",
+            "default": ""
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name"
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name"
+          },
+          "birth_date": {
+            "type": "string",
+            "title": "Birth Date"
+          },
+          "first_driving_license_date": {
+            "type": "string",
+            "title": "First Driving License Date"
+          },
+          "zip_code": {
+            "type": "string",
+            "title": "Zip Code"
+          },
+          "canton": {
+            "$ref": "#/components/schemas/Canton"
+          },
+          "area": {
+            "type": "string",
+            "title": "Area"
+          },
+          "address": {
+            "type": "string",
+            "title": "Address"
+          },
+          "address_number": {
+            "type": "string",
+            "title": "Address Number"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "phone": {
+            "type": "string",
+            "title": "Phone"
+          },
+          "nationality": {
+            "type": "string",
+            "title": "Nationality"
+          },
+          "foreigners_id_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ForeignersIdType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "main_driver": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MainDriver"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "deductible_under_26": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DeductibleUnder26"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "n_certificate_1": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N Certificate 1",
+            "default": ""
+          },
+          "car_brand_1": {
+            "type": "string",
+            "title": "Car Brand 1"
+          },
+          "car_model_1": {
+            "type": "string",
+            "title": "Car Model 1"
+          },
+          "vehicle_type_1": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VehicleType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "drive_1": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Drive"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "accessories_1": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accessories 1"
+          },
+          "serial_number_1": {
+            "type": "string",
+            "title": "Serial Number 1"
+          },
+          "first_registration_date_1": {
+            "type": "string",
+            "title": "First Registration Date 1"
+          },
+          "purchase_date_1": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Date 1",
+            "default": ""
+          },
+          "kilometers_per_year_1": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/KilometersPerYear"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "current_mileage_1": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Mileage 1"
+          },
+          "reasons_for_redemption_1": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReasonForRedemption"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "leasing_1": {
+            "$ref": "#/components/schemas/SiNo"
+          },
+          "leasing_company_1": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LeasingCompany"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "garage_parking_1": {
+            "$ref": "#/components/schemas/SiNo"
+          },
+          "submit_vehicle_proof_1": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/YesNo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "license_plate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "License Plate",
+            "default": ""
+          },
+          "interchangeable_plate": {
+            "$ref": "#/components/schemas/SiNo"
+          },
+          "n_certificate_2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N Certificate 2",
+            "default": ""
+          },
+          "car_brand_2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Car Brand 2",
+            "default": ""
+          },
+          "car_model_2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Car Model 2",
+            "default": ""
+          },
+          "vehicle_type_2": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VehicleType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "drive_2": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Drive"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "accessories_2": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accessories 2"
+          },
+          "serial_number_2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Serial Number 2",
+            "default": ""
+          },
+          "first_registration_date_2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Registration Date 2",
+            "default": ""
+          },
+          "purchase_date_2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Date 2",
+            "default": ""
+          },
+          "kilometers_per_year_2": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/KilometersPerYear"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "current_mileage_2": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Mileage 2"
+          },
+          "reasons_for_redemption_2": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReasonForRedemption"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "leasing_2": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SiNo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "No"
+          },
+          "leasing_company_2": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LeasingCompany"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "garage_parking_2": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SiNo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "No"
+          },
+          "submit_vehicle_proof_2": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/YesNo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "vehicle_usage": {
+            "$ref": "#/components/schemas/VehicleUsage"
+          },
+          "civil_insurance": {
+            "$ref": "#/components/schemas/CivilInsurance"
+          },
+          "comprehensive_insurance": {
+            "$ref": "#/components/schemas/ComprehensiveInsurance"
+          },
+          "deductible_partial_insurance": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DeductiblePartial"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "0"
+          },
+          "deductible_total_insurance": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DeductibleTotal"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "500"
+          },
+          "parking_damage_coverage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ParkingDamageCoverage"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "No"
+          },
+          "deductible_parking_damage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DeductibleParking"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "0"
+          },
+          "headlights_mirrors": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SiNo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "No"
+          },
+          "personal_belongings_coverage": {
+            "$ref": "#/components/schemas/PersonalBelongings"
+          },
+          "tires_damage": {
+            "$ref": "#/components/schemas/SiNo"
+          },
+          "bonus_protection": {
+            "$ref": "#/components/schemas/SiNo"
+          },
+          "roadside_assistance": {
+            "$ref": "#/components/schemas/SiNo"
+          },
+          "garage_free_choice": {
+            "$ref": "#/components/schemas/GarageFreeChoice"
+          },
+          "passenger_injury": {
+            "$ref": "#/components/schemas/SiNo"
+          },
+          "electric_vehicle": {
+            "$ref": "#/components/schemas/ElectricVehicleOptions"
+          },
+          "payment_mode": {
+            "$ref": "#/components/schemas/PaymentMode"
+          },
+          "current_insurance": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CurrentInsurer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": ""
+          },
+          "n_rc_claims_5_years": {
+            "$ref": "#/components/schemas/ClaimsCount"
+          },
+          "n_collisions_claims_5_years": {
+            "$ref": "#/components/schemas/ClaimsCount"
+          },
+          "n_parking_claims_5_years": {
+            "$ref": "#/components/schemas/ClaimsCount"
+          },
+          "n_glass_claims_5_years": {
+            "$ref": "#/components/schemas/ClaimsCount"
+          },
+          "n_partial_comprehensive_claims_5_years": {
+            "$ref": "#/components/schemas/ClaimsCount"
+          },
+          "n_rc_claims_3_years": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClaimsCount"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "0"
+          },
+          "n_collisions_claims_3_years": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClaimsCount"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "0"
+          },
+          "n_parking_claims_3_years": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClaimsCount"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "0"
+          },
+          "n_glass_claims_3_years": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClaimsCount"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "0"
+          },
+          "n_partial_comprehensive_claims_3_years": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClaimsCount"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "0"
+          },
+          "other_questions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Other Questions",
+            "default": ""
+          },
+          "source_user": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source User",
+            "default": ""
+          },
+          "scrapers": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scrapers"
+          },
+          "recipient_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recipient Email"
+          },
+          "registration_scraper": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registration Scraper"
+          },
+          "registration_only": {
+            "type": "boolean",
+            "title": "Registration Only",
+            "default": false
+          },
+          "request_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Source"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Source"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "insurance_companies": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/InsuranceCompany"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Insurance Companies"
+          },
+          "invite_customer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/YesNo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "customer_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Email"
+          },
+          "customer_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "gender",
+          "first_name",
+          "last_name",
+          "birth_date",
+          "first_driving_license_date",
+          "zip_code",
+          "canton",
+          "area",
+          "address",
+          "address_number",
+          "email",
+          "phone",
+          "nationality",
+          "language",
+          "car_brand_1",
+          "car_model_1",
+          "serial_number_1",
+          "first_registration_date_1",
+          "leasing_1",
+          "garage_parking_1",
+          "interchangeable_plate",
+          "vehicle_usage",
+          "civil_insurance",
+          "comprehensive_insurance",
+          "personal_belongings_coverage",
+          "tires_damage",
+          "bonus_protection",
+          "roadside_assistance",
+          "garage_free_choice",
+          "passenger_injury",
+          "payment_mode",
+          "n_rc_claims_5_years",
+          "n_collisions_claims_5_years",
+          "n_parking_claims_5_years",
+          "n_glass_claims_5_years",
+          "n_partial_comprehensive_claims_5_years"
+        ],
+        "title": "QuoteRequest",
+        "description": "Extends UserSchema with request-level options.",
+        "example": {
+          "accessories_1": 1500,
+          "accessories_2": 0,
+          "address": "Rietereweg",
+          "address_number": "5",
+          "area": "Birmenstorf",
+          "birth_date": "20.06.1968",
+          "bonus_protection": "Si",
+          "canton": "AG",
+          "car_brand_1": "volkswagen",
+          "car_brand_2": "Audi",
+          "car_model_1": "id.3",
+          "car_model_2": "A3",
+          "civil_insurance": "Si inclusi alla mia proprieta",
+          "comprehensive_insurance": "Totale",
+          "current_insurance": "Vaudoise",
+          "current_mileage_1": 35000,
+          "current_mileage_2": 60000,
+          "customer_email": "",
+          "customer_message": "",
+          "deductible_parking_damage": "200",
+          "deductible_partial_insurance": "0",
+          "deductible_total_insurance": "500",
+          "deductible_under_26": "0",
+          "drive_1": "Electric",
+          "drive_2": "Benzin",
+          "electric_vehicle": {
+            "batterie_alta_tensione": true,
+            "protezione_carte_ricarica_e_app": false,
+            "protezione_informatica": true,
+            "stazione_di_ricarica_e_accessori": false
+          },
+          "email": "val.mannucci@gmail.com",
+          "first_driving_license_date": "12.12.1989",
+          "first_name": "Pete",
+          "first_registration_date_1": "01.09.2020",
+          "first_registration_date_2": "15.03.2019",
+          "garage_free_choice": "fissa",
+          "garage_parking_1": "Si",
+          "garage_parking_2": "No",
+          "gender": "Maschio",
+          "headlights_mirrors": "Si",
+          "insurance_companies": [
+            "Zurich",
+            "AXA",
+            "Automate"
+          ],
+          "interchangeable_plate": "Si",
+          "invite_customer": "No",
+          "kilometers_per_year_1": "10000",
+          "kilometers_per_year_2": "15000",
+          "language": "de",
+          "last_name": "Künzi",
+          "leasing_1": "No",
+          "leasing_2": "No",
+          "license_plate": "123456",
+          "main_driver": {
+            "driver_type": "user"
+          },
+          "n_collisions_claims_3_years": "0",
+          "n_collisions_claims_5_years": "0",
+          "n_glass_claims_3_years": "0",
+          "n_glass_claims_5_years": "0",
+          "n_parking_claims_3_years": "0",
+          "n_parking_claims_5_years": "0",
+          "n_partial_comprehensive_claims_3_years": "0",
+          "n_partial_comprehensive_claims_5_years": "0",
+          "n_rc_claims_3_years": "0",
+          "n_rc_claims_5_years": "0",
+          "nationality": "CH",
+          "other_questions": "",
+          "parking_damage_coverage": "Illimitato",
+          "passenger_injury": "No",
+          "payment_mode": "Annuale",
+          "personal_belongings_coverage": "No",
+          "phone": "0794232907",
+          "purchase_date_1": "09.2020",
+          "purchase_date_2": "03.2019",
+          "recipient_email": "consultant@example.com",
+          "registration_only": false,
+          "registration_scraper": "",
+          "request_source": "api",
+          "roadside_assistance": "Si",
+          "scrapers": [
+            "zurich",
+            "axa",
+            "automate"
+          ],
+          "serial_number_1": "123456786",
+          "serial_number_2": "987654321",
+          "source": "api",
+          "source_user": "Mario Rossi",
+          "submit_vehicle_proof_1": "No",
+          "submit_vehicle_proof_2": "No",
+          "tires_damage": "No",
+          "vehicle_type_1": "passenger_car",
+          "vehicle_type_2": "passenger_car",
+          "vehicle_usage": "nessun uso specifico",
+          "zip_code": "5413"
+        }
+      },
+      "ReasonForRedemption": {
+        "type": "string",
+        "enum": [
+          "New redemption",
+          "Vehicle change",
+          "Vehicle change in the interchangeable sign",
+          "Open interchangeable sign",
+          "Change of ownership",
+          "Changing insurers without changing vehicles",
+          "other cases"
+        ],
+        "title": "ReasonForRedemption"
+      },
+      "SiNo": {
+        "type": "string",
+        "enum": [
+          "Si",
+          "No"
+        ],
+        "title": "SiNo"
+      },
+      "Source": {
+        "type": "string",
+        "enum": [
+          "onezone_consulente",
+          "onezone_cliente",
+          "api",
+          "cardossie"
+        ],
+        "title": "Source",
+        "description": "Where a quote request originated from."
+      },
+      "TestByRequestIdRequest": {
+        "properties": {
+          "consultant_onezone_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consultant Onezone Id",
+            "default": ""
+          },
+          "scrapers": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scrapers",
+            "default": []
+          },
+          "update_db": {
+            "type": "boolean",
+            "title": "Update Db",
+            "default": false
+          },
+          "send_email": {
+            "type": "boolean",
+            "title": "Send Email",
+            "default": true
+          },
+          "recipient_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recipient Email",
+            "default": "val.mannucci@gmail.com"
+          },
+          "registration_scraper": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registration Scraper",
+            "default": ""
+          },
+          "registration_only": {
+            "type": "boolean",
+            "title": "Registration Only",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "TestByRequestIdRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VehicleType": {
+        "type": "string",
+        "enum": [
+          "passenger_car",
+          "van"
+        ],
+        "title": "VehicleType"
+      },
+      "VehicleUsage": {
+        "type": "string",
+        "enum": [
+          "nessun uso specifico",
+          "trasporto merci",
+          "corriere",
+          "trasporto passeggeri",
+          "taxi",
+          "scuola guida",
+          "noleggio"
+        ],
+        "title": "VehicleUsage"
+      },
+      "YesNo": {
+        "type": "string",
+        "enum": [
+          "Yes",
+          "No"
+        ],
+        "title": "YesNo"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

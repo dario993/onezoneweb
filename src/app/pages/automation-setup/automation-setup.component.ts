@@ -5,6 +5,7 @@ import { AuthService } from '../../services/auth.service';
 import { AutomationService } from '../../services/automation.service';
 import { NavigatorService } from '../../services/navigator.service';
 import { ToasterService } from '../../services/toaster.service';
+import { StorageService } from '../../services/storage.service';
 import { I18nPipe } from '../../pipes/i18n.pipe';
 import { firstValueFrom, timeout } from 'rxjs';
 
@@ -37,7 +38,8 @@ export class AutomationSetupComponent implements OnInit {
     private readonly authService: AuthService,
     private readonly automationService: AutomationService,
     private readonly navigatorService: NavigatorService,
-    private readonly toasterService: ToasterService
+    private readonly toasterService: ToasterService,
+    private readonly storageService: StorageService
   ) {}
 
   ngOnInit(): void {
@@ -186,6 +188,12 @@ export class AutomationSetupComponent implements OnInit {
           )
         );
         if (loginResult.login_check) {
+          try {
+            const consultant = await firstValueFrom(
+              this.automationService.getConsultant(consultantId)
+            );
+            this.storageService.setItem('consultantData', JSON.stringify(consultant));
+          } catch { /* cache non bloccante */ }
           this.toasterService.success('Setup completato con successo!');
           this.navigatorService.navigateTo('automation-form');
         } else {

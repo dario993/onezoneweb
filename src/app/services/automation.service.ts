@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { StorageService } from './storage.service';
 import {
@@ -19,7 +19,11 @@ import {
   LocalityEntry,
   QuoteRequestPayload,
   QuoteRequestStatus,
+  StreetEntry,
 } from '../interfaces/automation.interface';
+
+const OPENPLZ_STREETS_URL = 'https://openplzapi.org/ch/Streets';
+const OPENPLZ_STREET_NAME_RE = /^[\p{L}\d\s.\-']+$/u;
 
 @Injectable({ providedIn: 'root' })
 export class AutomationService {
@@ -143,18 +147,24 @@ export class AutomationService {
     );
   }
 
-  public submitQuoteRequest(payload: QuoteRequestPayload): Observable<GenerateQuotesResponse> {
+  public submitQuoteRequest(
+    payload: QuoteRequestPayload,
+    usePublicConsultant = false
+  ): Observable<GenerateQuotesResponse> {
     return this.http.post<GenerateQuotesResponse>(
       `${this.baseUrl}/generate-quotes`,
       payload,
-      { headers: this.consultantHeaders }
+      { headers: usePublicConsultant ? this.adminHeaders : this.consultantHeaders }
     );
   }
 
-  public getQuoteRequestStatus(requestId: number): Observable<QuoteRequestStatus> {
+  public getQuoteRequestStatus(
+    requestId: number,
+    usePublicConsultant = false
+  ): Observable<QuoteRequestStatus> {
     return this.http.get<QuoteRequestStatus>(
       `${this.baseUrl}/quote-requests/${requestId}`,
-      { headers: this.consultantHeaders }
+      { headers: usePublicConsultant ? this.adminHeaders : this.consultantHeaders }
     );
   }
 
@@ -175,5 +185,36 @@ export class AutomationService {
 
   public hasConsultantApiKey(): boolean {
     return !!this.storageService.getItem('consultantApiKey');
+  }
+
+  public searchStreets(
+    name: string,
+    postalCode: string,
+    locality: string
+  ): Observable<StreetEntry[]> {
+    const trimmed = (name || '').trim();
+    if (!trimmed || !OPENPLZ_STREET_NAME_RE.test(trimmed)) return of([]);
+    const params = new URLSearchParams({
+      name: trimmed,
+      postalCode,
+      locality,
+      page: '1',
+      pageSize: '20',
+    });
+    return this.http
+      .get<Array<{ name: string; postalCode: string; locality: string; canton?: { key?: string } }>>(
+        `${OPENPLZ_STREETS_URL}?${params.toString()}`
+      )
+      .pipe(
+        map((arr) =>
+          (arr || []).map((s) => ({
+            name: s.name,
+            postalCode: s.postalCode,
+            locality: s.locality,
+            canton: s.canton?.key || '',
+          }))
+        ),
+        catchError(() => of([] as StreetEntry[]))
+      );
   }
 }

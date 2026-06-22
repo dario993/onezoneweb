@@ -651,7 +651,8 @@ export class BrokerstarService {
     */
   public mandateInformInsurances(
     newMandate: boolean = false,
-    insurances: Record<string, boolean> = {}
+    insurances: Record<string, boolean> = {},
+    contactLoginId: number = 0
   ): Observable<unknown> {
     return this.http
       .post(
@@ -660,6 +661,7 @@ export class BrokerstarService {
           isNew: newMandate,
           _sendMail: true,
           insurances: insurances,
+          contact_login_id: contactLoginId,
         },
         {
           headers: {

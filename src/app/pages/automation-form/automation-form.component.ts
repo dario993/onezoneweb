@@ -13,13 +13,15 @@ import { SwissCarInfoService } from '../../services/swiss-car-info.service';
 import { ToasterService } from '../../services/toaster.service';
 import { LoaderService } from '../../services/loader.service';
 import { I18nService } from '../../services/i18n.service';
+import { I18nFileService } from '../../services/i18nfile.service';
 import { I18nPipe } from '../../pipes/i18n.pipe';
 import { firstValueFrom, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
-import { LocalityEntry, VehicleResult } from '../../interfaces/automation.interface';
+import { LocalityEntry, StreetEntry, VehicleResult } from '../../interfaces/automation.interface';
 import { HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { StorageService } from '../../services/storage.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'page-automation-form',
@@ -162,12 +164,19 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   }
 
   selectVehicleResult(result: VehicleResult): void {
+    const N_CERT_RE = /^\d[A-Za-z]{2}\d{3}$/;
+    const SERIAL_RE = /^\d{9}$/;
+    const typeApproval = (result.type_approval ?? '').trim();
+    const serial = this.modal.serialQuery?.trim() ?? '';
+    const serialOk = SERIAL_RE.test(serial)
+      && !this.obviousSerialValidator({ value: serial } as AbstractControl);
+
     this.form.patchValue({
       [`car_brand_${this.modal.vehicleIndex}`]: result.make,
       [`car_model_${this.modal.vehicleIndex}`]: result.commercial_name,
-      [`n_certificate_${this.modal.vehicleIndex}`]: result.type_approval,
+      [`n_certificate_${this.modal.vehicleIndex}`]: N_CERT_RE.test(typeApproval) ? typeApproval : '',
       ...(this.modal.lastSearchType === 'matricule'
-        ? { [`serial_number_${this.modal.vehicleIndex}`]: this.modal.serialQuery.trim() }
+        ? { [`serial_number_${this.modal.vehicleIndex}`]: serialOk ? serial : '' }
         : {}),
     });
     this.closeVehicleModal();
@@ -497,6 +506,100 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     { value: 'Semestrale', label: 'automation.opt_payment_semi' },
   ];
   claimsOptions = ['0', '1', '2', '3'];
+
+  // ─── Nuove option arrays (allineamento contratto API) ───────────────────────
+  vehicleTypeOptions = [
+    { value: '', label: 'automation.form_select_placeholder' },
+    { value: 'passenger_car', label: 'automation.opt_vtype_passenger_car' },
+    { value: 'van', label: 'automation.opt_vtype_van' },
+  ];
+  driveOptions = [
+    { value: '', label: 'automation.form_select_placeholder' },
+    { value: 'Benzin', label: 'automation.opt_drive_benzin' },
+    { value: 'Diesel', label: 'automation.opt_drive_diesel' },
+    { value: 'Hybrid-Benzin', label: 'automation.opt_drive_hybrid_benzin' },
+    { value: 'Hybrid-Diesel', label: 'automation.opt_drive_hybrid_diesel' },
+    { value: 'Electric', label: 'automation.opt_drive_electric' },
+  ];
+  kmPerYearOptions = [
+    { value: '', label: 'automation.form_select_placeholder' },
+    { value: '5000', label: '5\'000' },
+    { value: '7000', label: '7\'000' },
+    { value: '10000', label: '10\'000' },
+    { value: '15000', label: '15\'000' },
+    { value: '20000', label: '20\'000' },
+    { value: '25000', label: '25\'000' },
+    { value: '30000', label: '30\'000' },
+    { value: '+30000', label: '+30\'000' },
+  ];
+  reasonsForRedemptionOptions = [
+    { value: '', label: 'automation.form_select_placeholder' },
+    { value: 'New redemption', label: 'automation.opt_reason_new' },
+    { value: 'Vehicle change', label: 'automation.opt_reason_vehicle_change' },
+    { value: 'Vehicle change in the interchangeable sign', label: 'automation.opt_reason_vehicle_change_inter' },
+    { value: 'Open interchangeable sign', label: 'automation.opt_reason_open_inter' },
+    { value: 'Change of ownership', label: 'automation.opt_reason_ownership' },
+    { value: 'Changing insurers without changing vehicles', label: 'automation.opt_reason_change_insurers' },
+    { value: 'other cases', label: 'automation.opt_reason_other' },
+  ];
+  submitVehicleProofOptions = [
+    { value: '', label: 'automation.form_select_placeholder' },
+    { value: 'Yes', label: 'automation.form_yes' },
+    { value: 'No', label: 'automation.form_no' },
+  ];
+  driverTypeOptions = [
+    { value: 'user', label: 'automation.opt_driver_user' },
+    { value: 'other', label: 'automation.opt_driver_other' },
+    { value: 'multiple', label: 'automation.opt_driver_multiple' },
+  ];
+  // LeasingCompany enum estratto da openapi.json (components.schemas.LeasingCompany.enum) — 123 voci
+  leasingCompanyOptions: string[] = [
+    'A+A Leasing AG', 'a2B Leasing & Finance AG', 'AGCO Finance AG', 'AGLF AG for Agricultural Financing',
+    'AIL Swiss-Austria Leasing AG', 'ALB AG Car Leasing & Consulting', 'ALD Automotive AG', 'Allane Schweiz AG',
+    'ALLMECO Leasing GmH, Unterhaching', 'Alphabet Fleet Management Switzerland Ltd.', 'Alphera Financial Services',
+    'AMAG Leasing AG', 'ARVAL (Switzerland) AG', 'ASL Auto Service-Leasing AG',
+    'Audi Leasing branch office, D-Braunschweig', 'Auto-Interleasing AG, 4132 Muttenz',
+    'Auto-Interleasing AG, 8902 Urdorf', 'Ayvens Switzerland AG',
+    'Bank11 for Private Customers and Trade GmbH, D-Neuss', 'Bank-now AG', 'Banque cantonale de Genève',
+    'Banque CIC (Suisse) SA', 'BAWAG PSK Leasing GmbH, A-Vienna', 'Binelli & Ehrsam AG',
+    'BMW Financial Services (Switzerland) AG', 'BNP Paribas Leasing Solutions Suisse SA',
+    'BPCE Equipment Solutions Switzerland AG', 'BTV Leasing Switzerland AG', 'BUGA Finanz AG',
+    'CA Auto Finance Suisse SA', 'Carauktion AG', 'Cariva AG',
+    'Caterpillar Financial Services GmbH, D-Ismaning', 'Cembra Money Bank (ex Cashgate AG)',
+    'Cembra Money Bank AG', 'CoOpera Leasing AG', 'Credit Suisse',
+    'Credit Suisse (Switzerland) AG, 1003 Lausanne', 'DL Location Leasing SA', 'EFL Autoleasing AG',
+    'Emil Frey AG, 8048 Zurich', 'Emil Frey AG, 8050 Zurich',
+    'Erste Bank und Sparkassen Leasing GmbH, A-Vienna', 'Europa-Leasing GmbH, D-Kieselbronn',
+    'Ferrari Financial Services AG, D-Grünwald/Munich', 'FGA Bank Germany GmbH, D-Heilbronn',
+    'Fical Finance AG, 5432, Neuenhof', 'Fire Auto Leasing AG', 'Flexikredit AG', 'FML Leasing AG',
+    'Ford Credit (Switzerland) GmbH', 'Ford Credit Europe (FCE)', 'Fortis Lease Suisse SA', 'Franz AG',
+    'General Motors Financial Suisse SA', 'Genève Crédit & Leasing SA', 'HARLA Leasing AG',
+    'HIL Mobilienleasing GmbH & Co KG, A-Dornbirn', 'Honda (Suisse) SA',
+    'Hypo Immobilien & Leasing GmbH, A-Dornbirn', 'Hypo SüdLeasing GmbH, A-Dornbirn',
+    'IG Leasing AG (ex Siemens Leasing AG)', 'IMPA Leasing AG', 'IVECO FINANCE AG',
+    'LeaseForce AG', 'lease it ag', 'Lease Plan (Switzerland) AG', 'LeaseTeq AG',
+    'Leasfinanz GmbH, A-Vienna', 'Leasing-west GmbH, D-Kiefersfelden', 'Leasinvest AG, 9496 Balzers',
+    'Leasinvest AG (Switzerland), 9477 Trübbach', 'Lepo Leasing AG', 'Loancar AG',
+    'MAN Financial Services GmbH, D-Munich', 'Maserati Financial Services',
+    'Mercedes-Benz Bank AG, D-Saarbrücken', 'Mercedes-Benz Financial Services Switzerland AG',
+    'MF Fleetmanagement AG', 'Migros Bank AG', 'Mobility Solutions AG',
+    'movon AG, 6330 Cham', 'Multilease AG, 1110 Morges', 'Multilease AG, 4624 Härkingen',
+    'Multilease AG, 8152 Glattbrugg', 'Multilease AG, 9000 St. Gallen',
+    'Multilease AG (Toyota Prius), 8048 Zurich', 'N+C Leasing AG', 'Neumühle Handels AG',
+    'Nissan Finance', 'Norddeutsche Landesbank, D-Hannover', 'Opel Finance AG', 'PhG LeasCo',
+    'Pierre Sudan Leasing and Finance AG', 'Porsche Financial Services Switzerland AG',
+    'Post Company Cars AG', 'PSA Finance Belux SA, B-Bruxelles', 'Raiffeisen Leasing', 'RCI Finance SA',
+    'Renault Trucks Financial Services (trucks only)', 'SAM Swiss AG for Mobility',
+    'Santander Consumer Bank, D-Mönchengladbach', 'Santander Consumer Finance Switzerland AG',
+    'Scania Finance Switzerland AG', 'Scania Leasing Austria Ltd.', 'Settelen AG',
+    'SG Equipment Finance Switzerland AG', 'Sixt Leasing (Switzerland) AG', 'SüdLeasing Suisse AG',
+    'Swiss Car Finance AG / SsangYong Switzerland AG', 'Swissquote Bank SA', 'TIBERIS AG',
+    'UBS Leasing AG', 'Unifin 98 AG', 'Valiant Bank AG', 'Volksbank Rottweil eG, D-Rottweil',
+    'Volksbank Vorarlberg Anlagen-Leasing GmbH, A-Rankweil', 'Volkswagen Leasing GmbH, D-Braunschweig',
+    'Volvo Finance (Switzerland) AG (trucks only)', 'Vorarlberg State and Mortgage Bank AG, A-Bregenz',
+    'Windlin Leasing AG', 'Würth Leasing AG', 'Zurich Cantonal Bank Leasing FS',
+  ];
+
   isTestMode = false;
 
   // Autocomplete marca nella modale
@@ -514,8 +617,30 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   showPlzDropdown = false;
   showAreaDropdown = false;
 
+  // Autocomplete indirizzo via OpenPLZ
+  streetSuggestions: StreetEntry[] = [];
+  showAddressDropdown = false;
+  addressLoading = false;
+  private readonly validAddresses = new Set<string>();
+  private readonly addressInput$ = new Subject<string>();
+
+  // Autocomplete main_driver sub-form
+  mdPlzSuggestions: LocalityEntry[] = [];
+  mdAreaSuggestions: LocalityEntry[] = [];
+  mdShowPlzDropdown = false;
+  mdShowAreaDropdown = false;
+  mdStreetSuggestions: StreetEntry[] = [];
+  mdShowAddressDropdown = false;
+  mdAddressLoading = false;
+  private readonly mdValidAddresses = new Set<string>();
+  private readonly mdAddressInput$ = new Subject<string>();
+
   // Scrapers/assicurazioni disponibili (env meno disabled_scrapers del consulente)
   public availableScrapers: string[] = [];
+
+  // Modalità pubblica (rotta /automation-form-generic-client): nessun consulente loggato,
+  // recipient_email dal form, submit con admin api key.
+  public publicMode = false;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -524,10 +649,23 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     private readonly toasterService: ToasterService,
     private readonly loaderService: LoaderService,
     private readonly i18nService: I18nService,
-    private readonly storageService: StorageService
+    private readonly i18nFileService: I18nFileService,
+    private readonly storageService: StorageService,
+    private readonly route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+    this.publicMode = !!this.route.snapshot.data['publicMode'];
+    if (this.publicMode) {
+      const langParam = (this.route.snapshot.queryParamMap.get('lang') || '').toLowerCase();
+      const allowed = ['de', 'en', 'fr', 'it'];
+      if (allowed.includes(langParam) && langParam !== this.storageService.getItem('selectedLanguage')) {
+        this.storageService.setItem('selectedLanguage', langParam);
+        this.i18nService.loadLanguage(this.i18nFileService.getLanguageFile(langParam));
+        window.location.reload();
+        return;
+      }
+    }
     this.computeAvailableScrapers();
     this.buildForm();
     this.form.get('scrapers')?.setValue([...this.availableScrapers]);
@@ -535,9 +673,21 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     this.setupModalBrandStream();
     this.setupModalTypeApprovalStream();
     this.setupModalSerialStream();
+    this.setupAddressStream();
+    this.setupAddressContextResets();
+    this.setupMainDriverAddressStream();
+    this.setupMainDriverAddressContextResets();
+    // TEMP: auto-fill solo in sviluppo
+    if (!environment.production) {
+      setTimeout(() => this.fillTestData(), 0);
+    }
   }
 
   private computeAvailableScrapers(): void {
+    if (this.publicMode) {
+      this.availableScrapers = [...environment.automationScrapers];
+      return;
+    }
     let disabled: string[] = [];
     try {
       const raw = this.storageService.getItem('consultantDisabledScrapers') || '[]';
@@ -667,23 +817,39 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       company_name: [''],
       first_name: ['', Validators.required],
       last_name: ['', Validators.required],
-      birth_date: ['', [Validators.required, Validators.pattern(/^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.(19\d{2}|20[0-2]\d)$/)]],
+      birth_date: ['', [Validators.required, Validators.pattern(/^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.(19\d{2}|20[0-2]\d)$/), this.minAgeFromTodayValidator(18)]],
       first_driving_license_date: ['', [Validators.required, Validators.pattern(/^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.(19\d{2}|20[0-2]\d)$/), this.minAgeValidator(18)]],
       zip_code: ['', [Validators.required, Validators.pattern(/^\d{4}$/), this.plzExistsValidator.bind(this)]],
       area: ['', [Validators.required, this.areaExistsValidator.bind(this)]],
-      address: ['', Validators.required],
+      address: ['', [Validators.required, this.addressFromApiValidator.bind(this)]],
       address_number: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, Validators.email, this.noPlusEmailValidator]],
       phone: ['', [Validators.required, Validators.pattern(/^\d{9,10}$/)]],
       nationality: ['CH', Validators.required],
       foreigners_id_type: [''],
       language: ['de', Validators.required],
 
+      main_driver_type: ['user'],
+      main_driver: this.fb.group({
+        gender: [''],
+        first_name: [''],
+        last_name: [''],
+        birth_date: ['', [Validators.pattern(/^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.(19\d{2}|20[0-2]\d)$/), this.minAgeFromTodayValidator(18)]],
+        first_driving_license_date: ['', [Validators.pattern(/^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.(19\d{2}|20[0-2]\d)$/), this.minAgeValidator(18)]],
+        zip_code: ['', [Validators.pattern(/^\d{4}$/), this.plzExistsValidator.bind(this)]],
+        canton: [''],
+        area: ['', [this.mdAreaExistsValidator]],
+        address: ['', [this.mdAddressFromApiValidator]],
+        address_number: [''],
+        nationality: [''],
+        foreigners_id_type: [''],
+      }),
+
       deductible_under_26: ['0'],
-      n_certificate_1: [''],
+      n_certificate_1: ['', Validators.pattern(/^\d[A-Za-z]{2}\d{3}$/)],
       car_brand_1: ['', Validators.required],
       car_model_1: ['', Validators.required],
-      serial_number_1: [''],
+      serial_number_1: ['', [Validators.required, Validators.pattern(/^\d{9}$/), this.obviousSerialValidator.bind(this)]],
       accessories_1: [null],
       canton: ['ZH', Validators.required],
       license_plate: [''],
@@ -691,15 +857,31 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       leasing_1: ['No', Validators.required],
       garage_parking_1: ['Si', Validators.required],
       interchangeable_plate: ['No', Validators.required],
+      vehicle_type_1: [''],
+      drive_1: [''],
+      purchase_date_1: ['', Validators.pattern(/^(0[1-9]|1[0-2])\.(19\d{2}|20[0-2]\d)$/)],
+      kilometers_per_year_1: [''],
+      current_mileage_1: [null],
+      reasons_for_redemption_1: [''],
+      leasing_company_1: [''],
+      submit_vehicle_proof_1: [''],
 
-      n_certificate_2: [''],
+      n_certificate_2: ['', Validators.pattern(/^\d[A-Za-z]{2}\d{3}$/)],
       car_brand_2: [''],
       car_model_2: [''],
       accessories_2: [null],
-      serial_number_2: [''],
+      serial_number_2: ['', [Validators.pattern(/^\d{9}$/), this.obviousSerialValidator.bind(this)]],
       first_registration_date_2: ['', Validators.pattern(/^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.(19\d{2}|20[0-2]\d)$/)],
       leasing_2: ['No'],
       garage_parking_2: ['Si'],
+      vehicle_type_2: [''],
+      drive_2: [''],
+      purchase_date_2: ['', Validators.pattern(/^(0[1-9]|1[0-2])\.(19\d{2}|20[0-2]\d)$/)],
+      kilometers_per_year_2: [''],
+      current_mileage_2: [null],
+      reasons_for_redemption_2: [''],
+      leasing_company_2: [''],
+      submit_vehicle_proof_2: [''],
 
       vehicle_usage: ['nessun uso specifico', Validators.required],
       civil_insurance: ['Si inclusi alla mia proprieta', Validators.required],
@@ -727,12 +909,18 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       n_parking_claims_5_years: ['0', Validators.required],
       n_glass_claims_5_years: ['0', Validators.required],
       n_partial_comprehensive_claims_5_years: ['0', Validators.required],
+      n_rc_claims_3_years: ['0'],
+      n_collisions_claims_3_years: ['0'],
+      n_parking_claims_3_years: ['0'],
+      n_glass_claims_3_years: ['0'],
+      n_partial_comprehensive_claims_3_years: ['0'],
+      source_user: [''],
 
       other_q_terminated: [false],
       other_q_refused: [false],
       other_q_license_suspension: [false],
 
-      recipient_email: [''],
+      recipient_email: ['', this.publicMode ? [Validators.required, Validators.email, this.noPlusEmailValidator] : [this.noPlusEmailValidator]],
       scrapers: [[], this.minArrayLength(1)],
     });
   }
@@ -743,6 +931,25 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       if (val === 'Azienda') ctrl.setValidators(Validators.required);
       else { ctrl.clearValidators(); ctrl.setValue(''); }
       ctrl.updateValueAndValidity();
+
+      const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.(19\d{2}|20[0-2]\d)$/;
+      const nameFn = this.form.get('first_name')!;
+      const surnameFn = this.form.get('last_name')!;
+      const birthFn = this.form.get('birth_date')!;
+      const licenseFn = this.form.get('first_driving_license_date')!;
+      if (val === 'Azienda') {
+        [nameFn, surnameFn, birthFn, licenseFn].forEach((c) => {
+          c.clearValidators();
+          c.setValue('', { emitEvent: false });
+          c.updateValueAndValidity({ emitEvent: false });
+        });
+      } else {
+        nameFn.setValidators(Validators.required);
+        surnameFn.setValidators(Validators.required);
+        birthFn.setValidators([Validators.required, Validators.pattern(dateRegex)]);
+        licenseFn.setValidators([Validators.required, Validators.pattern(dateRegex), this.minAgeValidator(18)]);
+        [nameFn, surnameFn, birthFn, licenseFn].forEach((c) => c.updateValueAndValidity({ emitEvent: false }));
+      }
     });
 
     this.form.get('nationality')!.valueChanges.subscribe((val) => {
@@ -753,13 +960,18 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     });
 
     this.form.get('interchangeable_plate')!.valueChanges.subscribe((val) => {
-      const fields = ['car_brand_2','car_model_2','serial_number_2','first_registration_date_2','leasing_2','garage_parking_2'];
+      const fields = ['car_brand_2','car_model_2','first_registration_date_2','leasing_2','garage_parking_2'];
       fields.forEach((f) => {
         const ctrl = this.form.get(f)!;
         if (val === 'Si') ctrl.setValidators(Validators.required);
         else ctrl.clearValidators();
         ctrl.updateValueAndValidity();
       });
+      const sn2 = this.form.get('serial_number_2')!;
+      sn2.setValidators(val === 'Si'
+        ? [Validators.required, Validators.pattern(/^\d{9}$/), this.obviousSerialValidator.bind(this)]
+        : [Validators.pattern(/^\d{9}$/), this.obviousSerialValidator.bind(this)]);
+      sn2.updateValueAndValidity();
     });
 
     const checkLeasing = () => {
@@ -790,14 +1002,86 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       else ctrl.clearValidators();
       ctrl.updateValueAndValidity();
     });
+
+    this.form.get('main_driver_type')!.valueChanges.subscribe((val) => {
+      const sub = this.form.get('main_driver') as FormGroup;
+      const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.(19\d{2}|20[0-2]\d)$/;
+      const requiredFields = ['gender', 'first_name', 'last_name', 'birth_date', 'first_driving_license_date', 'zip_code', 'canton', 'area', 'address', 'address_number', 'nationality'];
+      requiredFields.forEach((f) => {
+        const ctrl = sub.get(f)!;
+        if (val === 'other') {
+          if (f === 'birth_date') {
+            ctrl.setValidators([Validators.required, Validators.pattern(dateRegex), this.minAgeFromTodayValidator(18)]);
+          } else if (f === 'first_driving_license_date') {
+            ctrl.setValidators([Validators.required, Validators.pattern(dateRegex), this.minAgeValidator(18)]);
+          } else if (f === 'zip_code') {
+            ctrl.setValidators([Validators.required, Validators.pattern(/^\d{4}$/), this.plzExistsValidator.bind(this)]);
+          } else if (f === 'area') {
+            ctrl.setValidators([Validators.required, this.mdAreaExistsValidator]);
+          } else if (f === 'address') {
+            ctrl.setValidators([Validators.required, this.mdAddressFromApiValidator]);
+          } else {
+            ctrl.setValidators(Validators.required);
+          }
+        } else {
+          if (f === 'birth_date') {
+            ctrl.setValidators([Validators.pattern(dateRegex), this.minAgeFromTodayValidator(18)]);
+          } else if (f === 'first_driving_license_date') {
+            ctrl.setValidators([Validators.pattern(dateRegex), this.minAgeValidator(18)]);
+          } else if (f === 'zip_code') {
+            ctrl.setValidators([Validators.pattern(/^\d{4}$/), this.plzExistsValidator.bind(this)]);
+          } else if (f === 'area') {
+            ctrl.setValidators([this.mdAreaExistsValidator]);
+          } else if (f === 'address') {
+            ctrl.setValidators([this.mdAddressFromApiValidator]);
+          } else {
+            ctrl.clearValidators();
+          }
+        }
+        ctrl.updateValueAndValidity();
+      });
+      // foreigners_id_type: required solo se nationality != CH (e main_driver_type === 'other')
+      const nat = (sub.get('nationality')?.value ?? '').toUpperCase();
+      const fid = sub.get('foreigners_id_type')!;
+      if (val === 'other' && nat && nat !== 'CH') fid.setValidators(Validators.required);
+      else { fid.clearValidators(); fid.setValue(''); }
+      fid.updateValueAndValidity();
+    });
+
+    (this.form.get('main_driver') as FormGroup).get('nationality')!.valueChanges.subscribe((val) => {
+      const sub = this.form.get('main_driver') as FormGroup;
+      const fid = sub.get('foreigners_id_type')!;
+      const isOther = this.form.get('main_driver_type')?.value === 'other';
+      if (isOther && val && val.toUpperCase() !== 'CH') fid.setValidators(Validators.required);
+      else { fid.clearValidators(); fid.setValue(''); }
+      fid.updateValueAndValidity();
+    });
+
+    (this.form.get('main_driver') as FormGroup).get('birth_date')!.valueChanges.subscribe(() => {
+      (this.form.get('main_driver') as FormGroup).get('first_driving_license_date')?.updateValueAndValidity({ emitEvent: false });
+    });
+  }
+
+  get successMessage(): string {
+    return this.i18nService
+      .getTranslation('automation', 'form_success_message')
+      .replace('{email}', this.submittedEmail);
   }
 
   get showVehicle2(): boolean { return this.form.get('interchangeable_plate')?.value === 'Si'; }
   get showForeignersId(): boolean { const v = this.form.get('nationality')?.value; return v && v.toUpperCase() !== 'CH'; }
+  get showMainDriverForeignersId(): boolean {
+    const v = (this.form.get('main_driver') as FormGroup)?.get('nationality')?.value;
+    return v && v.toUpperCase() !== 'CH';
+  }
   get showCompanyName(): boolean { return this.form.get('gender')?.value === 'Azienda'; }
+  get showPersonalNameFields(): boolean { return this.form.get('gender')?.value !== 'Azienda'; }
   get showDeductibleTotal(): boolean { return this.form.get('comprehensive_insurance')?.value === 'Totale'; }
   get showDeductiblePartial(): boolean { return ['Totale','Parziale'].includes(this.form.get('comprehensive_insurance')?.value); }
   get showDeductibleParking(): boolean { return this.form.get('parking_damage_coverage')?.value !== 'No'; }
+  get showMainDriverFields(): boolean { return this.form.get('main_driver_type')?.value === 'other'; }
+  get showLeasingCompany1(): boolean { return this.form.get('leasing_1')?.value === 'Si'; }
+  get showLeasingCompany2(): boolean { return this.form.get('leasing_2')?.value === 'Si'; }
 
   private parseDdMmYyyy(value: string): Date | null {
     if (!value) return null;
@@ -809,6 +1093,39 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     const d = new Date(yyyy, mm - 1, dd);
     if (d.getFullYear() !== yyyy || d.getMonth() !== mm - 1 || d.getDate() !== dd) return null;
     return d;
+  }
+
+  private noPlusEmailValidator(control: AbstractControl): ValidationErrors | null {
+    const val = (control.value ?? '').toString();
+    if (!val) return null;
+    return val.includes('+') ? { emailPlus: true } : null;
+  }
+
+  private obviousSerialValidator(control: AbstractControl): ValidationErrors | null {
+    const digits = (control.value ?? '').toString();
+    if (digits.length < 2) return null;
+    if (new Set(digits).size === 1) return { obviousSerial: true };
+    const diffs = new Set<number>();
+    for (let i = 0; i < digits.length - 1; i++) {
+      const a = digits.charCodeAt(i) - 48;
+      const b = digits.charCodeAt(i + 1) - 48;
+      if (a < 0 || a > 9 || b < 0 || b > 9) return null;
+      diffs.add((b - a + 10) % 10);
+    }
+    if (diffs.size === 1 && (diffs.has(1) || diffs.has(9))) return { obviousSerial: true };
+    return null;
+  }
+
+  private minAgeFromTodayValidator(minAge: number) {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const birthDate = this.parseDdMmYyyy(control.value);
+      if (!birthDate) return null;
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
+      return age < minAge ? { minAge: { requiredAge: minAge, actualAge: age } } : null;
+    };
   }
 
   private minAgeValidator(minAge: number) {
@@ -836,11 +1153,36 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     if (ctrl.hasError('required')) return this.i18nService.getTranslation('automation', 'form_err_required');
     if (ctrl.hasError('plzNotFound')) return this.i18nService.getTranslation('automation', 'form_err_zip_not_found');
     if (ctrl.hasError('areaNotFound')) return this.i18nService.getTranslation('automation', 'form_err_area_not_found');
+    if (ctrl.hasError('addressNotFromApi')) return this.i18nService.getTranslation('automation', 'form_err_address_not_found');
     if (ctrl.hasError('email')) return this.i18nService.getTranslation('automation', 'form_err_email');
+    if (ctrl.hasError('emailPlus')) return this.i18nService.getTranslation('automation', 'form_err_email_no_plus');
     if (ctrl.hasError('pattern')) {
       const dateFields = ['birth_date','first_driving_license_date','first_registration_date_1','first_registration_date_2'];
       if (dateFields.includes(name)) return this.i18nService.getTranslation('automation', 'form_err_date_format');
+      if (name === 'n_certificate_1' || name === 'n_certificate_2') return this.i18nService.getTranslation('automation', 'form_n_certificate_error');
+      if (name === 'serial_number_1' || name === 'serial_number_2') return this.i18nService.getTranslation('automation', 'form_serial_number_error');
       return this.i18nService.getTranslation('automation', 'form_err_invalid_format');
+    }
+    if (ctrl.hasError('obviousSerial')) return this.i18nService.getTranslation('automation', 'form_serial_number_obvious_error');
+    if (ctrl.hasError('minAge')) return this.i18nService.getTranslation('automation', 'form_err_min_age_18');
+    return this.i18nService.getTranslation('automation', 'form_err_invalid_value');
+  }
+
+  isMainDriverInvalid(name: string): boolean {
+    const ctrl = (this.form.get('main_driver') as FormGroup)?.get(name);
+    return !!ctrl?.invalid && (this.submitted || !!ctrl?.touched);
+  }
+
+  getMainDriverError(name: string): string | null {
+    const ctrl = (this.form.get('main_driver') as FormGroup)?.get(name);
+    if (!ctrl || !ctrl.invalid || (!this.submitted && !ctrl.touched)) return null;
+    if (ctrl.hasError('required')) return this.i18nService.getTranslation('automation', 'form_err_required');
+    if (ctrl.hasError('plzNotFound')) return this.i18nService.getTranslation('automation', 'form_err_zip_not_found');
+    if (ctrl.hasError('areaNotFound')) return this.i18nService.getTranslation('automation', 'form_err_area_not_found');
+    if (ctrl.hasError('addressNotFromApi')) return this.i18nService.getTranslation('automation', 'form_err_address_not_found');
+    if (ctrl.hasError('pattern')) {
+      if (name === 'zip_code') return this.i18nService.getTranslation('automation', 'form_err_invalid_format');
+      return this.i18nService.getTranslation('automation', 'form_err_date_format');
     }
     if (ctrl.hasError('minAge')) return this.i18nService.getTranslation('automation', 'form_err_min_age_18');
     return this.i18nService.getTranslation('automation', 'form_err_invalid_value');
@@ -861,9 +1203,54 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     this.form.get(controlName)?.setValue(formatted, { emitEvent: false });
   }
 
+  onMonthYearInput(event: Event, controlName: string): void {
+    const inputEvent = event as InputEvent;
+    const input = event.target as HTMLInputElement;
+    let digits = input.value.replace(/\D/g, '');
+    if (digits.length > 6) digits = digits.substring(0, 6);
+    let formatted = '';
+    for (let i = 0; i < digits.length; i++) {
+      if (i === 2) formatted += '.';
+      formatted += digits[i];
+    }
+    if (inputEvent.inputType !== 'deleteContentBackward' && digits.length === 2) formatted += '.';
+    input.value = formatted;
+    this.form.get(controlName)?.setValue(formatted, { emitEvent: false });
+  }
+
+  onMainDriverDateInput(event: Event, controlName: string): void {
+    const inputEvent = event as InputEvent;
+    const input = event.target as HTMLInputElement;
+    let digits = input.value.replace(/\D/g, '');
+    if (digits.length > 8) digits = digits.substring(0, 8);
+    let formatted = '';
+    for (let i = 0; i < digits.length; i++) {
+      if (i === 2 || i === 4) formatted += '.';
+      formatted += digits[i];
+    }
+    if (inputEvent.inputType !== 'deleteContentBackward' && (digits.length === 2 || digits.length === 4)) formatted += '.';
+    input.value = formatted;
+    (this.form.get('main_driver') as FormGroup).get(controlName)?.setValue(formatted, { emitEvent: false });
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private resolveRecipientEmail(formEmail: string): string {
+    if (this.publicMode) {
+      const v = (this.form.get('recipient_email')?.value || '').toString().trim();
+      return v || formEmail;
+    }
+    try {
+      const cached = this.storageService.getItem('consultantData');
+      if (cached) {
+        const u = (JSON.parse(cached)?.ecohub_username || '').toString().trim();
+        if (u) return u;
+      }
+    } catch { /* ignore */ }
+    return formEmail;
   }
 
   async onSubmit(): Promise<void> {
@@ -875,30 +1262,39 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     const {
       ev_charging_station, ev_high_voltage_battery, ev_cyber_protection, ev_charging_cards_apps,
       other_q_terminated, other_q_refused, other_q_license_suspension,
+      main_driver_type, main_driver,
       ...rest
     } = this.form.value;
     const otherQuestions: string[] = [];
     if (other_q_terminated) otherQuestions.push(this.i18nService.getTranslation('automation', 'form_other_q_terminated'));
     if (other_q_refused) otherQuestions.push(this.i18nService.getTranslation('automation', 'form_other_q_refused'));
     if (other_q_license_suspension) otherQuestions.push(this.i18nService.getTranslation('automation', 'form_other_q_license_suspension'));
-    if (otherQuestions.length > 0) {
-      this.blockOfferModal = { open: true, items: otherQuestions };
-      return;
-    }
-    const payload = {
+    const recipientEmail = this.resolveRecipientEmail(rest.email);
+    const payload: Record<string, unknown> = {
       ...rest,
+      recipient_email: recipientEmail,
       electric_vehicle: {
         'stazione di ricarica e accessori': !!ev_charging_station,
         'batterie alta tensione': !!ev_high_voltage_battery,
         'protezione informatica': !!ev_cyber_protection,
         'protezione carte ricarica e app': !!ev_charging_cards_apps,
       },
-      other_questions: otherQuestions,
+      other_questions: otherQuestions.join(', '),
+      source: this.publicMode ? 'onezone_cliente' : 'onezone_consulente',
     };
+    if (main_driver_type === 'other') {
+      const driverData: Record<string, unknown> = {};
+      Object.entries(main_driver || {}).forEach(([k, v]) => {
+        if (v !== '' && v !== null && v !== undefined) driverData[k] = v;
+      });
+      payload['main_driver'] = { driver_type: 'other', driver: driverData };
+    } else if (main_driver_type === 'multiple') {
+      payload['main_driver'] = { driver_type: 'multiple' };
+    }
     this.loaderService.show();
     try {
-      await firstValueFrom(this.automationService.submitQuoteRequest(payload));
-      this.submittedEmail = this.form.get('email')?.value || '';
+      await firstValueFrom(this.automationService.submitQuoteRequest(payload as never, this.publicMode));
+      this.submittedEmail = recipientEmail;
       this.submitSuccess = true;
       this.loaderService.hide();
     } catch (err) {
@@ -909,6 +1305,82 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
         this.toasterService.warn(this.i18nService.getTranslation('automation', 'error_generic'));
       }
     }
+  }
+
+  private setupAddressStream(): void {
+    this.addressInput$
+      .pipe(
+        debounceTime(350),
+        distinctUntilChanged(),
+        filter((v) => v.length >= 3 && this.canQueryStreets()),
+        switchMap((name) => {
+          this.addressLoading = true;
+          const plz = this.form.get('zip_code')!.value.toString();
+          const area = this.form.get('area')!.value.toString();
+          return this.automationService.searchStreets(name, plz, area);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((streets) => {
+        this.streetSuggestions = streets;
+        streets.forEach((s) => this.validAddresses.add(s.name.toLowerCase()));
+        this.showAddressDropdown = streets.length > 0;
+        this.addressLoading = false;
+        this.form.get('address')?.updateValueAndValidity({ emitEvent: false });
+      });
+  }
+
+  private setupAddressContextResets(): void {
+    const reset = () => {
+      this.streetSuggestions = [];
+      this.showAddressDropdown = false;
+      this.validAddresses.clear();
+      const addr = this.form.get('address');
+      if (addr?.value) addr.setValue('', { emitEvent: false });
+      addr?.updateValueAndValidity({ emitEvent: false });
+    };
+    this.form.get('zip_code')!.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(reset);
+    this.form.get('area')!.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(reset);
+  }
+
+  public canQueryStreets(): boolean {
+    const plzCtrl = this.form.get('zip_code');
+    const areaCtrl = this.form.get('area');
+    if (!plzCtrl || !areaCtrl) return false;
+    if (plzCtrl.hasError('plzNotFound') || plzCtrl.hasError('required') || plzCtrl.hasError('pattern')) return false;
+    if (areaCtrl.hasError('areaNotFound') || areaCtrl.hasError('required')) return false;
+    const plz = (plzCtrl.value || '').toString();
+    const area = (areaCtrl.value || '').toString().trim();
+    return plz.length === 4 && area.length > 0;
+  }
+
+  onAddressInput(value: string): void {
+    if (!this.canQueryStreets()) {
+      this.streetSuggestions = [];
+      this.showAddressDropdown = false;
+      return;
+    }
+    if (value.length >= 3) {
+      this.addressInput$.next(value);
+    } else {
+      this.streetSuggestions = [];
+      this.showAddressDropdown = false;
+    }
+  }
+
+  selectStreet(s: StreetEntry): void {
+    this.validAddresses.add(s.name.toLowerCase());
+    this.form.patchValue({ address: s.name });
+    this.showAddressDropdown = false;
+    this.streetSuggestions = [];
+  }
+
+  hideAddressDropdown(): void { setTimeout(() => this.showAddressDropdown = false, 200); }
+
+  private addressFromApiValidator(control: AbstractControl): ValidationErrors | null {
+    const val = (control.value || '').toString().trim();
+    if (!val) return null;
+    return this.validAddresses.has(val.toLowerCase()) ? null : { addressNotFromApi: true };
   }
 
   private areaExistsValidator(control: AbstractControl): ValidationErrors | null {
@@ -961,31 +1433,168 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   hidePlzDropdown(): void { setTimeout(() => this.showPlzDropdown = false, 200); }
   hideAreaDropdown(): void { setTimeout(() => this.showAreaDropdown = false, 200); }
 
+  // ── Autocomplete main_driver sub-form ──────────────────────────────────────
+  private get mainDriverGroup(): FormGroup { return this.form.get('main_driver') as FormGroup; }
+
+  private mdAreaExistsValidator = (control: AbstractControl): ValidationErrors | null => {
+    const area = control.value?.toString().trim() || '';
+    if (!area) return null;
+    const plz = (control.parent?.get('zip_code')?.value ?? '').toString();
+    if (plz.length !== 4) return null;
+    const localities = this.automationService.getLocalitiesByPlz(plz);
+    return localities.some((l) => l.locality === area) ? null : { areaNotFound: true };
+  };
+
+  private mdAddressFromApiValidator = (control: AbstractControl): ValidationErrors | null => {
+    const val = (control.value || '').toString().trim();
+    if (!val) return null;
+    return this.mdValidAddresses.has(val.toLowerCase()) ? null : { addressNotFromApi: true };
+  };
+
+  public canQueryMainDriverStreets(): boolean {
+    const plzCtrl = this.mainDriverGroup?.get('zip_code');
+    const areaCtrl = this.mainDriverGroup?.get('area');
+    if (!plzCtrl || !areaCtrl) return false;
+    if (plzCtrl.hasError('plzNotFound') || plzCtrl.hasError('required') || plzCtrl.hasError('pattern')) return false;
+    if (areaCtrl.hasError('areaNotFound') || areaCtrl.hasError('required')) return false;
+    const plz = (plzCtrl.value || '').toString();
+    const area = (areaCtrl.value || '').toString().trim();
+    return plz.length === 4 && area.length > 0;
+  }
+
+  onMainDriverPlzInput(): void {
+    const val = this.mainDriverGroup?.get('zip_code')?.value?.toString() || '';
+    if (val.length >= 2) {
+      this.mdPlzSuggestions = this.automationService.searchByPlz(val);
+      this.mdShowPlzDropdown = this.mdPlzSuggestions.length > 0;
+    } else {
+      this.mdPlzSuggestions = [];
+      this.mdShowPlzDropdown = false;
+    }
+    this.mainDriverGroup?.get('area')?.updateValueAndValidity();
+  }
+
+  selectMainDriverPlz(entry: LocalityEntry): void {
+    this.mainDriverGroup?.patchValue({ zip_code: entry.plz, area: entry.locality, canton: entry.canton });
+    this.mdShowPlzDropdown = false;
+    this.mdPlzSuggestions = [];
+  }
+
+  onMainDriverAreaFocus(): void {
+    const plz = this.mainDriverGroup?.get('zip_code')?.value?.toString() || '';
+    if (plz.length === 4) {
+      this.mdAreaSuggestions = this.automationService.getLocalitiesByPlz(plz);
+      this.mdShowAreaDropdown = this.mdAreaSuggestions.length > 1;
+    }
+  }
+
+  selectMainDriverArea(entry: LocalityEntry): void {
+    this.mainDriverGroup?.patchValue({ area: entry.locality, canton: entry.canton });
+    this.mdShowAreaDropdown = false;
+    this.mdAreaSuggestions = [];
+  }
+
+  onMainDriverAddressInput(value: string): void {
+    if (!this.canQueryMainDriverStreets()) {
+      this.mdStreetSuggestions = [];
+      this.mdShowAddressDropdown = false;
+      return;
+    }
+    if (value.length >= 3) {
+      this.mdAddressInput$.next(value);
+    } else {
+      this.mdStreetSuggestions = [];
+      this.mdShowAddressDropdown = false;
+    }
+  }
+
+  selectMainDriverStreet(s: StreetEntry): void {
+    this.mdValidAddresses.add(s.name.toLowerCase());
+    this.mainDriverGroup?.patchValue({ address: s.name });
+    this.mdShowAddressDropdown = false;
+    this.mdStreetSuggestions = [];
+  }
+
+  hideMainDriverPlzDropdown(): void { setTimeout(() => this.mdShowPlzDropdown = false, 200); }
+  hideMainDriverAreaDropdown(): void { setTimeout(() => this.mdShowAreaDropdown = false, 200); }
+  hideMainDriverAddressDropdown(): void { setTimeout(() => this.mdShowAddressDropdown = false, 200); }
+
+  private setupMainDriverAddressStream(): void {
+    this.mdAddressInput$
+      .pipe(
+        debounceTime(350),
+        distinctUntilChanged(),
+        filter((v) => v.length >= 3 && this.canQueryMainDriverStreets()),
+        switchMap((name) => {
+          this.mdAddressLoading = true;
+          const plz = this.mainDriverGroup.get('zip_code')!.value.toString();
+          const area = this.mainDriverGroup.get('area')!.value.toString();
+          return this.automationService.searchStreets(name, plz, area);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((streets) => {
+        this.mdStreetSuggestions = streets;
+        streets.forEach((s) => this.mdValidAddresses.add(s.name.toLowerCase()));
+        this.mdShowAddressDropdown = streets.length > 0;
+        this.mdAddressLoading = false;
+        this.mainDriverGroup.get('address')?.updateValueAndValidity({ emitEvent: false });
+      });
+  }
+
+  private setupMainDriverAddressContextResets(): void {
+    const reset = () => {
+      this.mdStreetSuggestions = [];
+      this.mdShowAddressDropdown = false;
+      this.mdValidAddresses.clear();
+      const addr = this.mainDriverGroup?.get('address');
+      if (addr?.value) addr.setValue('', { emitEvent: false });
+      addr?.updateValueAndValidity({ emitEvent: false });
+    };
+    this.mainDriverGroup.get('zip_code')!.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(reset);
+    this.mainDriverGroup.get('area')!.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(reset);
+  }
+
   fillTestData(): void {
     this.form.patchValue({
       gender: 'Maschio', company_name: '', first_name: 'Dario', last_name: 'Sgamba',
-      birth_date: '06.11.1993', first_driving_license_date: '01.08.2010',
-      zip_code: '8001', area: 'Zürich', address: 'Via Roma', address_number: '1',
-      email: 'dario.sgamba@gmail.com', phone: '0791234567', nationality: 'CH',
-      foreigners_id_type: 'C', language: 'it', deductible_under_26: '5000',
-      n_certificate_1: '1PA537', car_brand_1: 'BMW', car_model_1: 'X5 xDrive40i',
-      serial_number_1: '149447880', accessories_1: null, canton: 'ZH',
-      license_plate: '711121', first_registration_date_1: '05.05.2021',
+      birth_date: '06.11.1993', first_driving_license_date: '06.11.2012',
+      zip_code: '1000', area: 'Lausanne 25', address: '', address_number: '1',
+      email: 'd.sgamba@hotmail.it', phone: '0722244451', nationality: 'CH',
+      foreigners_id_type: '', language: 'de',
+      main_driver_type: 'other',
+      deductible_under_26: '0',
+      n_certificate_1: '1VG324', car_brand_1: 'VW', car_model_1: 'Golf 2.0 TDI 5',
+      serial_number_1: '', accessories_1: 1000, canton: 'VD',
+      license_plate: '', first_registration_date_1: '06.11.2017',
       leasing_1: 'Si', garage_parking_1: 'Si', interchangeable_plate: 'No',
+      vehicle_type_1: 'passenger_car', drive_1: 'Diesel', purchase_date_1: '12.2017',
+      kilometers_per_year_1: '10000', current_mileage_1: 100000,
+      reasons_for_redemption_1: 'Vehicle change', leasing_company_1: 'A+A Leasing AG',
+      submit_vehicle_proof_1: 'Yes',
       vehicle_usage: 'nessun uso specifico', civil_insurance: 'Si inclusi alla mia proprieta',
       comprehensive_insurance: 'Totale', deductible_total_insurance: '1000',
-      deductible_partial_insurance: '0', parking_damage_coverage: 'Illimitato',
-      deductible_parking_damage: '200', headlights_mirrors: 'Si',
-      personal_belongings_coverage: '2000', tires_damage: 'Si', bonus_protection: 'Si',
+      deductible_partial_insurance: '0', parking_damage_coverage: 'No',
+      deductible_parking_damage: '', headlights_mirrors: 'Si',
+      personal_belongings_coverage: '2000', tires_damage: 'No', bonus_protection: 'Si',
       roadside_assistance: 'Si', garage_free_choice: 'fissa', passenger_injury: 'No',
       ev_charging_station: false, ev_high_voltage_battery: false,
       ev_cyber_protection: false, ev_charging_cards_apps: false,
-      payment_mode: 'Annuale', current_insurance: 'AXA',
+      payment_mode: 'Annuale', current_insurance: 'Baloise',
       n_rc_claims_5_years: '0', n_collisions_claims_5_years: '0',
       n_parking_claims_5_years: '0', n_glass_claims_5_years: '0',
       n_partial_comprehensive_claims_5_years: '0',
+      n_rc_claims_3_years: '0', n_collisions_claims_3_years: '0',
+      n_parking_claims_3_years: '0', n_glass_claims_3_years: '0',
+      n_partial_comprehensive_claims_3_years: '0',
+      source_user: '',
       other_q_terminated: false, other_q_refused: false, other_q_license_suspension: false,
-      recipient_email: '', scrapers: [...this.availableScrapers],
+      recipient_email: this.publicMode ? 'd.sgamba@hotmail.it' : '', scrapers: [...this.availableScrapers],
+    });
+    (this.form.get('main_driver') as FormGroup).patchValue({
+      gender: 'Maschio', first_name: 'Gioia', last_name: 'Sgamba',
+      birth_date: '24.08.1999', first_driving_license_date: '05.08.2018',
+      nationality: 'CH',
     });
     this.toasterService.success(this.i18nService.getTranslation('automation', 'form_test_loaded'));
   }

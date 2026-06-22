@@ -86,6 +86,8 @@
 
     <!-- Bottoni consulente (Invia mandato + Genera Preventivi) -->
     @if (isConsultant) {
+    <!-- Bottone "Invia mandato" temporaneamente nascosto -->
+    <!--
     <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
       <button
         (click)="navigator.navigateTo('/customers-mandate')"
@@ -94,6 +96,7 @@
         <img src="assets/icons/ozo/chevron-right-solid.png" alt="Go to" class="h-3 opacity-60" />
       </button>
     </div>
+    -->
     <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
       <button
         (click)="onGeneraPreventivi()"

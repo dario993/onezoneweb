@@ -7,13 +7,14 @@ import {
   AfterViewInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { NavigatorService } from '../../services/navigator.service';
 import { I18nService } from '../../services/i18n.service';
 import { LoaderService } from '../../services/loader.service';
 import statics from '../../../assets/statics.json';
 import { I18nPipe } from '../../pipes/i18n.pipe';
 import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'layout-unauthed',
@@ -30,14 +31,17 @@ export class LayoutUnauthedComponent
 
   private rotationAnimation: number | null = null;
   private loadingSubscription!: Subscription;
+  private routerSubscription?: Subscription;
   private isLoading = false;
   private retryCount = 0;
   private readonly maxRetries = 5;
+  public hideFooterNav = false;
 
   constructor(
     public readonly navigator: NavigatorService,
     public readonly loaderService: LoaderService,
-    public readonly i18n: I18nService
+    public readonly i18n: I18nService,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
@@ -53,6 +57,13 @@ export class LayoutUnauthedComponent
         }
       }
     );
+
+    this.hideFooterNav = this.router.url.includes('automation-form-generic-client');
+    this.routerSubscription = this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe((e) => {
+        this.hideFooterNav = e.urlAfterRedirects.includes('automation-form-generic-client');
+      });
   }
 
   ngAfterViewInit(): void {
@@ -65,6 +76,9 @@ export class LayoutUnauthedComponent
   ngOnDestroy(): void {
     if (this.loadingSubscription) {
       this.loadingSubscription.unsubscribe();
+    }
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
     }
     this.stopRotation();
   }

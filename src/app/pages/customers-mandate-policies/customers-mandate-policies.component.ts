@@ -9,6 +9,7 @@ import { I18nService } from '../../services/i18n.service';
 import { ToasterService } from '../../services/toaster.service';
 import { I18nPipe } from '../../pipes/i18n.pipe';
 import { PolicyByClient } from '../../interfaces/policy-by-client.interface';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'page-customers-mandate-policies',
@@ -26,7 +27,9 @@ export class CustomersMandatePoliciesComponent implements OnInit {
   public hasMandateFile: boolean = true;
   public insurances: Array<{ id: number; name: string; selected: boolean }> = [];
   public mandatePdfFile: File | null = null;
+  public isProduction: boolean = environment.production;
   private clientId: string = '';
+  private contactLoginId: number = 0;
 
   constructor(
     private readonly auth: AuthService,
@@ -90,13 +93,13 @@ export class CustomersMandatePoliciesComponent implements OnInit {
         .filter((i) => i.selected)
         .reduce(
           (acc: Record<string, boolean>, curr): Record<string, boolean> => {
-            acc[curr.id] = false;
+            acc[curr.id] = true;
             return acc;
           },
           {}
         );
 
-      this.brokerstarService.mandateInformInsurances(true, insurancesMap).subscribe();
+      this.brokerstarService.mandateInformInsurances(true, insurancesMap, this.contactLoginId).subscribe();
 
       this.toasterService.success(this.i18n.getTranslation('agreement', 'successsend'));
       this.navigator.navigateTo('home');
@@ -160,11 +163,23 @@ export class CustomersMandatePoliciesComponent implements OnInit {
     });
   }
 
-  private loadContact(contactid: string): void {
+  private loadContact(contactid: string, attempt: number = 0): void {
     this.loaderService.show();
     this.brokerstarService
       .contact(Number(contactid))
       .subscribe((response: any): void => {
+        // brokerstarService.contact() cattura gli errori e ritorna {}.
+        // Subito dopo la creazione del contact si verifica una race con lo share
+        // consulente↔contact: la GET può tornare 403 → response vuota.
+        // Ritentare fino a 3 volte (1s di delay) e, se fallisce ancora, forzare un reload.
+        if (!response || !response.contactType) {
+          if (attempt < 2) {
+            setTimeout(() => this.loadContact(contactid, attempt + 1), 1000);
+            return;
+          }
+          window.location.reload();
+          return;
+        }
         this.loaderService.hide();
         this.contactname = this.auth.getUserName(
           response.contactType.id as number,
@@ -172,7 +187,8 @@ export class CustomersMandatePoliciesComponent implements OnInit {
           String(response.name2)
         );
         this.hasMandateFile = response.hasMandateFile ?? true;
-        if (!this.hasMandateFile) {
+        this.contactLoginId = response.permissions?.id ?? 0;
+        if (!this.hasMandateFile || !this.isProduction) {
           this.loadInsurances();
         }
         this.changeDetection.detectChanges();

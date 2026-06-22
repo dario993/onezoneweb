@@ -13,7 +13,7 @@
   <div class="flex-1 p-4 -mt-4">
 
     <!-- Mandate Upload Section (visible only if hasMandateFile=false) -->
-    @if (!hasMandateFile) {
+    @if (!hasMandateFile || !isProduction) {
     <div class="bg-white rounded-lg shadow-md p-4 mb-6">
       <!-- PDF Upload -->
       <p class="text-sm font-semibold text-gray-700 mb-3">

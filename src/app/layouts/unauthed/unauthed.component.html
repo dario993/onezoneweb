@@ -34,7 +34,7 @@
   </main>
 
   <!-- Bottom Navigation Menu -->
-  <nav class="grid grid-cols-3 bg-gradient-to-b from-white to-gray-100">
+  <nav *ngIf="!hideFooterNav" class="grid grid-cols-3 bg-gradient-to-b from-white to-gray-100">
     <!-- Support Button -->
     <button
       (click)="openFooterLink('support')"

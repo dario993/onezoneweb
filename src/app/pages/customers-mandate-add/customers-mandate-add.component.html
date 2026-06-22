@@ -75,61 +75,116 @@
       </div>
     </div>
 
-    <!-- Address -->
-    <div class="w-full mb-4">
-      <label class="block mb-2 text-sm font-bold">
-        {{ "register.address" | i18n }}
-      </label>
-      <input
-        type="text"
-        [(ngModel)]="registerData['address']"
-        [class]="
-          'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
-          (hasError('address') ? 'border-red-500' : 'border-blue-900')
-        "
-        autocomplete="street-address"
-      />
-      <div *ngIf="hasError('address')" class="text-red-500 text-xs mt-1">
-        {{ getError("address") }}
-      </div>
-    </div>
-
     <!-- ZIP Code -->
-    <div class="w-full mb-4">
+    <div class="w-full mb-4 relative">
       <label class="block mb-2 text-sm font-bold">
         {{ "register.zip" | i18n }}
       </label>
       <input
         type="text"
+        maxlength="4"
         [(ngModel)]="registerData['postCode']"
+        (input)="onPlzInput()"
+        (blur)="hidePlzDropdown()"
         [class]="
           'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
           (hasError('postCode') ? 'border-red-500' : 'border-blue-900')
         "
         autocomplete="postal-code"
       />
+      <ul
+        *ngIf="showPlzDropdown"
+        class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"
+      >
+        <li
+          *ngFor="let s of plzSuggestions"
+          (mousedown)="selectPlz(s)"
+          class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between"
+        >
+          <span class="font-medium">{{ s.plz }}</span>
+          <span class="text-gray-500">{{ s.locality }} ({{ s.canton }})</span>
+        </li>
+      </ul>
       <div *ngIf="hasError('postCode')" class="text-red-500 text-xs mt-1">
         {{ getError("postCode") }}
       </div>
     </div>
 
     <!-- City -->
-    <div class="w-full mb-4">
+    <div class="w-full mb-4 relative">
       <label class="block mb-2 text-sm font-bold">
         {{ "register.city" | i18n }}
       </label>
       <input
         type="text"
         [(ngModel)]="registerData['city']"
+        (focus)="onAreaFocus()"
+        (input)="onAreaInput()"
+        (blur)="hideAreaDropdown()"
         [class]="
           'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
           (hasError('city') ? 'border-red-500' : 'border-blue-900')
         "
         autocomplete="address-level2"
       />
+      <ul
+        *ngIf="showAreaDropdown"
+        class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"
+      >
+        <li
+          *ngFor="let s of areaSuggestions"
+          (mousedown)="selectArea(s)"
+          class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between"
+        >
+          <span>{{ s.locality }}</span>
+          <span class="text-gray-500">({{ s.canton }})</span>
+        </li>
+      </ul>
       <div *ngIf="hasError('city')" class="text-red-500 text-xs mt-1">
         {{ getError("city") }}
       </div>
+    </div>
+
+    <!-- Address -->
+    <div class="w-full mb-4 relative">
+      <label class="block mb-2 text-sm font-bold">
+        {{ "register.address" | i18n }}
+      </label>
+      <input
+        type="text"
+        [(ngModel)]="registerData['address']"
+        (input)="onAddressInput($any($event.target).value)"
+        (blur)="hideAddressDropdown()"
+        [attr.disabled]="canQueryStreets() ? null : true"
+        autocomplete="off"
+        [class]="
+          'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 disabled:bg-gray-100 ' +
+          (hasError('address') ? 'border-red-500' : 'border-blue-900')
+        "
+      />
+      <ul
+        *ngIf="showAddressDropdown"
+        class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"
+      >
+        <li
+          *ngFor="let s of streetSuggestions"
+          (mousedown)="selectStreet(s)"
+          class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between"
+        >
+          <span>{{ s.name }}</span>
+          <span class="text-gray-500">{{ s.postalCode }} {{ s.locality }}</span>
+        </li>
+      </ul>
+      <p *ngIf="addressLoading" class="text-xs text-gray-400 mt-1">…</p>
+      <div *ngIf="hasError('address')" class="text-red-500 text-xs mt-1">
+        {{ getError("address") }}
+      </div>
+      <p
+        *ngIf="!hasError('address') && !canQueryStreets()"
+        class="text-xs text-gray-400 mt-1"
+      >
+        {{ "automation.form_address_hint_need_zip_area" | i18n }}
+      </p>
     </div>
 
     <!-- Birthday -->
@@ -173,61 +228,116 @@
       </div>
     </div>
 
-    <!-- Company Address -->
-    <div class="w-full mb-4">
-      <label class="block mb-2 text-sm font-bold">
-        {{ "register.address" | i18n }}
-      </label>
-      <input
-        type="text"
-        [(ngModel)]="registerData['address']"
-        [class]="
-          'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
-          (hasError('address') ? 'border-red-500' : 'border-blue-900')
-        "
-        autocomplete="street-address"
-      />
-      <div *ngIf="hasError('address')" class="text-red-500 text-xs mt-1">
-        {{ getError("address") }}
-      </div>
-    </div>
-
     <!-- Company ZIP -->
-    <div class="w-full mb-4">
+    <div class="w-full mb-4 relative">
       <label class="block mb-2 text-sm font-bold">
         {{ "register.zip" | i18n }}
       </label>
       <input
         type="text"
+        maxlength="4"
         [(ngModel)]="registerData['postCode']"
+        (input)="onPlzInput()"
+        (blur)="hidePlzDropdown()"
         [class]="
           'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
           (hasError('postCode') ? 'border-red-500' : 'border-blue-900')
         "
         autocomplete="postal-code"
       />
+      <ul
+        *ngIf="showPlzDropdown"
+        class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"
+      >
+        <li
+          *ngFor="let s of plzSuggestions"
+          (mousedown)="selectPlz(s)"
+          class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between"
+        >
+          <span class="font-medium">{{ s.plz }}</span>
+          <span class="text-gray-500">{{ s.locality }} ({{ s.canton }})</span>
+        </li>
+      </ul>
       <div *ngIf="hasError('postCode')" class="text-red-500 text-xs mt-1">
         {{ getError("postCode") }}
       </div>
     </div>
 
     <!-- Company City -->
-    <div class="w-full mb-4">
+    <div class="w-full mb-4 relative">
       <label class="block mb-2 text-sm font-bold">
         {{ "register.city" | i18n }}
       </label>
       <input
         type="text"
         [(ngModel)]="registerData['city']"
+        (focus)="onAreaFocus()"
+        (input)="onAreaInput()"
+        (blur)="hideAreaDropdown()"
         [class]="
           'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
           (hasError('city') ? 'border-red-500' : 'border-blue-900')
         "
         autocomplete="address-level2"
       />
+      <ul
+        *ngIf="showAreaDropdown"
+        class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"
+      >
+        <li
+          *ngFor="let s of areaSuggestions"
+          (mousedown)="selectArea(s)"
+          class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between"
+        >
+          <span>{{ s.locality }}</span>
+          <span class="text-gray-500">({{ s.canton }})</span>
+        </li>
+      </ul>
       <div *ngIf="hasError('city')" class="text-red-500 text-xs mt-1">
         {{ getError("city") }}
       </div>
+    </div>
+
+    <!-- Company Address -->
+    <div class="w-full mb-4 relative">
+      <label class="block mb-2 text-sm font-bold">
+        {{ "register.address" | i18n }}
+      </label>
+      <input
+        type="text"
+        [(ngModel)]="registerData['address']"
+        (input)="onAddressInput($any($event.target).value)"
+        (blur)="hideAddressDropdown()"
+        [attr.disabled]="canQueryStreets() ? null : true"
+        autocomplete="off"
+        [class]="
+          'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 disabled:bg-gray-100 ' +
+          (hasError('address') ? 'border-red-500' : 'border-blue-900')
+        "
+      />
+      <ul
+        *ngIf="showAddressDropdown"
+        class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"
+      >
+        <li
+          *ngFor="let s of streetSuggestions"
+          (mousedown)="selectStreet(s)"
+          class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between"
+        >
+          <span>{{ s.name }}</span>
+          <span class="text-gray-500">{{ s.postalCode }} {{ s.locality }}</span>
+        </li>
+      </ul>
+      <p *ngIf="addressLoading" class="text-xs text-gray-400 mt-1">…</p>
+      <div *ngIf="hasError('address')" class="text-red-500 text-xs mt-1">
+        {{ getError("address") }}
+      </div>
+      <p
+        *ngIf="!hasError('address') && !canQueryStreets()"
+        class="text-xs text-gray-400 mt-1"
+      >
+        {{ "automation.form_address_hint_need_zip_area" | i18n }}
+      </p>
     </div>
 
     <!-- Company Founded Date -->

@@ -1,4 +1,4 @@
-<div class="max-w-3xl mx-auto p-4 pb-12">
+<div [ngClass]="publicMode ? 'w-full px-4 pb-12 pt-4' : 'max-w-3xl mx-auto p-4 pb-12'">
 
   <!-- Titolo -->
   <h1 class="text-2xl font-bold text-gray-800 mb-8">
@@ -10,7 +10,7 @@
   <div class="rounded-2xl p-10 text-center border bg-green-50 border-green-200">
     <div class="text-green-500 text-6xl mb-4">&#10003;</div>
     <h2 class="text-2xl font-semibold text-green-700 mb-4">{{ 'automation.form_success_title' | i18n }}</h2>
-    <p class="text-gray-600 text-lg">{{ 'automation.form_success_message' | i18n }}</p>
+    <p class="text-gray-600 text-lg">{{ successMessage }}</p>
   </div>
   }
 
@@ -62,6 +62,7 @@
         </div>
         }
 
+        @if (showPersonalNameFields) {
         <!-- First Name -->
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_first_name' | i18n }} <span class="text-red-500">*</span></label>
@@ -113,6 +114,7 @@
           <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_date_placeholder' | i18n }}</p>
           }
         </div>
+        }
 
         <!-- ZIP Code con autocomplete -->
         <div class="mb-4 relative">
@@ -161,13 +163,33 @@
         </div>
 
         <!-- Address -->
-        <div class="mb-4">
+        <div class="mb-4 relative">
           <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_address' | i18n }} <span class="text-red-500">*</span></label>
           <input type="text" formControlName="address"
-            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            (input)="onAddressInput($any($event.target).value)"
+            (blur)="hideAddressDropdown()"
+            [attr.disabled]="canQueryStreets() ? null : true"
+            autocomplete="off"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
             [ngClass]="isInvalid('address') ? 'border-red-500' : 'border-gray-300'" />
+          @if (showAddressDropdown) {
+          <ul class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+            @for (s of streetSuggestions; track s.name + s.postalCode) {
+            <li (mousedown)="selectStreet(s)"
+              class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between">
+              <span>{{ s.name }}</span>
+              <span class="text-gray-500">{{ s.postalCode }} {{ s.locality }}</span>
+            </li>
+            }
+          </ul>
+          }
+          @if (addressLoading) {
+          <p class="text-xs text-gray-400 mt-1">…</p>
+          }
           @if (getError('address')) {
           <p class="text-xs text-red-500 mt-1">{{ getError('address') }}</p>
+          } @else if (!canQueryStreets()) {
+          <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_address_hint_need_zip_area' | i18n }}</p>
           }
         </div>
 
@@ -192,6 +214,22 @@
           <p class="text-xs text-red-500 mt-1">{{ getError('email') }}</p>
           }
         </div>
+
+        <!-- Recipient email (solo modalità pubblica) -->
+        @if (publicMode) {
+        <div class="mb-4 md:col-span-2">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_recipient_email_label' | i18n }} <span class="text-red-500">*</span></label>
+          <input type="email" formControlName="recipient_email"
+            [placeholder]="'automation.form_recipient_email_placeholder' | i18n"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('recipient_email') ? 'border-red-500' : 'border-gray-300'" />
+          @if (getError('recipient_email')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('recipient_email') }}</p>
+          } @else {
+          <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_recipient_email_hint' | i18n }}</p>
+          }
+        </div>
+        }
 
         <!-- Phone -->
         <div class="mb-4 md:col-span-2">
@@ -244,6 +282,189 @@
             }
           </select>
         </div>
+
+        <!-- Main Driver -->
+        <div class="mb-4 md:col-span-2">
+          <label class="block text-sm font-medium text-gray-600 mb-2">{{ 'automation.form_main_driver' | i18n }}</label>
+          <div class="flex flex-wrap gap-6">
+            @for (d of driverTypeOptions; track d.value) {
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" formControlName="main_driver_type" [value]="d.value" class="accent-blue-600" />
+              <span class="text-gray-700">{{ d.label | i18n }}</span>
+            </label>
+            }
+          </div>
+          <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_main_driver_hint' | i18n }}</p>
+        </div>
+
+        <!-- Main Driver sub-form (visibile solo se driver_type === 'other') -->
+        @if (showMainDriverFields) {
+        <div class="mb-4 md:col-span-2 bg-gray-50 border border-dashed border-gray-300 rounded-xl p-4" formGroupName="main_driver">
+          <p class="text-sm font-semibold text-gray-700 mb-3">{{ 'automation.form_main_driver_subform_title' | i18n }}</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="mb-2">
+              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_gender' | i18n }} <span class="text-red-500">*</span></label>
+              <select formControlName="gender"
+                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">{{ 'automation.form_select_placeholder' | i18n }}</option>
+                @for (g of genderOptions; track g) {
+                <option [value]="g">{{ g === 'Maschio' ? ('automation.form_gender_male' | i18n) : g === 'Femmina' ? ('automation.form_gender_female' | i18n) : ('automation.form_gender_company' | i18n) }}</option>
+                }
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_nationality' | i18n }} <span class="text-red-500">*</span></label>
+              <select formControlName="nationality"
+                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">{{ 'automation.form_select_placeholder' | i18n }}</option>
+                @for (n of nationalityOptions; track n.value) {
+                <option [value]="n.value">{{ ('automation.country_' + n.value) | i18n }}</option>
+                }
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_first_name' | i18n }} <span class="text-red-500">*</span></label>
+              <input type="text" formControlName="first_name"
+                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div class="mb-2">
+              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_last_name' | i18n }} <span class="text-red-500">*</span></label>
+              <input type="text" formControlName="last_name"
+                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div class="mb-2">
+              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_birth_date' | i18n }} <span class="text-red-500">*</span></label>
+              <input type="text" formControlName="birth_date" [placeholder]="'automation.form_date_placeholder' | i18n" maxlength="10"
+                (input)="onMainDriverDateInput($event, 'birth_date')"
+                class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [ngClass]="isMainDriverInvalid('birth_date') ? 'border-red-500' : 'border-gray-300'" />
+              @if (getMainDriverError('birth_date')) {
+              <p class="text-xs text-red-500 mt-1">{{ getMainDriverError('birth_date') }}</p>
+              }
+            </div>
+            <div class="mb-2">
+              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_canton' | i18n }} <span class="text-red-500">*</span></label>
+              <select formControlName="canton"
+                class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [ngClass]="isMainDriverInvalid('canton') ? 'border-red-500' : 'border-gray-300'">
+                <option value="">{{ 'automation.form_select_placeholder' | i18n }}</option>
+                @for (c of cantonOptions; track c.value) {
+                <option [value]="c.value">{{ ('automation.canton_' + c.value) | i18n }}</option>
+                }
+              </select>
+              @if (getMainDriverError('canton')) {
+              <p class="text-xs text-red-500 mt-1">{{ getMainDriverError('canton') }}</p>
+              }
+            </div>
+            <div class="mb-2 relative">
+              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_zip_code' | i18n }} <span class="text-red-500">*</span></label>
+              <input type="text" formControlName="zip_code" maxlength="4"
+                (input)="onMainDriverPlzInput()" (blur)="hideMainDriverPlzDropdown()"
+                class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [ngClass]="isMainDriverInvalid('zip_code') ? 'border-red-500' : 'border-gray-300'" />
+              @if (mdShowPlzDropdown) {
+              <ul class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+                @for (s of mdPlzSuggestions; track s.plz + s.locality) {
+                <li (mousedown)="selectMainDriverPlz(s)"
+                  class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between">
+                  <span class="font-medium">{{ s.plz }}</span>
+                  <span class="text-gray-500">{{ s.locality }} ({{ s.canton }})</span>
+                </li>
+                }
+              </ul>
+              }
+              @if (getMainDriverError('zip_code')) {
+              <p class="text-xs text-red-500 mt-1">{{ getMainDriverError('zip_code') }}</p>
+              }
+            </div>
+            <div class="mb-2 relative">
+              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_area' | i18n }} <span class="text-red-500">*</span></label>
+              <input type="text" formControlName="area"
+                (focus)="onMainDriverAreaFocus()" (blur)="hideMainDriverAreaDropdown()"
+                class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [ngClass]="isMainDriverInvalid('area') ? 'border-red-500' : 'border-gray-300'" />
+              @if (mdShowAreaDropdown) {
+              <ul class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+                @for (s of mdAreaSuggestions; track s.plz + s.locality) {
+                <li (mousedown)="selectMainDriverArea(s)"
+                  class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between">
+                  <span>{{ s.locality }}</span>
+                  <span class="text-gray-500">({{ s.canton }})</span>
+                </li>
+                }
+              </ul>
+              }
+              @if (getMainDriverError('area')) {
+              <p class="text-xs text-red-500 mt-1">{{ getMainDriverError('area') }}</p>
+              }
+            </div>
+            <div class="mb-2 relative">
+              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_address' | i18n }} <span class="text-red-500">*</span></label>
+              <input type="text" formControlName="address"
+                (input)="onMainDriverAddressInput($any($event.target).value)"
+                (blur)="hideMainDriverAddressDropdown()"
+                [attr.disabled]="canQueryMainDriverStreets() ? null : true"
+                autocomplete="off"
+                class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                [ngClass]="isMainDriverInvalid('address') ? 'border-red-500' : 'border-gray-300'" />
+              @if (mdShowAddressDropdown) {
+              <ul class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+                @for (s of mdStreetSuggestions; track s.name + s.postalCode) {
+                <li (mousedown)="selectMainDriverStreet(s)"
+                  class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between">
+                  <span>{{ s.name }}</span>
+                  <span class="text-gray-500">{{ s.postalCode }} {{ s.locality }}</span>
+                </li>
+                }
+              </ul>
+              }
+              @if (mdAddressLoading) {
+              <p class="text-xs text-gray-400 mt-1">…</p>
+              }
+              @if (getMainDriverError('address')) {
+              <p class="text-xs text-red-500 mt-1">{{ getMainDriverError('address') }}</p>
+              } @else if (!canQueryMainDriverStreets()) {
+              <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_address_hint_need_zip_area' | i18n }}</p>
+              }
+            </div>
+            <div class="mb-2">
+              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_address_number' | i18n }} <span class="text-red-500">*</span></label>
+              <input type="text" formControlName="address_number"
+                class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [ngClass]="isMainDriverInvalid('address_number') ? 'border-red-500' : 'border-gray-300'" />
+              @if (getMainDriverError('address_number')) {
+              <p class="text-xs text-red-500 mt-1">{{ getMainDriverError('address_number') }}</p>
+              }
+            </div>
+            @if (showMainDriverForeignersId) {
+            <div class="mb-2">
+              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_foreigners_id' | i18n }} <span class="text-red-500">*</span></label>
+              <select formControlName="foreigners_id_type"
+                class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [ngClass]="isMainDriverInvalid('foreigners_id_type') ? 'border-red-500' : 'border-gray-300'">
+                <option value="">{{ 'automation.form_select_placeholder' | i18n }}</option>
+                @for (f of foreignersIdOptions; track f.value) {
+                <option [value]="f.value">{{ f.label | i18n }}</option>
+                }
+              </select>
+              @if (getMainDriverError('foreigners_id_type')) {
+              <p class="text-xs text-red-500 mt-1">{{ getMainDriverError('foreigners_id_type') }}</p>
+              }
+            </div>
+            }
+            <div class="mb-2">
+              <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_driving_license' | i18n }} <span class="text-red-500">*</span></label>
+              <input type="text" formControlName="first_driving_license_date" [placeholder]="'automation.form_date_placeholder' | i18n" maxlength="10"
+                (input)="onMainDriverDateInput($event, 'first_driving_license_date')"
+                class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [ngClass]="isMainDriverInvalid('first_driving_license_date') ? 'border-red-500' : 'border-gray-300'" />
+              @if (getMainDriverError('first_driving_license_date')) {
+              <p class="text-xs text-red-500 mt-1">{{ getMainDriverError('first_driving_license_date') }}</p>
+              }
+            </div>
+          </div>
+        </div>
+        }
 
       </div>
     </div>
@@ -301,17 +522,27 @@
         <!-- N Certificate 1 -->
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_n_certificate' | i18n }}</label>
-          <input type="text" formControlName="n_certificate_1" readonly
-            class="w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-lg px-4 py-2 cursor-default" />
+          <input type="text" formControlName="n_certificate_1" maxlength="6"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('n_certificate_1') ? 'border-red-500' : 'border-gray-300'" />
+          @if (getError('n_certificate_1')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('n_certificate_1') }}</p>
+          } @else {
           <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_n_certificate_hint' | i18n }}</p>
+          }
         </div>
 
         <!-- Serial Number 1 (Stammnummer) -->
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_serial_number' | i18n }}</label>
-          <input type="text" formControlName="serial_number_1" readonly
-            class="w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-lg px-4 py-2 cursor-default" />
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_serial_number' | i18n }} <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="serial_number_1" maxlength="9" inputmode="numeric"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('serial_number_1') ? 'border-red-500' : 'border-gray-300'" />
+          @if (getError('serial_number_1')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('serial_number_1') }}</p>
+          } @else {
           <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_serial_number_hint' | i18n }}</p>
+          }
         </div>
 
         <!-- Accessories 1 -->
@@ -386,6 +617,96 @@
           <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_garage_hint' | i18n }}</p>
         </div>
 
+        <!-- Vehicle Type 1 -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_vehicle_type' | i18n }}</label>
+          <select formControlName="vehicle_type_1"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            @for (v of vehicleTypeOptions; track v.value) {
+            <option [value]="v.value">{{ v.label | i18n }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Drive 1 -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_drive' | i18n }}</label>
+          <select formControlName="drive_1"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            @for (d of driveOptions; track d.value) {
+            <option [value]="d.value">{{ d.label | i18n }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Purchase Date 1 -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_purchase_date' | i18n }}</label>
+          <input type="text" formControlName="purchase_date_1" [placeholder]="'automation.form_month_year_placeholder' | i18n" maxlength="7"
+            (input)="onMonthYearInput($event, 'purchase_date_1')"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('purchase_date_1') ? 'border-red-500' : 'border-gray-300'" />
+          @if (getError('purchase_date_1')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('purchase_date_1') }}</p>
+          } @else {
+          <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_month_year_placeholder' | i18n }}</p>
+          }
+        </div>
+
+        <!-- Kilometers per year 1 -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_km_per_year' | i18n }}</label>
+          <select formControlName="kilometers_per_year_1"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            @for (k of kmPerYearOptions; track k.value) {
+            <option [value]="k.value">{{ k.value === '' ? (k.label | i18n) : k.label }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Current Mileage 1 -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_current_mileage' | i18n }}</label>
+          <input type="number" formControlName="current_mileage_1" min="0" max="999999"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+
+        <!-- Reason for Redemption 1 -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_reason_redemption' | i18n }}</label>
+          <select formControlName="reasons_for_redemption_1"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            @for (r of reasonsForRedemptionOptions; track r.value) {
+            <option [value]="r.value">{{ r.label | i18n }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Leasing Company 1 (visibile solo se leasing_1=Si) -->
+        @if (showLeasingCompany1) {
+        <div class="mb-4 md:col-span-2">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_leasing_company' | i18n }}</label>
+          <select formControlName="leasing_company_1"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">{{ 'automation.form_select_placeholder' | i18n }}</option>
+            @for (lc of leasingCompanyOptions; track lc) {
+            <option [value]="lc">{{ lc }}</option>
+            }
+          </select>
+        </div>
+        }
+
+        <!-- Submit Vehicle Proof 1 -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_submit_vehicle_proof' | i18n }}</label>
+          <select formControlName="submit_vehicle_proof_1"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            @for (s of submitVehicleProofOptions; track s.value) {
+            <option [value]="s.value">{{ s.label | i18n }}</option>
+            }
+          </select>
+        </div>
+
         <!-- 2. Veicolo - Targa intercambiabile -->
         <div class="mb-4 md:col-span-2">
           <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_interchangeable_plate' | i18n }}</label>
@@ -443,17 +764,27 @@
         <!-- N Certificate 2 -->
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_n_certificate_v2' | i18n }}</label>
-          <input type="text" formControlName="n_certificate_2" readonly
-            class="w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-lg px-4 py-2 cursor-default" />
+          <input type="text" formControlName="n_certificate_2" maxlength="6"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('n_certificate_2') ? 'border-red-500' : 'border-gray-300'" />
+          @if (getError('n_certificate_2')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('n_certificate_2') }}</p>
+          } @else {
           <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_n_certificate_v2_hint' | i18n }}</p>
+          }
         </div>
 
         <!-- Serial Number 2 -->
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_serial_number_v2' | i18n }}</label>
-          <input type="text" formControlName="serial_number_2" readonly
-            class="w-full border border-gray-200 bg-gray-50 text-gray-600 rounded-lg px-4 py-2 cursor-default" />
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_serial_number_v2' | i18n }} <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="serial_number_2" maxlength="9" inputmode="numeric"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('serial_number_2') ? 'border-red-500' : 'border-gray-300'" />
+          @if (getError('serial_number_2')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('serial_number_2') }}</p>
+          } @else {
           <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_serial_number_v2_hint' | i18n }}</p>
+          }
         </div>
 
         <!-- Accessories 2 -->
@@ -502,6 +833,94 @@
             <option value="No">{{ 'automation.form_no' | i18n }}</option>
           </select>
           <p class="text-xs text-gray-400 mt-1">{{ 'automation.form_garage_v2_hint' | i18n }}</p>
+        </div>
+
+        <!-- Vehicle Type 2 -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_vehicle_type' | i18n }}</label>
+          <select formControlName="vehicle_type_2"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            @for (v of vehicleTypeOptions; track v.value) {
+            <option [value]="v.value">{{ v.label | i18n }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Drive 2 -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_drive' | i18n }}</label>
+          <select formControlName="drive_2"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            @for (d of driveOptions; track d.value) {
+            <option [value]="d.value">{{ d.label | i18n }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Purchase Date 2 -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_purchase_date' | i18n }}</label>
+          <input type="text" formControlName="purchase_date_2" [placeholder]="'automation.form_month_year_placeholder' | i18n" maxlength="7"
+            (input)="onMonthYearInput($event, 'purchase_date_2')"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [ngClass]="isInvalid('purchase_date_2') ? 'border-red-500' : 'border-gray-300'" />
+          @if (getError('purchase_date_2')) {
+          <p class="text-xs text-red-500 mt-1">{{ getError('purchase_date_2') }}</p>
+          }
+        </div>
+
+        <!-- Kilometers per year 2 -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_km_per_year' | i18n }}</label>
+          <select formControlName="kilometers_per_year_2"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            @for (k of kmPerYearOptions; track k.value) {
+            <option [value]="k.value">{{ k.value === '' ? (k.label | i18n) : k.label }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Current Mileage 2 -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_current_mileage' | i18n }}</label>
+          <input type="number" formControlName="current_mileage_2" min="0" max="999999"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+
+        <!-- Reason for Redemption 2 -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_reason_redemption' | i18n }}</label>
+          <select formControlName="reasons_for_redemption_2"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            @for (r of reasonsForRedemptionOptions; track r.value) {
+            <option [value]="r.value">{{ r.label | i18n }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Leasing Company 2 (visibile solo se leasing_2=Si) -->
+        @if (showLeasingCompany2) {
+        <div class="mb-4 md:col-span-2">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_leasing_company' | i18n }}</label>
+          <select formControlName="leasing_company_2"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">{{ 'automation.form_select_placeholder' | i18n }}</option>
+            @for (lc of leasingCompanyOptions; track lc) {
+            <option [value]="lc">{{ lc }}</option>
+            }
+          </select>
+        </div>
+        }
+
+        <!-- Submit Vehicle Proof 2 -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_submit_vehicle_proof' | i18n }}</label>
+          <select formControlName="submit_vehicle_proof_2"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            @for (s of submitVehicleProofOptions; track s.value) {
+            <option [value]="s.value">{{ s.label | i18n }}</option>
+            }
+          </select>
         </div>
 
       </div>
@@ -812,7 +1231,55 @@
           </div>
         </div>
 
-
+        <!-- Sinistri 3 anni (opzionali) -->
+        <h3 class="text-sm font-semibold text-gray-700 mt-4 mb-2">{{ 'automation.form_claims_3y_title' | i18n }}</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_rc_claims_3y' | i18n }}</label>
+            <select formControlName="n_rc_claims_3_years"
+              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              @for (n of claimsOptions; track n) {
+              <option [value]="n">{{ n === '3' ? ('automation.form_claims_3_or_more' | i18n) : n === '0' ? ('automation.form_claims_none' | i18n) : n }}</option>
+              }
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_collision_claims_3y' | i18n }}</label>
+            <select formControlName="n_collisions_claims_3_years"
+              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              @for (n of claimsOptions; track n) {
+              <option [value]="n">{{ n === '3' ? ('automation.form_claims_3_or_more' | i18n) : n === '0' ? ('automation.form_claims_none' | i18n) : n }}</option>
+              }
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_parking_claims_3y' | i18n }}</label>
+            <select formControlName="n_parking_claims_3_years"
+              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              @for (n of claimsOptions; track n) {
+              <option [value]="n">{{ n === '3' ? ('automation.form_claims_3_or_more' | i18n) : n === '0' ? ('automation.form_claims_none' | i18n) : n }}</option>
+              }
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_glass_claims_3y' | i18n }}</label>
+            <select formControlName="n_glass_claims_3_years"
+              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              @for (n of claimsOptions; track n) {
+              <option [value]="n">{{ n === '3' ? ('automation.form_claims_3_or_more' | i18n) : n === '0' ? ('automation.form_claims_none' | i18n) : n }}</option>
+              }
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_partial_claims_3y' | i18n }}</label>
+            <select formControlName="n_partial_comprehensive_claims_3_years"
+              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              @for (n of claimsOptions; track n) {
+              <option [value]="n">{{ n === '3' ? ('automation.form_claims_3_or_more' | i18n) : n === '0' ? ('automation.form_claims_none' | i18n) : n }}</option>
+              }
+            </select>
+          </div>
+        </div>
 
       </div>
     </div>

@@ -38,6 +38,13 @@ export interface LocalityEntry {
   canton: string;
 }
 
+export interface StreetEntry {
+  name: string;
+  postalCode: string;
+  locality: string;
+  canton: string;
+}
+
 export interface CheckLoginResponse {
   status: 'verified' | 'failed' | 'already_verified' | 'error';
   login_check: boolean;
@@ -57,8 +64,12 @@ export interface GetConsultantResponse {
   api_key: string;
   name: string;
   surname: string;
+  ecohub_username?: string;
+  ecohub_password?: string;
+  ecohub_totp_secret?: string;
   commission_number?: string;
   registration_number?: string;
+  login_check?: boolean;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -180,7 +191,7 @@ export interface QuoteRequestPayload {
   n_parking_claims_5_years: string;
   n_glass_claims_5_years: string;
   n_partial_comprehensive_claims_5_years: string;
-  other_questions: string[];
+  other_questions: string;
   // Opzionale
   recipient_email?: string;
   scrapers?: string[];

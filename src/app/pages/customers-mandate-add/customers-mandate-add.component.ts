@@ -1,14 +1,17 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
 import { isset } from '../../helper';
 import { I18nService } from '../../services/i18n.service';
 import { LoaderService } from '../../services/loader.service';
 import { BrokerstarService } from '../../services/brokerstar.service';
+import { AutomationService } from '../../services/automation.service';
 import { I18nPipe } from '../../pipes/i18n.pipe';
 import { ToasterService } from '../../services/toaster.service';
+import { LocalityEntry, StreetEntry } from '../../interfaces/automation.interface';
 
 @Component({
   selector: 'page-customers-mandate-add',
@@ -17,22 +20,154 @@ import { ToasterService } from '../../services/toaster.service';
   styleUrls: ['./customers-mandate-add.component.scss'],
   imports: [CommonModule, FormsModule, I18nPipe],
 })
-export class CustomersMandateAddComponent implements OnInit {
+export class CustomersMandateAddComponent implements OnInit, OnDestroy {
   public registerType: 'person' | 'company' = 'person';
   public registerData: Record<string, unknown> = {};
   private errorFields: Record<string, string | undefined> = {};
+
+  public plzSuggestions: LocalityEntry[] = [];
+  public areaSuggestions: LocalityEntry[] = [];
+  public streetSuggestions: StreetEntry[] = [];
+  public showPlzDropdown = false;
+  public showAreaDropdown = false;
+  public showAddressDropdown = false;
+  public addressLoading = false;
+  private readonly validAddresses = new Set<string>();
+  private readonly addressInput$ = new Subject<string>();
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private readonly router: Router,
     private readonly loaderService: LoaderService,
     private readonly i18n: I18nService,
     private readonly brokerstarService: BrokerstarService,
+    private readonly automationService: AutomationService,
     private readonly toasterService: ToasterService,
     private readonly cdr: ChangeDetectorRef
   ) {}
 
-  public ngOnInit(): void {}
+  public ngOnInit(): void {
+    this.addressInput$
+      .pipe(
+        debounceTime(350),
+        distinctUntilChanged(),
+        filter((v) => v.length >= 3 && this.canQueryStreets()),
+        switchMap((name) => {
+          this.addressLoading = true;
+          const plz = String(this.registerData['postCode'] || '');
+          const area = String(this.registerData['city'] || '');
+          return this.automationService.searchStreets(name, plz, area);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((streets) => {
+        this.streetSuggestions = streets;
+        streets.forEach((s) => this.validAddresses.add(s.name.toLowerCase()));
+        this.showAddressDropdown = streets.length > 0;
+        this.addressLoading = false;
+        this.cdr.detectChanges();
+      });
+  }
 
+  public ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // ── Autocomplete CAP ──────────────────────────────────────────────────────
+  public onPlzInput(): void {
+    this.resetAddressContext();
+    const val = String(this.registerData['postCode'] || '');
+    if (val.length >= 2) {
+      this.plzSuggestions = this.automationService.searchByPlz(val);
+      this.showPlzDropdown = this.plzSuggestions.length > 0;
+    } else {
+      this.plzSuggestions = [];
+      this.showPlzDropdown = false;
+    }
+  }
+
+  public selectPlz(entry: LocalityEntry): void {
+    this.registerData['postCode'] = entry.plz;
+    this.registerData['city'] = entry.locality;
+    this.showPlzDropdown = false;
+    this.plzSuggestions = [];
+    this.resetAddressContext();
+  }
+
+  public hidePlzDropdown(): void {
+    setTimeout(() => (this.showPlzDropdown = false), 200);
+  }
+
+  // ── Autocomplete Località ─────────────────────────────────────────────────
+  public onAreaFocus(): void {
+    const plz = String(this.registerData['postCode'] || '');
+    if (plz.length === 4) {
+      this.areaSuggestions = this.automationService.getLocalitiesByPlz(plz);
+      this.showAreaDropdown = this.areaSuggestions.length > 1;
+    }
+  }
+
+  public onAreaInput(): void {
+    this.resetAddressContext();
+  }
+
+  public selectArea(entry: LocalityEntry): void {
+    this.registerData['city'] = entry.locality;
+    this.showAreaDropdown = false;
+    this.areaSuggestions = [];
+    this.resetAddressContext();
+  }
+
+  public hideAreaDropdown(): void {
+    setTimeout(() => (this.showAreaDropdown = false), 200);
+  }
+
+  // ── Autocomplete Indirizzo ────────────────────────────────────────────────
+  public canQueryStreets(): boolean {
+    const plz = String(this.registerData['postCode'] || '');
+    const area = String(this.registerData['city'] || '').trim();
+    if (plz.length !== 4 || area.length === 0) return false;
+    const localities = this.automationService.getLocalitiesByPlz(plz);
+    if (localities.length === 0) return false;
+    return localities.some((l) => l.locality === area);
+  }
+
+  public onAddressInput(value: string): void {
+    if (!this.canQueryStreets()) {
+      this.streetSuggestions = [];
+      this.showAddressDropdown = false;
+      return;
+    }
+    if (value.length >= 3) {
+      this.addressInput$.next(value);
+    } else {
+      this.streetSuggestions = [];
+      this.showAddressDropdown = false;
+    }
+  }
+
+  public selectStreet(s: StreetEntry): void {
+    this.validAddresses.add(s.name.toLowerCase());
+    this.registerData['address'] = s.name;
+    this.showAddressDropdown = false;
+    this.streetSuggestions = [];
+  }
+
+  public hideAddressDropdown(): void {
+    setTimeout(() => (this.showAddressDropdown = false), 200);
+  }
+
+  private resetAddressContext(): void {
+    this.streetSuggestions = [];
+    this.showAddressDropdown = false;
+    this.validAddresses.clear();
+    if (this.registerData['address']) {
+      this.registerData['address'] = '';
+    }
+  }
+
+  // ── Validazione ───────────────────────────────────────────────────────────
   private checkData(): void {
     this.errorFields = {};
     if (this.registerType === 'person') {
@@ -43,15 +178,32 @@ export class CustomersMandateAddComponent implements OnInit {
     if (!isset(this.registerData['name2'])) {
       this.errorFields['name2'] = this.i18n.getTranslation('register', 'required');
     }
-    if (!isset(this.registerData['address'])) {
-      this.errorFields['address'] = this.i18n.getTranslation('register', 'required');
-    }
-    if (!isset(this.registerData['postCode'])) {
+
+    const plz = String(this.registerData['postCode'] || '');
+    const city = String(this.registerData['city'] || '').trim();
+    const address = String(this.registerData['address'] || '').trim();
+
+    if (!plz) {
       this.errorFields['postCode'] = this.i18n.getTranslation('register', 'required');
+    } else if (!/^\d{4}$/.test(plz) || this.automationService.getLocalitiesByPlz(plz).length === 0) {
+      this.errorFields['postCode'] = this.i18n.getTranslation('register', 'invalid');
     }
-    if (!isset(this.registerData['city'])) {
+
+    if (!city) {
       this.errorFields['city'] = this.i18n.getTranslation('register', 'required');
+    } else if (!this.errorFields['postCode']) {
+      const localities = this.automationService.getLocalitiesByPlz(plz);
+      if (!localities.some((l) => l.locality === city)) {
+        this.errorFields['city'] = this.i18n.getTranslation('register', 'invalid');
+      }
     }
+
+    if (!address) {
+      this.errorFields['address'] = this.i18n.getTranslation('register', 'required');
+    } else if (!this.validAddresses.has(address.toLowerCase())) {
+      this.errorFields['address'] = this.i18n.getTranslation('register', 'invalid');
+    }
+
     if (!isset(this.registerData['mail'])) {
       this.errorFields['mail'] = this.i18n.getTranslation('register', 'required');
     }
@@ -142,7 +294,9 @@ export class CustomersMandateAddComponent implements OnInit {
     this.brokerstarService.registerUser(payload).subscribe({
       next: (response: any) => {
         this.toasterService.success(this.i18n.getTranslation('profile', 'success'));
+        sessionStorage.removeItem('customers-mandate-cache');
         const contactId = response?.contact?.id || response?.id;
+        this.loaderService.hide();
         this.router.navigate(['/customers-mandate-policies/' + contactId]);
       },
       error: (error: any) => {
@@ -159,7 +313,6 @@ export class CustomersMandateAddComponent implements OnInit {
         this.loaderService.hide();
         this.cdr.detectChanges();
       },
-      complete: () => this.loaderService.hide(),
     });
   }
 
