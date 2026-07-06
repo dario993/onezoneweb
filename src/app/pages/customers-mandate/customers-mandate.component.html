@@ -57,7 +57,7 @@
             <h3 class="text-lg font-bold text-gray-900 flex-1 pr-2">
               {{ customer.name }}
             </h3>
-            @if (customer.enriched && customer.hasMandateFile) {
+            @if (customer.hasMandateFile) {
             <span
               class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap"
             >
@@ -70,7 +70,6 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Counts -->
             <div class="space-y-1">
-              @if (customer.enriched) {
               <p class="text-sm text-gray-600">
                 {{ "customers.people" | i18n }} ({{
                   customer.subContactCount
@@ -81,7 +80,6 @@
                   customer.policyCount
                 }})
               </p>
-              }
             </div>
 
             <!-- Address -->

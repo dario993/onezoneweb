@@ -195,5 +195,10 @@ export interface QuoteRequestPayload {
   // Opzionale
   recipient_email?: string;
   scrapers?: string[];
+  // Immatricolazione (eVN)
+  registration_only?: boolean;
+  registration_scraper?: string;
+  submit_vehicle_proof_1?: string;
+  submit_vehicle_proof_2?: string;
   [key: string]: any;
 }

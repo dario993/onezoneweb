@@ -27,6 +27,7 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
 })
 export class CustomersMandateComponent implements OnDestroy, AfterViewInit {
   public customers: any[] = [];
+  private pagesData: Map<number, any[]> = new Map();
   public searchValueSubject: BehaviorSubject<string> =
     new BehaviorSubject<string>('');
   private readonly destroy$ = new Subject<void>();
@@ -34,17 +35,14 @@ export class CustomersMandateComponent implements OnDestroy, AfterViewInit {
   private totalPages = 0;
   public isLoadingPage = false;
   public allPagesLoaded = false;
+  private userHasScrolled = false;
 
   private scrollHandler: (() => void) | null = null;
   private mainElement: HTMLElement | null = null;
 
-  private readonly baseParams: Record<string, any> = {
+  private readonly pageParams: Record<string, any> = {
     'filters[show_contacts]': 2,
-    limit: 15,
-  };
-
-  private readonly enrichParams: Record<string, any> = {
-    ...{ 'filters[show_contacts]': 2, limit: 50 },
+    limit: 30,
     'add[has_mandate_file]': true,
     'add[policy_count]': true,
     'add[sub_contact_count]': true,
@@ -63,6 +61,15 @@ export class CustomersMandateComponent implements OnDestroy, AfterViewInit {
     } catch {
       return null;
     }
+  }
+
+  private rebuildCustomers(): void {
+    const flat: any[] = [];
+    for (let p = 1; p <= this.currentPage; p++) {
+      const page = this.pagesData.get(p);
+      if (page) flat.push(...page);
+    }
+    this.customers = flat;
   }
 
   private writeCachePage(page: number, customers: any[], totalPages: number): void {
@@ -122,9 +129,12 @@ export class CustomersMandateComponent implements OnDestroy, AfterViewInit {
     if (!this.mainElement) {
       return;
     }
+    if (this.mainElement.scrollTop > 0) {
+      this.userHasScrolled = true;
+    }
     const nearBottom =
       this.mainElement.scrollHeight - this.mainElement.scrollTop - this.mainElement.clientHeight < 200;
-    if (nearBottom && !this.isLoadingPage && !this.allPagesLoaded) {
+    if (this.userHasScrolled && nearBottom && !this.isLoadingPage && !this.allPagesLoaded) {
       this.loadNextPage();
     }
   }
@@ -159,9 +169,11 @@ export class CustomersMandateComponent implements OnDestroy, AfterViewInit {
 
   private resetAndLoad(search: string): void {
     this.customers = [];
+    this.pagesData.clear();
     this.currentPage = 0;
     this.totalPages = 0;
     this.allPagesLoaded = false;
+    this.userHasScrolled = false;
     this.loadNextPage(search);
   }
 
@@ -182,94 +194,87 @@ export class CustomersMandateComponent implements OnDestroy, AfterViewInit {
         this.totalPages = cache!.totalPages;
         this.currentPage = nextPage;
         this.allPagesLoaded = this.currentPage >= this.totalPages;
-        this.customers = [...this.customers, ...cachedPage];
+        this.pagesData.set(nextPage, cachedPage);
+        this.rebuildCustomers();
         this.changeDetection.detectChanges();
 
         // Revalidate in background
-        this.enrichPage(nextPage, q, false);
+        this.fetchPage(nextPage, q, false, true);
         return;
       }
     }
 
-    this.isLoadingPage = true;
-    this.loaderService.show();
-
-    this.brokerstarService
-      .loadContactPage(nextPage, { ...this.baseParams, q })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((response: any): void => {
-        this.isLoadingPage = false;
-        this.loaderService.hide();
-
-        if (response?.data) {
-          this.totalPages = response.pages || 1;
-          this.currentPage = nextPage;
-          this.allPagesLoaded = this.currentPage >= this.totalPages;
-
-          const newCustomers = response.data.map((contact: any) => ({
-            id: contact.id,
-            name: this.auth.getUserName(
-              contact.contactType?.id as number,
-              String(contact.name1),
-              String(contact.name2)
-            ),
-            address: contact.address,
-            postcode: contact.postcode,
-            city: contact.city,
-            mail: contact.mail,
-            mailPrivate: contact.mailPrivate,
-            phoneDirect: contact.phoneDirect,
-            phonePrivate: contact.phonePrivate,
-            phoneWork: contact.phoneWork,
-            mobile: contact.mobile,
-            enriched: false,
-            hasMandateFile: false,
-            policyCount: 0,
-            subContactCount: 0,
-          }));
-
-          if (this.currentPage === 1) {
-            const authUserId = this.auth.userData?.contact?.id;
-            const authUserIndex = newCustomers.findIndex(
-              (c: any) => c.id === authUserId
-            );
-            if (authUserIndex > 0) {
-              const [authUser] = newCustomers.splice(authUserIndex, 1);
-              newCustomers.unshift(authUser);
-            }
-          }
-
-          this.customers = [...this.customers, ...newCustomers];
-          this.changeDetection.detectChanges();
-
-          this.enrichPage(nextPage, q, !q);
-        }
-      });
+    this.fetchPage(nextPage, q, true, !q);
   }
 
-  private enrichPage(page: number, q: string, saveToCache: boolean): void {
+  private fetchPage(
+    page: number,
+    q: string,
+    showLoader: boolean,
+    saveToCache: boolean
+  ): void {
+    if (showLoader) {
+      this.isLoadingPage = true;
+      this.loaderService.show();
+    }
+
     this.brokerstarService
-      .loadContactPage(page, { ...this.enrichParams, q })
+      .loadContactPage(page, { ...this.pageParams, q })
       .pipe(takeUntil(this.destroy$))
       .subscribe((response: any): void => {
-        if (response?.data) {
-          response.data.forEach((contact: any) => {
-            const customer = this.customers.find((c) => c.id === contact.id);
-            if (customer) {
-              customer.hasMandateFile = contact.hasMandateFile;
-              customer.policyCount = contact.policyCount || 0;
-              customer.subContactCount = contact.subContactCount || 0;
-              customer.enriched = true;
-            }
-          });
-          this.changeDetection.detectChanges();
+        if (showLoader) {
+          this.isLoadingPage = false;
+          this.loaderService.hide();
+        }
 
-          if (saveToCache) {
-            const pageCustomers = this.customers.filter((c) =>
-              response.data.some((contact: any) => contact.id === c.id)
-            );
-            this.writeCachePage(page, pageCustomers, this.totalPages);
+        if (!response?.data) {
+          return;
+        }
+
+        this.totalPages = response.pages || 1;
+        this.allPagesLoaded = page >= this.totalPages;
+
+        const newCustomers = response.data.map((contact: any) => ({
+          id: contact.id,
+          name: this.auth.getUserName(
+            contact.contactType?.id as number,
+            String(contact.name1),
+            String(contact.name2)
+          ),
+          address: contact.address,
+          postcode: contact.postcode,
+          city: contact.city,
+          mail: contact.mail,
+          mailPrivate: contact.mailPrivate,
+          phoneDirect: contact.phoneDirect,
+          phonePrivate: contact.phonePrivate,
+          phoneWork: contact.phoneWork,
+          mobile: contact.mobile,
+          hasMandateFile: !!contact.hasMandateFile,
+          policyCount: contact.policyCount || 0,
+          subContactCount: contact.subContactCount || 0,
+        }));
+
+        if (page === 1) {
+          const authUserId = this.auth.userData?.contact?.id;
+          const authUserIndex = newCustomers.findIndex(
+            (c: any) => c.id === authUserId
+          );
+          if (authUserIndex > 0) {
+            const [authUser] = newCustomers.splice(authUserIndex, 1);
+            newCustomers.unshift(authUser);
           }
+        }
+
+        if (showLoader) {
+          this.currentPage = page;
+        }
+        this.pagesData.set(page, newCustomers);
+        this.rebuildCustomers();
+        this.changeDetection.detectChanges();
+
+        if (saveToCache) {
+          this.writeCachePage(page, newCustomers, this.totalPages);
         }
       });
   }

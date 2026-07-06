@@ -225,10 +225,6 @@ export class BrokerstarService {
         responseType: 'json',
       })
       .pipe(
-        distinctUntilChanged(
-          (prev: any, curr: any): boolean => prev.length === curr.length
-        ),
-        map((data: any): any => data),
         catchError((error: HttpErrorResponse): any => {
           console.log(error);
           return of({ data: [], page: page, pages: 0, total: 0 });

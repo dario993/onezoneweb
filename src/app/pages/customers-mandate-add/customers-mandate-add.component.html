@@ -37,6 +37,41 @@
 
   <!-- Person Registration Form -->
   <ng-container *ngIf="registerType === 'person'">
+    <!-- Gender -->
+    <div class="w-full mb-4">
+      <label class="block mb-2 text-sm font-bold">
+        {{ "automation.form_gender" | i18n }}
+      </label>
+      <div class="flex gap-6">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="radio"
+            name="gender"
+            value="m"
+            [(ngModel)]="registerData['gender']"
+            class="accent-yellow-500"
+          />
+          <span class="text-sm text-blue-900">{{ "automation.form_gender_male" | i18n }}</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="radio"
+            name="gender"
+            value="f"
+            [(ngModel)]="registerData['gender']"
+            class="accent-yellow-500"
+          />
+          <span class="text-sm text-blue-900">{{ "automation.form_gender_female" | i18n }}</span>
+        </label>
+      </div>
+      <p class="text-xs text-gray-400 mt-1">
+        {{ "automation.form_gender_hint" | i18n }}
+      </p>
+      <div *ngIf="hasError('gender')" class="text-red-500 text-xs mt-1">
+        {{ getError("gender") }}
+      </div>
+    </div>
+
     <!-- First Name -->
     <div class="w-full mb-4">
       <label class="block mb-2 text-sm font-bold">
@@ -185,6 +220,24 @@
       >
         {{ "automation.form_address_hint_need_zip_area" | i18n }}
       </p>
+    </div>
+
+    <!-- House Number -->
+    <div class="w-full mb-4">
+      <label class="block mb-2 text-sm font-bold">
+        {{ "automation.form_address_number" | i18n }}
+      </label>
+      <input
+        type="text"
+        [(ngModel)]="registerData['address_number']"
+        [class]="
+          'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
+          (hasError('address_number') ? 'border-red-500' : 'border-blue-900')
+        "
+      />
+      <div *ngIf="hasError('address_number')" class="text-red-500 text-xs mt-1">
+        {{ getError("address_number") }}
+      </div>
     </div>
 
     <!-- Birthday -->
@@ -340,23 +393,24 @@
       </p>
     </div>
 
-    <!-- Company Founded Date -->
+    <!-- Company House Number -->
     <div class="w-full mb-4">
       <label class="block mb-2 text-sm font-bold">
-        {{ "register.birthdaycompany" | i18n }}
+        {{ "automation.form_address_number" | i18n }}
       </label>
       <input
-        type="date"
-        [(ngModel)]="registerData['birthday']"
+        type="text"
+        [(ngModel)]="registerData['address_number']"
         [class]="
           'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
-          (hasError('birthday') ? 'border-red-500' : 'border-blue-900')
+          (hasError('address_number') ? 'border-red-500' : 'border-blue-900')
         "
       />
-      <div *ngIf="hasError('birthday')" class="text-red-500 text-xs mt-1">
-        {{ getError("birthday") }}
+      <div *ngIf="hasError('address_number')" class="text-red-500 text-xs mt-1">
+        {{ getError("address_number") }}
       </div>
     </div>
+
   </ng-container>
 
   <!-- Email -->
@@ -378,17 +432,23 @@
     </div>
   </div>
 
-  <!-- Mobile (Optional) -->
+  <!-- Mobile -->
   <div class="w-full mb-8">
     <label class="block mb-2 text-sm font-bold">
-      {{ "register.mobile" | i18n }} ({{ "register.optional" | i18n }})
+      {{ "register.mobile" | i18n }}
     </label>
     <input
       type="tel"
       [(ngModel)]="registerData['mobile']"
-      class="w-full p-2 text-sm text-blue-900 border-0 border-b border-blue-900 bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2"
+      [class]="
+        'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
+        (hasError('mobile') ? 'border-red-500' : 'border-blue-900')
+      "
       autocomplete="tel"
     />
+    <div *ngIf="hasError('mobile')" class="text-red-500 text-xs mt-1">
+      {{ getError("mobile") }}
+    </div>
   </div>
 
   <!-- Submit Button -->

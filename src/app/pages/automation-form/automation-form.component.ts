@@ -505,6 +505,12 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     { value: 'Annuale', label: 'automation.opt_payment_annual' },
     { value: 'Semestrale', label: 'automation.opt_payment_semi' },
   ];
+  licenseSuspensionOptions = [
+    { value: 'keine',              label: 'automation.opt_license_susp_none' },
+    { value: '1 Monat',            label: 'automation.opt_license_susp_1m' },
+    { value: '2 Monate',           label: 'automation.opt_license_susp_2m' },
+    { value: '3 Monate oder mehr', label: 'automation.opt_license_susp_3m_plus' },
+  ];
   claimsOptions = ['0', '1', '2', '3'];
 
   // ─── Nuove option arrays (allineamento contratto API) ───────────────────────
@@ -918,10 +924,13 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
 
       other_q_terminated: [false],
       other_q_refused: [false],
-      other_q_license_suspension: [false],
+      other_q_license_suspension: ['keine'],
 
       recipient_email: ['', this.publicMode ? [Validators.required, Validators.email, this.noPlusEmailValidator] : [this.noPlusEmailValidator]],
       scrapers: [[], this.minArrayLength(1)],
+
+      request_type: ['Vergleich Versicherungsangebote', Validators.required],
+      registration_scraper: [''],
     });
   }
 
@@ -972,6 +981,8 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
         ? [Validators.required, Validators.pattern(/^\d{9}$/), this.obviousSerialValidator.bind(this)]
         : [Validators.pattern(/^\d{9}$/), this.obviousSerialValidator.bind(this)]);
       sn2.updateValueAndValidity();
+      // riallinea il required di submit_vehicle_proof_2 alla modalità corrente
+      this.applyRequestTypeValidators();
     });
 
     const checkLeasing = () => {
@@ -1001,6 +1012,12 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       if (val && val !== 'No') ctrl.setValidators(Validators.required);
       else ctrl.clearValidators();
       ctrl.updateValueAndValidity();
+    });
+
+    this.form.get('gender')!.valueChanges.subscribe((val) => {
+      if (val !== 'Azienda' && this.form.get('main_driver_type')?.value === 'multiple') {
+        this.form.get('main_driver_type')!.setValue('user');
+      }
     });
 
     this.form.get('main_driver_type')!.valueChanges.subscribe((val) => {
@@ -1060,6 +1077,42 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     (this.form.get('main_driver') as FormGroup).get('birth_date')!.valueChanges.subscribe(() => {
       (this.form.get('main_driver') as FormGroup).get('first_driving_license_date')?.updateValueAndValidity({ emitEvent: false });
     });
+
+    this.form.get('request_type')!.valueChanges.subscribe(() => this.applyRequestTypeValidators());
+  }
+
+  private applyRequestTypeValidators(): void {
+    const regScraper = this.form.get('registration_scraper')!;
+    const scrapers = this.form.get('scrapers')!;
+    const proof1 = this.form.get('submit_vehicle_proof_1')!;
+    const proof2 = this.form.get('submit_vehicle_proof_2')!;
+    const hasV2 = this.showVehicle2;
+
+    if (this.isRegistrationOnly) {
+      regScraper.setValidators(Validators.required);
+      scrapers.clearValidators();
+      scrapers.setValue([], { emitEvent: false });
+      proof1.clearValidators();
+      proof1.setValue('', { emitEvent: false });
+      proof2.clearValidators();
+      proof2.setValue('', { emitEvent: false });
+    } else if (this.isOfferAndRegistration) {
+      regScraper.setValidators(Validators.required);
+      scrapers.clearValidators();
+      scrapers.setValue([], { emitEvent: false });
+      proof1.setValidators(Validators.required);
+      if (hasV2) proof2.setValidators(Validators.required);
+      else { proof2.clearValidators(); proof2.setValue('', { emitEvent: false }); }
+    } else {
+      // isCompareOffers (default)
+      regScraper.clearValidators();
+      regScraper.setValue('', { emitEvent: false });
+      scrapers.setValidators(this.minArrayLength(1));
+      proof1.clearValidators();
+      proof2.clearValidators();
+    }
+
+    [regScraper, scrapers, proof1, proof2].forEach((c) => c.updateValueAndValidity({ emitEvent: false }));
   }
 
   get successMessage(): string {
@@ -1080,8 +1133,21 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   get showDeductiblePartial(): boolean { return ['Totale','Parziale'].includes(this.form.get('comprehensive_insurance')?.value); }
   get showDeductibleParking(): boolean { return this.form.get('parking_damage_coverage')?.value !== 'No'; }
   get showMainDriverFields(): boolean { return this.form.get('main_driver_type')?.value === 'other'; }
+  get visibleDriverTypeOptions() {
+    const isCompany = this.form.get('gender')?.value === 'Azienda';
+    return isCompany ? this.driverTypeOptions : this.driverTypeOptions.filter(d => d.value !== 'multiple');
+  }
   get showLeasingCompany1(): boolean { return this.form.get('leasing_1')?.value === 'Si'; }
   get showLeasingCompany2(): boolean { return this.form.get('leasing_2')?.value === 'Si'; }
+
+  // Tipo richiesta (immatricolazione)
+  public registrationScraperOptions: string[] = ['zurich', 'automate', 'helvetia', 'axa', 'mobiliar', 'allianz'];
+  get isRegistrationOnly(): boolean { return this.form?.get('request_type')?.value === 'Nur Nachweis bestellen'; }
+  get isCompareOffers(): boolean { return this.form?.get('request_type')?.value === 'Vergleich Versicherungsangebote'; }
+  get isOfferAndRegistration(): boolean { return this.form?.get('request_type')?.value === 'Offerte und Nachweis nur von dieser Versicherung'; }
+  get showRegistrationScraper(): boolean { return this.isRegistrationOnly || this.isOfferAndRegistration; }
+  get showSubmitVehicleProof(): boolean { return this.isOfferAndRegistration; }
+  get showScrapersSection(): boolean { return this.isCompareOffers; }
 
   private parseDdMmYyyy(value: string): Date | null {
     if (!value) return null;
@@ -1263,12 +1329,20 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       ev_charging_station, ev_high_voltage_battery, ev_cyber_protection, ev_charging_cards_apps,
       other_q_terminated, other_q_refused, other_q_license_suspension,
       main_driver_type, main_driver,
+      request_type, registration_scraper,
+      submit_vehicle_proof_1, submit_vehicle_proof_2,
+      scrapers,
       ...rest
     } = this.form.value;
     const otherQuestions: string[] = [];
     if (other_q_terminated) otherQuestions.push(this.i18nService.getTranslation('automation', 'form_other_q_terminated'));
     if (other_q_refused) otherQuestions.push(this.i18nService.getTranslation('automation', 'form_other_q_refused'));
-    if (other_q_license_suspension) otherQuestions.push(this.i18nService.getTranslation('automation', 'form_other_q_license_suspension'));
+    if (other_q_license_suspension && other_q_license_suspension !== 'keine') {
+      const base = this.i18nService.getTranslation('automation', 'form_other_q_license_suspension');
+      const opt = this.licenseSuspensionOptions.find(o => o.value === other_q_license_suspension);
+      const dur = opt ? this.i18nService.getTranslation('automation', opt.label.replace(/^automation\./, '')) : other_q_license_suspension;
+      otherQuestions.push(`${base}: ${dur}`);
+    }
     const recipientEmail = this.resolveRecipientEmail(rest.email);
     const payload: Record<string, unknown> = {
       ...rest,
@@ -1282,6 +1356,22 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       other_questions: otherQuestions.join(', '),
       source: this.publicMode ? 'onezone_cliente' : 'onezone_consulente',
     };
+
+    // Flag immatricolazione / scrapers in base al tipo di richiesta
+    if (this.isRegistrationOnly) {
+      payload['registration_scraper'] = registration_scraper;
+      payload['registration_only'] = true;
+    } else if (this.isOfferAndRegistration) {
+      payload['registration_scraper'] = registration_scraper;
+      payload['registration_only'] = false;
+      if (submit_vehicle_proof_1) payload['submit_vehicle_proof_1'] = submit_vehicle_proof_1;
+      if (this.showVehicle2 && submit_vehicle_proof_2) payload['submit_vehicle_proof_2'] = submit_vehicle_proof_2;
+    } else {
+      payload['scrapers'] = scrapers;
+      if (submit_vehicle_proof_1) payload['submit_vehicle_proof_1'] = submit_vehicle_proof_1;
+      if (this.showVehicle2 && submit_vehicle_proof_2) payload['submit_vehicle_proof_2'] = submit_vehicle_proof_2;
+    }
+
     if (main_driver_type === 'other') {
       const driverData: Record<string, unknown> = {};
       Object.entries(main_driver || {}).forEach(([k, v]) => {
@@ -1588,9 +1678,11 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       n_parking_claims_3_years: '0', n_glass_claims_3_years: '0',
       n_partial_comprehensive_claims_3_years: '0',
       source_user: '',
-      other_q_terminated: false, other_q_refused: false, other_q_license_suspension: false,
+      other_q_terminated: false, other_q_refused: false, other_q_license_suspension: 'keine',
       recipient_email: this.publicMode ? 'd.sgamba@hotmail.it' : '', scrapers: [...this.availableScrapers],
+      request_type: 'Vergleich Versicherungsangebote', registration_scraper: '',
     });
+    this.applyRequestTypeValidators();
     (this.form.get('main_driver') as FormGroup).patchValue({
       gender: 'Maschio', first_name: 'Gioia', last_name: 'Sgamba',
       birth_date: '24.08.1999', first_driving_license_date: '05.08.2018',

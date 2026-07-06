@@ -80,6 +80,15 @@ export class AutomationService {
     });
   }
 
+  private get publicHeaders(): HttpHeaders {
+    return new HttpHeaders({
+      Authorization: 'Bearer sys:public_web',
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'ngrok-skip-browser-warning': 'true',
+    });
+  }
+
   private get consultantHeaders(): HttpHeaders {
     const apiKey = this.storageService.getItem('consultantApiKey');
     if (!apiKey) {
@@ -154,7 +163,7 @@ export class AutomationService {
     return this.http.post<GenerateQuotesResponse>(
       `${this.baseUrl}/generate-quotes`,
       payload,
-      { headers: usePublicConsultant ? this.adminHeaders : this.consultantHeaders }
+      { headers: usePublicConsultant ? this.publicHeaders : this.consultantHeaders }
     );
   }
 

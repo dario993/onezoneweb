@@ -185,3 +185,10 @@ src/app/
 - `docs/2026-06-12-21-37-autocomplete-indirizzo-openplz.md` — Autocomplete campo `address` nel form automation via OpenPLZ API (CH): abilitato solo con `zip_code`+`area` validi, ≥3 char, validator "from API"
 - `docs/2026-06-16-18-23-lang-query-param-automation-form-public.md` — Query param `?lang=it|de|fr|en` sulla rotta pubblica `automation-form-generic-client` per forzare la lingua del form
 - `docs/2026-06-17-16-33-mandate-add-autocomplete-indirizzo.md` — Riordino campi `customers-mandate-add` (CAP → Località → Indirizzo) + autocomplete CH (JSON locale + OpenPLZ) come in `automation-form`
+- `docs/2026-06-22-16-50-form-tipo-richiesta-immatricolazione.md` — Form automation: selettore "Was können wir für Sie tun" (3 modalità), `registration_scraper`/`registration_only` nel payload, visibilità condizionale Scrapers/Fahrzeugnachweis
+- `docs/2026-06-22-18-43-license-suspension-select.md` — Form automation: la domanda "Ritiro patente" (Sezione 6) da checkbox a `<select>` con 4 opzioni (durata); in `other_questions` finisce `"<label>: <durata>"` quando ≠ keine
+- `docs/2026-06-24-14-24-mandate-add-gender-civico-mobile.md` — customers-mandate-add: radio Gender (Mann/Frau) nel form persona, campo Hausnummer concatenato in `payload['address']`, mobile obbligatorio, label DE "Privat Kunde"/"Firma"
+- `docs/2026-06-24-14-40-main-driver-multiple-only-company.md` — automation-form: opzione "Mehrere Fahrer" (`main_driver_type=multiple`) visibile solo se gender = `Azienda` (Firma); reset a `user` quando il gender cambia
+- `docs/2026-07-03-17-45-perf-customers-mandate-single-call.md` — customers-mandate: fusione base+enrich in una sola `GET /contact` con `add[…]` e `limit=30` (elimina doppia chiamata per pagina)
+- `docs/2026-07-06-16-18-customers-mandate-pages-map.md` — customers-mandate: refactor cache in `Map<page, records>` + rebuild per gestire add/delete/reorder backend durante la revalidate
+- `docs/2026-07-06-18-26-rinomina-tires-garage-labels.md` — Rinomina etichette i18n `form_tires_damage` (pneumatici + cerchi) e `form_garage_free_choice` (rimosso "libera") in it/en/fr/de

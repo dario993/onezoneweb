@@ -171,6 +171,9 @@ export class CustomersMandateAddComponent implements OnInit, OnDestroy {
   private checkData(): void {
     this.errorFields = {};
     if (this.registerType === 'person') {
+      if (!isset(this.registerData['gender'])) {
+        this.errorFields['gender'] = this.i18n.getTranslation('register', 'required');
+      }
       if (!isset(this.registerData['name1'])) {
         this.errorFields['name1'] = this.i18n.getTranslation('register', 'required');
       }
@@ -204,10 +207,17 @@ export class CustomersMandateAddComponent implements OnInit, OnDestroy {
       this.errorFields['address'] = this.i18n.getTranslation('register', 'invalid');
     }
 
+    if (!isset(this.registerData['address_number'])) {
+      this.errorFields['address_number'] = this.i18n.getTranslation('register', 'required');
+    }
+
     if (!isset(this.registerData['mail'])) {
       this.errorFields['mail'] = this.i18n.getTranslation('register', 'required');
     }
-    if (!isset(this.registerData['birthday'])) {
+    if (!isset(this.registerData['mobile'])) {
+      this.errorFields['mobile'] = this.i18n.getTranslation('register', 'required');
+    }
+    if (this.registerType === 'person' && !isset(this.registerData['birthday'])) {
       this.errorFields['birthday'] = this.i18n.getTranslation('register', 'required');
     }
   }
@@ -236,7 +246,10 @@ export class CustomersMandateAddComponent implements OnInit, OnDestroy {
       payload['name2'] = this.registerData['name2'];
     }
     if (isset(this.registerData['address'])) {
-      payload['address'] = this.registerData['address'];
+      const num = String(this.registerData['address_number'] || '').trim();
+      payload['address'] = num
+        ? `${this.registerData['address']} ${num}`
+        : this.registerData['address'];
     }
     if (isset(this.registerData['postCode'])) {
       payload['postCode'] = this.registerData['postCode'];
