@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { StorageService } from './storage.service';
 import {
@@ -24,6 +24,7 @@ import {
 
 const OPENPLZ_STREETS_URL = 'https://openplzapi.org/ch/Streets';
 const OPENPLZ_STREET_NAME_RE = /^[\p{L}\d\s.\-']+$/u;
+const PUBLIC_CONSULTANT_ID = 'sys:public_web';
 
 @Injectable({ providedIn: 'root' })
 export class AutomationService {
@@ -80,9 +81,9 @@ export class AutomationService {
     });
   }
 
-  private get publicHeaders(): HttpHeaders {
+  private buildBearerHeaders(apiKey: string): HttpHeaders {
     return new HttpHeaders({
-      Authorization: 'Bearer sys:public_web',
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
       Accept: 'application/json',
       'ngrok-skip-browser-warning': 'true',
@@ -127,6 +128,23 @@ export class AutomationService {
       );
   }
 
+  public getPublicConsultant(): Observable<GetConsultantResponse> {
+    return this.http
+      .get<GetConsultantResponse>(
+        `${this.baseUrl}/consultants/${PUBLIC_CONSULTANT_ID}`,
+        { headers: this.adminHeaders }
+      )
+      .pipe(
+        tap((res) => this.storageService.setItem('publicConsultantApiKey', res.api_key))
+      );
+  }
+
+  public ensurePublicApiKey(): Observable<string> {
+    const cached = this.storageService.getItem('publicConsultantApiKey');
+    if (cached) return of(cached);
+    return this.getPublicConsultant().pipe(map((res) => res.api_key));
+  }
+
   public checkLogin(consultantId: string): Observable<CheckLoginResponse> {
     return this.http.post<CheckLoginResponse>(
       `${this.baseUrl}/consultants/${consultantId}/verify-login`,
@@ -160,10 +178,21 @@ export class AutomationService {
     payload: QuoteRequestPayload,
     usePublicConsultant = false
   ): Observable<GenerateQuotesResponse> {
+    if (usePublicConsultant) {
+      return this.ensurePublicApiKey().pipe(
+        switchMap((apiKey) =>
+          this.http.post<GenerateQuotesResponse>(
+            `${this.baseUrl}/generate-quotes`,
+            payload,
+            { headers: this.buildBearerHeaders(apiKey) }
+          )
+        )
+      );
+    }
     return this.http.post<GenerateQuotesResponse>(
       `${this.baseUrl}/generate-quotes`,
       payload,
-      { headers: usePublicConsultant ? this.publicHeaders : this.consultantHeaders }
+      { headers: this.consultantHeaders }
     );
   }
 

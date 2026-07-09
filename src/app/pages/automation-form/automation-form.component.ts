@@ -34,6 +34,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   submitted = false;
   submitSuccess = false;
   submittedEmail = '';
+  submitErrorHtml: string | null = null;
 
   blockOfferModal = { open: false, items: [] as string[] };
 
@@ -622,11 +623,14 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
   areaSuggestions: LocalityEntry[] = [];
   showPlzDropdown = false;
   showAreaDropdown = false;
+  plzActiveIndex = -1;
+  areaActiveIndex = -1;
 
   // Autocomplete indirizzo via OpenPLZ
   streetSuggestions: StreetEntry[] = [];
   showAddressDropdown = false;
   addressLoading = false;
+  addressActiveIndex = -1;
   private readonly validAddresses = new Set<string>();
   private readonly addressInput$ = new Subject<string>();
 
@@ -671,6 +675,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
         window.location.reload();
         return;
       }
+      this.automationService.ensurePublicApiKey().subscribe({ error: () => { /* risolta al submit */ } });
     }
     this.computeAvailableScrapers();
     this.buildForm();
@@ -1321,6 +1326,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
 
   async onSubmit(): Promise<void> {
     this.submitted = true;
+    this.submitErrorHtml = null;
     if (this.form.invalid) {
       this.toasterService.warn(this.i18nService.getTranslation('automation', 'form_err_fill_required'));
       return;
@@ -1389,11 +1395,39 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       this.loaderService.hide();
     } catch (err) {
       this.loaderService.hide();
-      if (err instanceof HttpErrorResponse && err.status === 429) {
+      const backendMsg = this.extractBackendErrorMessage(err);
+      this.submitErrorHtml = backendMsg;
+      if (err instanceof HttpErrorResponse && err.status === 429 && !backendMsg) {
         this.toasterService.warn(this.i18nService.getTranslation('automation', 'error_pool_full'));
+      } else if (backendMsg) {
+        this.toasterService.warn(`Errore backend (HTTP ${(err as HttpErrorResponse).status ?? '?'}) — vedi dettagli sopra il form`);
+        try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch { /* noop */ }
       } else {
         this.toasterService.warn(this.i18nService.getTranslation('automation', 'error_generic'));
       }
+    }
+  }
+
+  private extractBackendErrorMessage(err: unknown): string | null {
+    if (!(err instanceof HttpErrorResponse)) return null;
+    const escape = (s: string) => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+    const body = err.error;
+    const header = `<strong>HTTP ${err.status}${err.statusText ? ' ' + escape(err.statusText) : ''}</strong>`;
+    if (!body) return header;
+    const detail = (body as { detail?: unknown }).detail;
+    if (typeof detail === 'string') return `${header}<br>${escape(detail)}`;
+    if (Array.isArray(detail)) {
+      const lines = detail.map((d: { loc?: unknown[]; msg?: string; type?: string }) => {
+        const loc = Array.isArray(d.loc) ? d.loc.filter(x => x !== 'body').join('.') : '';
+        return `<li>${loc ? '<code>' + escape(loc) + '</code>: ' : ''}${escape(d.msg || '')}${d.type ? ' <em>[' + escape(d.type) + ']</em>' : ''}</li>`;
+      });
+      return `${header} — Validation error:<ul class="list-disc pl-5 mt-1">${lines.join('')}</ul>`;
+    }
+    if (typeof body === 'string') return `${header}<br>${escape(body)}`;
+    try {
+      return `${header}<pre class="whitespace-pre-wrap text-xs mt-1">${escape(JSON.stringify(body, null, 2))}</pre>`;
+    } catch {
+      return header;
     }
   }
 
@@ -1415,6 +1449,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
         this.streetSuggestions = streets;
         streets.forEach((s) => this.validAddresses.add(s.name.toLowerCase()));
         this.showAddressDropdown = streets.length > 0;
+        this.addressActiveIndex = -1;
         this.addressLoading = false;
         this.form.get('address')?.updateValueAndValidity({ emitEvent: false });
       });
@@ -1424,6 +1459,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     const reset = () => {
       this.streetSuggestions = [];
       this.showAddressDropdown = false;
+      this.addressActiveIndex = -1;
       this.validAddresses.clear();
       const addr = this.form.get('address');
       if (addr?.value) addr.setValue('', { emitEvent: false });
@@ -1448,6 +1484,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     if (!this.canQueryStreets()) {
       this.streetSuggestions = [];
       this.showAddressDropdown = false;
+      this.addressActiveIndex = -1;
       return;
     }
     if (value.length >= 3) {
@@ -1455,6 +1492,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     } else {
       this.streetSuggestions = [];
       this.showAddressDropdown = false;
+      this.addressActiveIndex = -1;
     }
   }
 
@@ -1463,9 +1501,15 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     this.form.patchValue({ address: s.name });
     this.showAddressDropdown = false;
     this.streetSuggestions = [];
+    this.addressActiveIndex = -1;
   }
 
-  hideAddressDropdown(): void { setTimeout(() => this.showAddressDropdown = false, 200); }
+  hideAddressDropdown(): void {
+    setTimeout(() => {
+      this.showAddressDropdown = false;
+      this.addressActiveIndex = -1;
+    }, 200);
+  }
 
   private addressFromApiValidator(control: AbstractControl): ValidationErrors | null {
     const val = (control.value || '').toString().trim();
@@ -1497,6 +1541,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       this.plzSuggestions = [];
       this.showPlzDropdown = false;
     }
+    this.plzActiveIndex = -1;
     this.form.get('area')?.updateValueAndValidity();
   }
 
@@ -1504,6 +1549,7 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
     this.form.patchValue({ zip_code: entry.plz, area: entry.locality, canton: entry.canton });
     this.showPlzDropdown = false;
     this.plzSuggestions = [];
+    this.plzActiveIndex = -1;
   }
 
   onAreaFocus(): void {
@@ -1512,16 +1558,83 @@ export class AutomationFormComponent implements OnInit, OnDestroy {
       this.areaSuggestions = this.automationService.getLocalitiesByPlz(plz);
       this.showAreaDropdown = this.areaSuggestions.length > 1;
     }
+    this.areaActiveIndex = -1;
   }
 
   selectArea(entry: LocalityEntry): void {
     this.form.patchValue({ area: entry.locality, canton: entry.canton });
     this.showAreaDropdown = false;
     this.areaSuggestions = [];
+    this.areaActiveIndex = -1;
   }
 
-  hidePlzDropdown(): void { setTimeout(() => this.showPlzDropdown = false, 200); }
-  hideAreaDropdown(): void { setTimeout(() => this.showAreaDropdown = false, 200); }
+  hidePlzDropdown(): void {
+    setTimeout(() => {
+      this.showPlzDropdown = false;
+      this.plzActiveIndex = -1;
+    }, 200);
+  }
+  hideAreaDropdown(): void {
+    setTimeout(() => {
+      this.showAreaDropdown = false;
+      this.areaActiveIndex = -1;
+    }, 200);
+  }
+
+  public onDropdownKeydown(event: KeyboardEvent, kind: 'plz' | 'area' | 'address'): void {
+    const state = this.getDropdownState(kind);
+    if (!state.isOpen || state.items.length === 0) return;
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        this.setActiveIndex(kind, (state.activeIndex + 1) % state.items.length);
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        this.setActiveIndex(kind, (state.activeIndex - 1 + state.items.length) % state.items.length);
+        break;
+      case 'Home':
+        event.preventDefault();
+        this.setActiveIndex(kind, 0);
+        break;
+      case 'End':
+        event.preventDefault();
+        this.setActiveIndex(kind, state.items.length - 1);
+        break;
+      case 'Enter':
+        if (state.activeIndex >= 0 && state.activeIndex < state.items.length) {
+          event.preventDefault();
+          const item = state.items[state.activeIndex];
+          if (kind === 'plz') this.selectPlz(item as LocalityEntry);
+          else if (kind === 'area') this.selectArea(item as LocalityEntry);
+          else this.selectStreet(item as StreetEntry);
+        }
+        break;
+      case 'Escape':
+        event.preventDefault();
+        this.closeDropdown(kind);
+        break;
+    }
+  }
+
+  private getDropdownState(kind: 'plz' | 'area' | 'address'):
+    { items: (LocalityEntry | StreetEntry)[]; isOpen: boolean; activeIndex: number } {
+    if (kind === 'plz') return { items: this.plzSuggestions, isOpen: this.showPlzDropdown, activeIndex: this.plzActiveIndex };
+    if (kind === 'area') return { items: this.areaSuggestions, isOpen: this.showAreaDropdown, activeIndex: this.areaActiveIndex };
+    return { items: this.streetSuggestions, isOpen: this.showAddressDropdown, activeIndex: this.addressActiveIndex };
+  }
+
+  private setActiveIndex(kind: 'plz' | 'area' | 'address', i: number): void {
+    if (kind === 'plz') this.plzActiveIndex = i;
+    else if (kind === 'area') this.areaActiveIndex = i;
+    else this.addressActiveIndex = i;
+  }
+
+  private closeDropdown(kind: 'plz' | 'area' | 'address'): void {
+    if (kind === 'plz') { this.showPlzDropdown = false; this.plzActiveIndex = -1; }
+    else if (kind === 'area') { this.showAreaDropdown = false; this.areaActiveIndex = -1; }
+    else { this.showAddressDropdown = false; this.addressActiveIndex = -1; }
+  }
 
   // ── Autocomplete main_driver sub-form ──────────────────────────────────────
   private get mainDriverGroup(): FormGroup { return this.form.get('main_driver') as FormGroup; }

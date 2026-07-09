@@ -14,6 +14,18 @@
   </div>
   }
 
+  <!-- Errore dal backend -->
+  @if (submitErrorHtml && !submitSuccess) {
+  <div class="rounded-xl p-4 mb-6 border bg-red-50 border-red-300 text-red-800">
+    <div class="flex items-start gap-3">
+      <div class="text-red-600 text-xl leading-none">&#9888;</div>
+      <div class="flex-1 text-sm" [innerHTML]="submitErrorHtml"></div>
+      <button type="button" class="text-red-600 hover:text-red-800 text-lg leading-none"
+        (click)="submitErrorHtml = null" aria-label="Chiudi">&times;</button>
+    </div>
+  </div>
+  }
+
   <!-- Form -->
   @if (!submitSuccess) {
 
@@ -155,12 +167,20 @@
           <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_zip_code' | i18n }} <span class="text-red-500">*</span></label>
           <input type="text" formControlName="zip_code" maxlength="4"
             (input)="onPlzInput()" (blur)="hidePlzDropdown()"
+            role="combobox" aria-autocomplete="list" aria-controls="plz-listbox"
+            [attr.aria-expanded]="showPlzDropdown"
+            [attr.aria-activedescendant]="plzActiveIndex >= 0 ? 'plz-opt-' + plzActiveIndex : null"
+            (keydown)="onDropdownKeydown($event, 'plz')"
             class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             [ngClass]="isInvalid('zip_code') ? 'border-red-500' : 'border-gray-300'" />
           @if (showPlzDropdown) {
-          <ul class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
-            @for (s of plzSuggestions; track s.plz + s.locality) {
-            <li (mousedown)="selectPlz(s)"
+          <ul id="plz-listbox" role="listbox"
+            class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+            @for (s of plzSuggestions; track s.plz + s.locality; let i = $index) {
+            <li [id]="'plz-opt-' + i" role="option"
+              [attr.aria-selected]="i === plzActiveIndex"
+              [class.bg-blue-100]="i === plzActiveIndex"
+              (mousedown)="selectPlz(s)" (mouseenter)="plzActiveIndex = i"
               class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between">
               <span class="font-medium">{{ s.plz }}</span>
               <span class="text-gray-500">{{ s.locality }} ({{ s.canton }})</span>
@@ -178,12 +198,20 @@
           <label class="block text-sm font-medium text-gray-600 mb-1">{{ 'automation.form_area' | i18n }} <span class="text-red-500">*</span></label>
           <input type="text" formControlName="area"
             (focus)="onAreaFocus()" (blur)="hideAreaDropdown()"
+            role="combobox" aria-autocomplete="list" aria-controls="area-listbox"
+            [attr.aria-expanded]="showAreaDropdown"
+            [attr.aria-activedescendant]="areaActiveIndex >= 0 ? 'area-opt-' + areaActiveIndex : null"
+            (keydown)="onDropdownKeydown($event, 'area')"
             class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             [ngClass]="isInvalid('area') ? 'border-red-500' : 'border-gray-300'" />
           @if (showAreaDropdown) {
-          <ul class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
-            @for (s of areaSuggestions; track s.plz + s.locality) {
-            <li (mousedown)="selectArea(s)"
+          <ul id="area-listbox" role="listbox"
+            class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+            @for (s of areaSuggestions; track s.plz + s.locality; let i = $index) {
+            <li [id]="'area-opt-' + i" role="option"
+              [attr.aria-selected]="i === areaActiveIndex"
+              [class.bg-blue-100]="i === areaActiveIndex"
+              (mousedown)="selectArea(s)" (mouseenter)="areaActiveIndex = i"
               class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between">
               <span>{{ s.locality }}</span>
               <span class="text-gray-500">({{ s.canton }})</span>
@@ -204,12 +232,20 @@
             (blur)="hideAddressDropdown()"
             [attr.disabled]="canQueryStreets() ? null : true"
             autocomplete="off"
+            role="combobox" aria-autocomplete="list" aria-controls="address-listbox"
+            [attr.aria-expanded]="showAddressDropdown"
+            [attr.aria-activedescendant]="addressActiveIndex >= 0 ? 'address-opt-' + addressActiveIndex : null"
+            (keydown)="onDropdownKeydown($event, 'address')"
             class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
             [ngClass]="isInvalid('address') ? 'border-red-500' : 'border-gray-300'" />
           @if (showAddressDropdown) {
-          <ul class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
-            @for (s of streetSuggestions; track s.name + s.postalCode) {
-            <li (mousedown)="selectStreet(s)"
+          <ul id="address-listbox" role="listbox"
+            class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+            @for (s of streetSuggestions; track s.name + s.postalCode; let i = $index) {
+            <li [id]="'address-opt-' + i" role="option"
+              [attr.aria-selected]="i === addressActiveIndex"
+              [class.bg-blue-100]="i === addressActiveIndex"
+              (mousedown)="selectStreet(s)" (mouseenter)="addressActiveIndex = i"
               class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between">
               <span>{{ s.name }}</span>
               <span class="text-gray-500">{{ s.postalCode }} {{ s.locality }}</span>

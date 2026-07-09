@@ -192,3 +192,4 @@ src/app/
 - `docs/2026-07-03-17-45-perf-customers-mandate-single-call.md` — customers-mandate: fusione base+enrich in una sola `GET /contact` con `add[…]` e `limit=30` (elimina doppia chiamata per pagina)
 - `docs/2026-07-06-16-18-customers-mandate-pages-map.md` — customers-mandate: refactor cache in `Map<page, records>` + rebuild per gestire add/delete/reorder backend durante la revalidate
 - `docs/2026-07-06-18-26-rinomina-tires-garage-labels.md` — Rinomina etichette i18n `form_tires_damage` (pneumatici + cerchi) e `form_garage_free_choice` (rimosso "libera") in it/en/fr/de
+- `docs/2026-07-06-20-16-autocomplete-keyboard-nav.md` — Navigazione da tastiera (ArrowUp/Down/Home/End/Enter/Esc) + ARIA combobox/listbox nei dropdown di autocomplete indirizzo (CAP/Località/Via) in automation-form e customers-mandate-add

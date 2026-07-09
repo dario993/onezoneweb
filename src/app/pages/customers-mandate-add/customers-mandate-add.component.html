@@ -121,6 +121,12 @@
         [(ngModel)]="registerData['postCode']"
         (input)="onPlzInput()"
         (blur)="hidePlzDropdown()"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-controls="plz-listbox"
+        [attr.aria-expanded]="showPlzDropdown"
+        [attr.aria-activedescendant]="plzActiveIndex >= 0 ? 'plz-opt-' + plzActiveIndex : null"
+        (keydown)="onDropdownKeydown($event, 'plz')"
         [class]="
           'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
           (hasError('postCode') ? 'border-red-500' : 'border-blue-900')
@@ -129,11 +135,18 @@
       />
       <ul
         *ngIf="showPlzDropdown"
+        id="plz-listbox"
+        role="listbox"
         class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"
       >
         <li
-          *ngFor="let s of plzSuggestions"
+          *ngFor="let s of plzSuggestions; let i = index"
+          [id]="'plz-opt-' + i"
+          role="option"
+          [attr.aria-selected]="i === plzActiveIndex"
+          [class.bg-blue-100]="i === plzActiveIndex"
           (mousedown)="selectPlz(s)"
+          (mouseenter)="plzActiveIndex = i"
           class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between"
         >
           <span class="font-medium">{{ s.plz }}</span>
@@ -156,6 +169,12 @@
         (focus)="onAreaFocus()"
         (input)="onAreaInput()"
         (blur)="hideAreaDropdown()"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-controls="area-listbox"
+        [attr.aria-expanded]="showAreaDropdown"
+        [attr.aria-activedescendant]="areaActiveIndex >= 0 ? 'area-opt-' + areaActiveIndex : null"
+        (keydown)="onDropdownKeydown($event, 'area')"
         [class]="
           'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
           (hasError('city') ? 'border-red-500' : 'border-blue-900')
@@ -164,11 +183,18 @@
       />
       <ul
         *ngIf="showAreaDropdown"
+        id="area-listbox"
+        role="listbox"
         class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"
       >
         <li
-          *ngFor="let s of areaSuggestions"
+          *ngFor="let s of areaSuggestions; let i = index"
+          [id]="'area-opt-' + i"
+          role="option"
+          [attr.aria-selected]="i === areaActiveIndex"
+          [class.bg-blue-100]="i === areaActiveIndex"
           (mousedown)="selectArea(s)"
+          (mouseenter)="areaActiveIndex = i"
           class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between"
         >
           <span>{{ s.locality }}</span>
@@ -192,6 +218,12 @@
         (blur)="hideAddressDropdown()"
         [attr.disabled]="canQueryStreets() ? null : true"
         autocomplete="off"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-controls="address-listbox"
+        [attr.aria-expanded]="showAddressDropdown"
+        [attr.aria-activedescendant]="addressActiveIndex >= 0 ? 'address-opt-' + addressActiveIndex : null"
+        (keydown)="onDropdownKeydown($event, 'address')"
         [class]="
           'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 disabled:bg-gray-100 ' +
           (hasError('address') ? 'border-red-500' : 'border-blue-900')
@@ -199,11 +231,18 @@
       />
       <ul
         *ngIf="showAddressDropdown"
+        id="address-listbox"
+        role="listbox"
         class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"
       >
         <li
-          *ngFor="let s of streetSuggestions"
+          *ngFor="let s of streetSuggestions; let i = index"
+          [id]="'address-opt-' + i"
+          role="option"
+          [attr.aria-selected]="i === addressActiveIndex"
+          [class.bg-blue-100]="i === addressActiveIndex"
           (mousedown)="selectStreet(s)"
+          (mouseenter)="addressActiveIndex = i"
           class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between"
         >
           <span>{{ s.name }}</span>
@@ -292,6 +331,12 @@
         [(ngModel)]="registerData['postCode']"
         (input)="onPlzInput()"
         (blur)="hidePlzDropdown()"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-controls="plz-listbox"
+        [attr.aria-expanded]="showPlzDropdown"
+        [attr.aria-activedescendant]="plzActiveIndex >= 0 ? 'plz-opt-' + plzActiveIndex : null"
+        (keydown)="onDropdownKeydown($event, 'plz')"
         [class]="
           'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
           (hasError('postCode') ? 'border-red-500' : 'border-blue-900')
@@ -300,11 +345,18 @@
       />
       <ul
         *ngIf="showPlzDropdown"
+        id="plz-listbox"
+        role="listbox"
         class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"
       >
         <li
-          *ngFor="let s of plzSuggestions"
+          *ngFor="let s of plzSuggestions; let i = index"
+          [id]="'plz-opt-' + i"
+          role="option"
+          [attr.aria-selected]="i === plzActiveIndex"
+          [class.bg-blue-100]="i === plzActiveIndex"
           (mousedown)="selectPlz(s)"
+          (mouseenter)="plzActiveIndex = i"
           class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between"
         >
           <span class="font-medium">{{ s.plz }}</span>
@@ -327,6 +379,12 @@
         (focus)="onAreaFocus()"
         (input)="onAreaInput()"
         (blur)="hideAreaDropdown()"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-controls="area-listbox"
+        [attr.aria-expanded]="showAreaDropdown"
+        [attr.aria-activedescendant]="areaActiveIndex >= 0 ? 'area-opt-' + areaActiveIndex : null"
+        (keydown)="onDropdownKeydown($event, 'area')"
         [class]="
           'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 ' +
           (hasError('city') ? 'border-red-500' : 'border-blue-900')
@@ -335,11 +393,18 @@
       />
       <ul
         *ngIf="showAreaDropdown"
+        id="area-listbox"
+        role="listbox"
         class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"
       >
         <li
-          *ngFor="let s of areaSuggestions"
+          *ngFor="let s of areaSuggestions; let i = index"
+          [id]="'area-opt-' + i"
+          role="option"
+          [attr.aria-selected]="i === areaActiveIndex"
+          [class.bg-blue-100]="i === areaActiveIndex"
           (mousedown)="selectArea(s)"
+          (mouseenter)="areaActiveIndex = i"
           class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between"
         >
           <span>{{ s.locality }}</span>
@@ -363,6 +428,12 @@
         (blur)="hideAddressDropdown()"
         [attr.disabled]="canQueryStreets() ? null : true"
         autocomplete="off"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-controls="address-listbox"
+        [attr.aria-expanded]="showAddressDropdown"
+        [attr.aria-activedescendant]="addressActiveIndex >= 0 ? 'address-opt-' + addressActiveIndex : null"
+        (keydown)="onDropdownKeydown($event, 'address')"
         [class]="
           'w-full p-2 text-sm text-blue-900 border-0 border-b bg-transparent focus:outline-none focus:border-yellow-500 focus:border-b-2 disabled:bg-gray-100 ' +
           (hasError('address') ? 'border-red-500' : 'border-blue-900')
@@ -370,11 +441,18 @@
       />
       <ul
         *ngIf="showAddressDropdown"
+        id="address-listbox"
+        role="listbox"
         class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"
       >
         <li
-          *ngFor="let s of streetSuggestions"
+          *ngFor="let s of streetSuggestions; let i = index"
+          [id]="'address-opt-' + i"
+          role="option"
+          [attr.aria-selected]="i === addressActiveIndex"
+          [class.bg-blue-100]="i === addressActiveIndex"
           (mousedown)="selectStreet(s)"
+          (mouseenter)="addressActiveIndex = i"
           class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between"
         >
           <span>{{ s.name }}</span>
